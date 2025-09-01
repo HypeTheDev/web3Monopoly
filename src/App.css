@@ -21,13 +21,12 @@
   font-family: 'Courier New', Monaco, 'Bitstream Vera Sans Mono', 'Lucida Console', Terminal, monospace;
   max-width: 1200px;
   margin: 0 auto;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: #000000;
   color: var(--primary-color);
   position: relative;
-  overflow: hidden;
   border: 1px solid var(--primary-color);
   border-radius: 0;
   box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
@@ -476,7 +475,15 @@
 /* Cross-Platform Compatibility & Enhanced Responsive Design */
 
 /* Viewport Handling */
-html {
+html, body {
+  /* Ensure black backgrounds across entire page */
+  background: #000000 !important;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  color: var(--primary-color);
+  font-family: 'Courier New', Monaco, 'Bitstream Vera Sans Mono', 'Lucida Console', Terminal, monospace;
+
   /* Better mobile viewport handling */
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -484,6 +491,10 @@ html {
   -webkit-touch-callout: none;
   /* Enable smooth scrolling */
   scroll-behavior: smooth;
+
+  /* Fullscreen compatibility */
+  -webkit-fullscreen-background-color: #000000 !important;
+  fullscreen-background-color: #000000 !important;
 }
 
 /* iOS Safari Fix */
@@ -687,6 +698,15 @@ html {
 
 /* Standard mobile */
 @media (max-width: 480px) {
+  .App {
+    /* Allow scrolling on mobile */
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+    /* Better scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+  }
+
   .game-title h1 {
     font-size: 1rem;
   }
@@ -724,10 +744,31 @@ html {
     min-height: 350px;
   }
 
+  .game-main {
+    /* Allow mobile scrolling */
+    overflow: visible;
+    height: auto;
+    min-height: 600px;
+  }
+
+  .demo-container {
+    /* Enable vertical stacking on very small screens */
+    flex-direction: column;
+    height: auto;
+    gap: 15px;
+  }
+
+  .game-center-panel {
+    /* Allow overflow on mobile for scrolling game board */
+    overflow: visible;
+    min-height: 400px;
+  }
+
   /* Smaller buttons for mobile */
   .control-btn, .action-btn {
     padding: 6px 12px;
     font-size: 0.8rem;
+    min-height: 44px; /* iOS touch target */
   }
 }
 
@@ -887,6 +928,64 @@ html {
   /* Disable matrix rain for accessibility */
   .matrix-bg {
     opacity: 0;
+  }
+}
+
+/* Fullscreen API support - prevent white backgrounds when fullscreen */
+:-webkit-full-screen {
+  background: #000000 !important;
+}
+
+:-moz-full-screen {
+  background: #000000 !important;
+}
+
+:fullscreen {
+  background: #000000 !important;
+}
+
+/* Ensure full page is black when fullscreen is active */
+:-webkit-full-screen html,
+:-webkit-full-screen body {
+  background: #000000 !important;
+  margin: 0;
+  padding: 0;
+}
+
+:fullscreen html,
+:fullscreen body {
+  background: #000000 !important;
+  margin: 0;
+  padding: 0;
+}
+
+:fullscreen .App {
+  max-width: none;
+  width: 100vw;
+  height: 100vh;
+  border: none;
+}
+
+/* Additional fullscreen fixes for various browsers */
+html:has(.App:-webkit-full-screen),
+body:has(.App:-webkit-full-screen),
+html:has(.App:fullscreen),
+body:has(.App:fullscreen) {
+  background: #000000 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Mobile browser fullscreen fixes */
+@supports (-webkit-touch-callout: none) {
+  html:has(.App:-webkit-full-screen),
+  body:has(.App:-webkit-full-screen) {
+    background: #000000 !important;
+    /* Ensure no white bars on iOS */
+    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
 }
 

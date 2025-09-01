@@ -4,27 +4,14 @@ import './MusicPlayer.css';
 // Music Player Component with multiple sources
 const MusicPlayer: React.FC = () => {
   const [currentTrack, setCurrentTrack] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [volume, setVolume] = useState<number>(30);
   const [playlist, setPlaylist] = useState<Track[]>([]);
-  const [currentSource, setCurrentSource] = useState<'soundcloud' | 'youtube' | 'spotify' | 'radio'>('soundcloud');
+  const [currentSource, setCurrentSource] = useState<'radio'>('radio');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Available tracks from different sources (URLs would be replaced with real ones)
+  // Available tracks - Only FM Ambient Radio
   const tracksBySource = useMemo(() => ({
-    soundcloud: [
-      { id: 'sc-1', title: 'Ambient Terminal 1', artist: 'Code Ambient', url: 'https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/123456789' },
-      { id: 'sc-2', title: 'Matrix Algorithms', artist: 'Cyber Beats', url: 'https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/987654321' },
-      { id: 'sc-3', title: 'Terminal Dreams', artist: 'DOS Dreams', url: 'https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/456789123' }
-    ],
-    youtube: [
-      { id: 'yt-1', title: 'Ambiance for Code', artist: 'YouTube Ambient', url: 'https://www.youtube.com/embed/---actual-video-id---' },
-      { id: 'yt-2', title: 'Coding Session Music', artist: 'Focus Audio', url: 'https://www.youtube.com/embed/---actual-video-id---' }
-    ],
-    spotify: [
-      { id: 'sp-1', title: 'Cyber Ambient', artist: 'Spotify Ambient', url: 'https://open.spotify.com/embed/track/---actual-track-id---' },
-      { id: 'sp-2', title: 'Terminal Sessions', artist: 'Spotify Tech', url: 'https://open.spotify.com/embed/track/---actual-track-id---' }
-    ],
     radio: [
       { id: 'rd-1', title: 'Ambient Radio 24/7', artist: 'Ambient FM', url: 'https://streaming.radionomy.com/ambient-radio' },
       { id: 'rd-2', title: 'Coding Beats FM', artist: 'Dev Radio', url: 'https://streaming.radionomy.com/coding-beats' },
@@ -43,6 +30,17 @@ const MusicPlayer: React.FC = () => {
     setPlaylist(tracksBySource[currentSource]);
     setCurrentTrack(0);
   }, [currentSource, tracksBySource]);
+
+  // Auto-play on component load
+  useEffect(() => {
+    if (playlist.length > 0) {
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        setIsPlaying(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [playlist]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -73,7 +71,7 @@ const MusicPlayer: React.FC = () => {
     setCurrentTrack(prevIndex);
   };
 
-  const changeSource = (source: 'soundcloud' | 'youtube' | 'spotify' | 'radio') => {
+  const changeSource = (source: 'radio') => {
     setCurrentSource(source);
     setIsPlaying(false);
     setCurrentTrack(0);
@@ -87,51 +85,6 @@ const MusicPlayer: React.FC = () => {
     }
 
     switch (currentSource) {
-      case 'soundcloud':
-        return (
-          <div className="soundcloud-player">
-            <iframe
-              width="100%"
-              height="166"
-              scrolling="no"
-              frameBorder="no"
-              allow="autoplay"
-              title={`${track.title} by ${track.artist} on SoundCloud`}
-              src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&color=%23000000&auto_play=${isPlaying}&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`}
-            />
-          </div>
-        );
-
-      case 'youtube':
-        return (
-          <div className="youtube-player">
-            <iframe
-              width="100%"
-              height="166"
-              title={`${track.title} by ${track.artist} on YouTube`}
-              src={`${track.url}?autoplay=${isPlaying ? '1' : '0'}&mute=1&loop=1&playlist=---actual-video-id---`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        );
-
-      case 'spotify':
-        return (
-          <div className="spotify-player">
-            <iframe
-              src={track.url}
-              width="100%"
-              height="152"
-              title={`${track.title} by ${track.artist} on Spotify`}
-              frameBorder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            />
-          </div>
-        );
-
       case 'radio':
         return (
           <div className="radio-player">
@@ -161,7 +114,7 @@ const MusicPlayer: React.FC = () => {
             <button
               key={source}
               className={`source-btn ${currentSource === source ? 'active' : ''}`}
-              onClick={() => changeSource(source as any)}
+              onClick={() => changeSource('radio')}
             >
               {source.toUpperCase()}
             </button>
