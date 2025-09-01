@@ -209,16 +209,17 @@
   gap: 15px;
 }
 
-/* Right Panel */
+/* Right Panel - reduced chat log size */
 .game-right-panel {
-  width: 350px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   background: #111111;
   border-left: 1px solid var(--primary-color);
-  padding: 15px;
-  gap: 15px;
+  padding: 10px;
+  gap: 10px;
   overflow: hidden;
+  font-size: 0.85rem;
 }
 
 .game-right-panel.hidden {
@@ -233,6 +234,7 @@
   padding: 15px;
   gap: 15px;
   overflow: hidden;
+  min-height: 600px;
 }
 
 /* Game Status Display */
@@ -242,6 +244,7 @@
   padding: 12px;
   border-radius: 0;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .status-line {

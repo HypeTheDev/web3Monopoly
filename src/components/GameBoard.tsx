@@ -5,9 +5,18 @@ import './GameBoard.css';
 interface GameBoardProps {
   properties: Property[];
   onPropertyClick: (property: Property) => void;
+  currentPlayerPosition?: number;
+  playerNames?: string[];
+  playerColors?: string[];
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ properties, onPropertyClick }) => {
+const GameBoard: React.FC<GameBoardProps> = ({
+  properties,
+  onPropertyClick,
+  currentPlayerPosition = 0,
+  playerNames = ['P1', 'P2', 'P3', 'P4'],
+  playerColors = ['#ff00ff', '#00ffff', '#ffff00', '#ff8800']
+}) => {
   // Standard Monopoly board layout (simplified for rendering)
   const boardLayout = [
     { position: 0, name: 'GO', type: 'corner', color: 'transparent' },
