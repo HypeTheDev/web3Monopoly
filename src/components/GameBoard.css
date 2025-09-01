@@ -4,13 +4,39 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px;
-  margin: 15px;
+  padding: 10px;
+  margin: 0;
   border: 2px solid var(--primary-color);
   background: var(--background-color);
   font-family: 'Courier New', Monaco, 'Bitstream Vera Sans Mono', 'Lucida Console', Terminal, monospace;
   box-shadow: 0 0 30px var(--primary-color);
   min-height: 500px;
+  width: 100%;
+  /* Cross-platform enhancements */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* High resolution support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .game-board {
+    /* Better scaling on high-DPI displays */
+    border-width: 1px;
+    transform: translateZ(0);
+  }
+
+  .board-tile {
+    font-size: 9px;
+    border-width: 1px;
+  }
+}
+
+/* Force hardware acceleration on WebKit browsers */
+.game-board, .board-grid, .board-tile {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .board-grid {

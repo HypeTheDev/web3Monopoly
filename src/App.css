@@ -188,6 +188,8 @@
   display: flex;
   overflow: hidden;
   background: #000000;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .demo-container {
@@ -195,6 +197,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  gap: 20px;
+  align-items: start;
 }
 
 /* Left Panel */
@@ -203,10 +207,12 @@
   display: flex;
   flex-direction: column;
   background: #111111;
+  border: 1px solid var(--primary-color);
   border-right: 1px solid var(--primary-color);
   padding: 15px;
   overflow-y: auto;
   gap: 15px;
+  flex-shrink: 0;
 }
 
 /* Right Panel - reduced chat log size */
@@ -215,11 +221,12 @@
   display: flex;
   flex-direction: column;
   background: #111111;
+  border: 1px solid var(--primary-color);
   border-left: 1px solid var(--primary-color);
-  padding: 10px;
-  gap: 10px;
+  padding: 15px;
+  gap: 15px;
   overflow: hidden;
-  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
 .game-right-panel.hidden {
@@ -231,10 +238,16 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  background: #111111;
+  border: 1px solid var(--primary-color);
   padding: 15px;
   gap: 15px;
   overflow: hidden;
   min-height: 600px;
+}
+
+.game-center-panel, .game-left-panel, .game-right-panel {
+  margin: 0;
 }
 
 /* Game Status Display */
@@ -268,6 +281,7 @@
   padding: 12px;
   border-radius: 0;
   box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+  margin: 0;
 }
 
 .music-panel h3, .logs-header h4, .logs-header h5, .data-summary h5 {
@@ -459,14 +473,83 @@
   font-family: inherit;
 }
 
-/* Responsive Design */
+/* Cross-Platform Compatibility & Enhanced Responsive Design */
+
+/* Viewport Handling */
+html {
+  /* Better mobile viewport handling */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  /* Prevent zoom on mobile */
+  -webkit-touch-callout: none;
+  /* Enable smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+/* iOS Safari Fix */
+@supports (-webkit-touch-callout: none) {
+  .App {
+    /* Fix viewport height issues on iOS */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  .game-left-panel,
+  .game-right-panel,
+  .game-center-panel {
+    /* Better overflow handling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fix line-height issues on iOS */
+  .board-tile,
+  .property-name {
+    line-height: 1.2;
+  }
+}
+
+/* Enhanced Responsive Design */
+
+/* Ultra-wide screens */
+@media (min-width: 1440px) {
+  .App {
+    max-width: 1400px;
+  }
+
+  .game-left-panel,
+  .game-right-panel {
+    width: 320px;
+  }
+
+  /* Large gameboard for wide screens */
+  .board-grid {
+    grid-template-columns: repeat(11, 70px);
+    grid-template-rows: repeat(11, 70px);
+  }
+
+  .game-board {
+    min-height: 650px;
+  }
+}
+
+/* Standard desktop */
 @media (max-width: 1200px) {
   .game-right-panel {
     width: 280px;
   }
+
+  .board-grid {
+    grid-template-columns: repeat(11, 55px);
+    grid-template-rows: repeat(11, 55px);
+  }
 }
 
+/* Small desktop/laptop */
 @media (max-width: 1024px) {
+  .App {
+    max-width: 100vw;
+  }
+
   .game-right-panel {
     width: 250px;
   }
@@ -475,12 +558,44 @@
   .game-left-panel {
     padding: 10px;
   }
+
+  .board-grid {
+    grid-template-columns: repeat(11, 50px);
+    grid-template-rows: repeat(11, 50px);
+  }
+
+  .game-title h1 {
+    font-size: 1.4rem;
+  }
 }
 
+/* Tablet landscape */
+@media (max-width: 900px) {
+  .game-header {
+    padding: 12px;
+  }
+
+  .ai-status-panel {
+    padding: 12px;
+    gap: 15px;
+  }
+
+  .game-main {
+    padding: 15px;
+  }
+
+  .demo-container {
+    gap: 15px;
+  }
+}
+
+/* Tablet portrait */
 @media (max-width: 768px) {
   .App {
     max-width: 100vw;
     width: 100vw;
+    /* Better tablet support */
+    touch-action: pan-x pan-y;
   }
 
   .game-header {
@@ -510,6 +625,7 @@
 
   .ai-controls {
     justify-content: center;
+    flex-wrap: wrap;
   }
 
   .demo-container {
@@ -521,14 +637,15 @@
     width: 100%;
     border-left: none;
     border-right: none;
-    max-height: 40vh;
+    max-height: 35vh;
     border-top: 1px solid var(--primary-color);
     border-bottom: 1px solid var(--primary-color);
+    padding: 12px;
   }
 
   .game-center-panel {
     flex: 1;
-    min-height: 200px;
+    min-height: 250px;
   }
 
   .terminal-footer {
@@ -540,8 +657,35 @@
   .version-info {
     text-align: center;
   }
+
+  .board-grid {
+    grid-template-columns: repeat(11, 40px);
+    grid-template-rows: repeat(11, 40px);
+  }
+
+  .game-board {
+    min-height: 450px;
+  }
 }
 
+/* Large mobile */
+@media (max-width: 640px) {
+  .game-title h1 {
+    font-size: 1.1rem;
+  }
+
+  /* Prevent zoom on form inputs */
+  input, select, button {
+    font-size: 16px;
+  }
+
+  .board-grid {
+    grid-template-columns: repeat(11, 35px);
+    grid-template-rows: repeat(11, 35px);
+  }
+}
+
+/* Standard mobile */
 @media (max-width: 480px) {
   .game-title h1 {
     font-size: 1rem;
@@ -569,6 +713,187 @@
   .network-status {
     font-size: 0.7rem;
     text-align: center;
+  }
+
+  .board-grid {
+    grid-template-columns: repeat(11, 30px);
+    grid-template-rows: repeat(11, 30px);
+  }
+
+  .game-board {
+    min-height: 350px;
+  }
+
+  /* Smaller buttons for mobile */
+  .control-btn, .action-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 360px) {
+  .game-title h1 {
+    font-size: 0.95rem;
+  }
+
+  .board-grid {
+    grid-template-columns: repeat(11, 25px);
+    grid-template-rows: repeat(11, 25px);
+  }
+
+  .board-tile {
+    font-size: 8px;
+  }
+
+  .game-main {
+    padding: 10px;
+  }
+}
+
+/* Chrome/Android specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  .App {
+    /* Fix pixel ratio issues */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Better scrollbar on Android */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 5px;
+  }
+}
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+  .game-left-panel,
+  .game-right-panel,
+  .game-center-panel {
+    /* Fix Firefox scrolling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #111111;
+  }
+
+  /* Fix line-height in Firefox */
+  .board-tile {
+    line-height: 1.1;
+  }
+}
+
+/* Safari specific fixes */
+@supports (-webkit-appearance: none) and (not (-ms-ime-align: auto)) {
+  .App {
+    /* Fix Safari layout bugs */
+    transform: translateZ(0);
+  }
+
+  /* Fix Safari input focus */
+  input:focus, select:focus {
+    -webkit-user-select: text;
+    -webkit-appearance: none;
+  }
+}
+
+/* Edge/IE specific fixes */
+@supports (-ms-ime-align: auto) {
+  .App {
+    /* Fix Edge layout issues */
+    display: block;
+    min-height: 100vh;
+    height: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Better selector styling for Edge */
+  .speed-selector {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/* Cross-platform color compatibility */
+@media screen and (prefers-color-scheme: dark) {
+  .App {
+    /* Ensure we maintain dark theme regardless of user OS preference */
+    background: #000000 !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .control-btn, .action-btn {
+    /* Larger touch targets for mobile */
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 16px;
+  }
+
+  .board-tile:hover {
+    /* Disable hover on touch devices */
+    background: transparent;
+  }
+
+  .board-tile:active {
+    /* Active state for touch */
+    background: var(--primary-color) !important;
+    color: var(--background-color) !important;
+    transform: none;
+  }
+
+  /* Better button press feedback on touch */
+  button:active {
+    transform: scale(0.98);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  /* Ensure good contrast in high contrast mode */
+  .board-tile {
+    border-width: 2px;
+  }
+
+  .control-btn, .action-btn {
+    border-width: 2px;
+  }
+
+  .music-panel, .logs-header, .data-summary {
+    border-width: 2px;
+  }
+
+  .status-indicators span {
+    border: 1px solid #ffffff;
+    background: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable matrix rain for accessibility */
+  .matrix-bg {
+    opacity: 0;
+  }
+}
+
+/* Print styles (disable for web-only app) */
+@media print {
+  .App {
+    display: none !important;
   }
 }
 
