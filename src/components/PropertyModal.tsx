@@ -58,7 +58,7 @@ const PropertyModal: React.FC<PropertyModalProps> = ({
               <div className="owned">
                 <div className="owner-details">
                   <span>OWNER: {property.owner.name}</span>
-                  {property.owner.id === currentPlayer.id && (
+                  {property.owner.id === currentPlayer?.id && currentPlayer && (
                     <span className="current-owner">[YOU]</span>
                   )}
                 </div>
@@ -83,13 +83,13 @@ const PropertyModal: React.FC<PropertyModalProps> = ({
             </button>
           )}
 
-          {!property.owner && currentPlayer.money < property.price && (
+          {!property.owner && currentPlayer && currentPlayer.money < property.price && (
             <div className="insufficient-funds">
               INSUFFICIENT_FUNDS
             </div>
           )}
 
-          {property.owner?.id === currentPlayer.id && (
+          {property.owner?.id === currentPlayer?.id && currentPlayer && (
             <>
               {canMortgage ? (
                 <button
@@ -113,7 +113,7 @@ const PropertyModal: React.FC<PropertyModalProps> = ({
             </>
           )}
 
-          {property.owner?.id !== currentPlayer.id && property.owner && (
+          {property.owner?.id !== currentPlayer?.id && currentPlayer && property.owner && (
             <div className="rent-info">
               <span>RENT_DUE:</span>
               <span>${property.rent[property.houses]}</span>
