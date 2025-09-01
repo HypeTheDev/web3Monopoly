@@ -11,6 +11,7 @@ export interface Player {
   tokenId: string; // Web3 token ID
   walletAddress?: string; // Optional for offline play
   avatar?: string;
+  color: string; // Player color for UI(display)
 }
 
 export interface Property {
