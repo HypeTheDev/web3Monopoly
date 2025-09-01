@@ -282,16 +282,16 @@ function App() {
               />
             )}
 
-            {gameState?.gameMode === GameMode.DBA && 'league' in gameState && gameState.league && (
+            {gameState?.gameMode === GameMode.DBA && 'league' in gameState && gameState.league ? (
               <DBADashboard
                 gameState={gameState as DBAGameState}
-                onViewChange={(view) => {
-                  // Handle view changes in DBA by directly updating the game state
-                  if (gameState && gameState instanceof Object && 'currentView' in gameState) {
-                    gameState.currentView = view;
-                    // Force a state update by creating new object reference
-                    setGameState({...gameState} as DBAGameState);
-                  }
+                onViewChange={(view: DBAGameState['currentView']) => {
+                  // Handle view changes in DBA by updating the game state
+                  const updatedState = {
+                    ...gameState,
+                    currentView: view
+                  } as DBAGameState;
+                  setGameState(updatedState);
                 }}
                 onAdvanceWeek={() => {
                   if (gameEngine && gameEngine instanceof DBAEngine) {
@@ -299,7 +299,7 @@ function App() {
                   }
                 }}
               />
-            )}
+            ) : null}
 
             {gameState?.gameMode === 'spades' && 'teams' in gameState && (
               <div className="spades-board">
