@@ -221,8 +221,14 @@
 
 .theme-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 10px;
+}
+
+/* Scroll container for preset themes */
+.themes-scroll-container {
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .preset-theme-btn {

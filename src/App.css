@@ -123,6 +123,16 @@
   color: #000000;
 }
 
+.action-btn.info {
+  border-color: var(--info-color);
+  color: var(--info-color);
+}
+
+.action-btn.info:hover {
+  background: var(--info-color);
+  color: #000000;
+}
+
 /* AI Status Panel */
 .ai-status-panel {
   display: flex;
@@ -657,7 +667,8 @@ html, body {
     width: 100%;
     border-left: none;
     border-right: none;
-    max-height: 25vh;
+    max-height: 35vh;
+    min-height: 150px;
     border-top: 1px solid var(--primary-color);
     border-bottom: 1px solid var(--primary-color);
     padding: 12px;
@@ -667,6 +678,10 @@ html, body {
     flex: 1;
     min-height: 300px;
     align-self: stretch;
+  }
+
+  .game-center-panel, .game-left-panel, .game-right-panel {
+    margin: 5px;
   }
 
   .terminal-footer {

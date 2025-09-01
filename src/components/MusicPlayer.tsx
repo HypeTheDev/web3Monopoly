@@ -4,18 +4,16 @@ import './MusicPlayer.css';
 // Music Player Component with multiple sources
 const MusicPlayer: React.FC = () => {
   const [currentTrack, setCurrentTrack] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(30);
   const [playlist, setPlaylist] = useState<Track[]>([]);
   const [currentSource, setCurrentSource] = useState<'radio'>('radio');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Available tracks - Only FM Ambient Radio
+  // Available tracks - Synthwave Radio Only
   const tracksBySource = useMemo(() => ({
     radio: [
-      { id: 'rd-1', title: 'Ambient Radio 24/7', artist: 'Ambient FM', url: 'https://streaming.radionomy.com/ambient-radio' },
-      { id: 'rd-2', title: 'Coding Beats FM', artist: 'Dev Radio', url: 'https://streaming.radionomy.com/coding-beats' },
-      { id: 'rd-3', title: 'Synthwave Zone', artist: 'Retro FM', url: 'https://streaming.radionomy.com/synthwave-zone' }
+      { id: 'rd-1', title: 'Synthwave Zone', artist: 'Retro FM', url: 'https://streaming.radionomy.com/synthwave-zone' }
     ]
   }), []);
 

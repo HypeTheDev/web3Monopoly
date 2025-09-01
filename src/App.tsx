@@ -8,12 +8,13 @@ import MusicPlayer from './components/MusicPlayer';
 import PropertyModal from './components/PropertyModal';
 import ColorPicker from './components/ColorPicker';
 import MatrixRain from './components/MatrixRain';
+import WorldNews from './components/WorldNews';
 
 // Game Engine
 import { MonopolyGameEngine, GameEntry } from './lib/GameEngine';
 
 // Types
-import { Property, GameState, TerminalTheme } from './types/GameTypes';
+import { Property, GameState, TerminalTheme, MonopolyGameState, GameMode } from './types/GameTypes';
 
 function App() {
   const [gameEngine, setGameEngine] = useState<MonopolyGameEngine | null>(null);
@@ -25,6 +26,7 @@ function App() {
   const [showPropertyModal, setShowPropertyModal] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showLogs, setShowLogs] = useState(true);
+  const [showWorldNews, setShowWorldNews] = useState(false);
 
   const [terminalTheme, setTerminalTheme] = useState<TerminalTheme>({
     primaryColor: '#00ff00',
@@ -113,6 +115,12 @@ function App() {
         </div>
         <div className="header-controls">
           <button
+            className="action-btn info"
+            onClick={() => setShowWorldNews(true)}
+          >
+            NEWS
+          </button>
+          <button
             className="theme-button"
             onClick={() => setShowColorPicker(true)}
           >
@@ -174,20 +182,32 @@ function App() {
 
             {/* Current Game State */}
             <div className="game-state-panel">
-              <h4>GAME_STATE</h4>
+              <h4>{gameState?.gameMode?.toUpperCase() || 'GAME_STATE'}</h4>
               <div className="state-info">
-                <div>BANK: ${gameState?.bankMoney || 0}</div>
-                <div>FREE: ${gameState?.freeParkingPot || 0}</div>
-                <div>OWNED: {gameState ? gameState.properties.filter(p => p.owner).length : 0}</div>
+                {gameState?.gameMode === 'monopoly' && 'properties' in gameState ? (
+                  <>
+                    <div>BANK: ${(gameState as MonopolyGameState).bankMoney || 0}</div>
+                    <div>FREE: ${(gameState as MonopolyGameState).freeParkingPot || 0}</div>
+                    <div>OWNED: {gameState.properties.filter(p => p.owner).length}</div>
+                  </>
+                ) : gameState?.gameMode === 'spades' && 'score' in gameState ? (
+                  <>
+                    <div>TEAM 1: {gameState.score.team1}</div>
+                    <div>TEAM 2: {gameState.score.team2}</div>
+                    <div>TRICKS: {Object.values(gameState.tricks).reduce((a, b) => a + b, 0)}</div>
+                  </>
+                ) : gameState?.gameMode === 'chess' ? (
+                  <div>CHESS - KING OF THE HILL</div>
+                ) : null}
               </div>
             </div>
           </div>
 
           {/* Center Panel - Game Board */}
           <div className="game-center-panel">
-            {gameState && (
+            {gameState?.gameMode === 'monopoly' && 'properties' in gameState && (
               <GameBoard
-                properties={gameState.properties}
+                properties={(gameState as MonopolyGameState).properties}
                 onPropertyClick={(property) => {
                   setSelectedProperty(property);
                   setShowPropertyModal(true);
@@ -195,6 +215,20 @@ function App() {
                 gameState={gameState}
               />
             )}
+            {gameState?.gameMode === 'spades' && (
+              <div className="spades-board">
+                <h3>Spades Game Board - Coming Soon!</h3>
+                <div className="game-status">
+                  Phase: {gameState.bidPhase ? 'Bidding' : 'Playing'}
+                </div>
+              </div>
+            )}
+            {(!gameState || (!('properties' in gameState) && !('teams' in gameState))) && (
+              <div className="loading-board">
+                <h3>Game Board Loading...</h3>
+              </div>
+            )}
+          </div>
 
             {/* Game Status Display */}
             <div className="game-status-display">
@@ -205,7 +239,11 @@ function App() {
                 POSITION: {currentPlayer?.position || 0}
               </div>
               <div className="status-line">
-                DICE_LAST: {gameState?.diceRolls.map(d => `[${d}]`).join('') || 'NONE'}
+                {gameState?.gameMode === 'monopoly' && 'diceRolls' in gameState
+                  ? `DICE_LAST: ${(gameState as MonopolyGameState).diceRolls.map((d: number) => `[${d}]`).join('') || 'NONE'}`
+                  : gameState?.gameMode === 'spades' && 'tricks' in gameState
+                  ? `TRICK_COUNT: ${Object.values(gameState.tricks).reduce((a: number, b: number) => a + b, 0) || 0}`
+                  : 'STATUS: ACTIVE'}
               </div>
               <div className="status-line">
                 WEB3_CONNECTION: {currentPlayer?.tokenId ? 'CONNECTED' : 'OFFLINE'}
@@ -245,7 +283,7 @@ function App() {
               <div className="summary-data">
                 <div>TURNS: {recentLogs.length}</div>
                 <div>AI: {recentLogs.filter(l => l.actionType === 'BUY_PROPERTY' || l.actionType === 'TRADE').length}</div>
-                <div>OWNED: {gameState ? gameState.properties.filter(p => p.owner).length : 0}</div>
+                <div>OWNED: {gameState && gameState.gameMode === 'monopoly' && 'properties' in gameState ? gameState.properties.filter((p: Property) => p.owner).length : 0}</div>
               </div>
             </div>
           </div>
@@ -268,6 +306,13 @@ function App() {
           theme={terminalTheme}
           onColorChange={handleColorChange}
           onClose={() => setShowColorPicker(false)}
+        />
+      )}
+
+      {showWorldNews && (
+        <WorldNews
+          isVisible={showWorldNews}
+          onClose={() => setShowWorldNews(false)}
         />
       )}
 

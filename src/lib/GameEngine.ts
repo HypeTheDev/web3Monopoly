@@ -1,4 +1,40 @@
-import { Player, Property, GameState, ChanceCard, GameStats } from '../types/GameTypes';
+import { Player, Property, GameState, ChanceCard, GameStats, GameMode, MonopolyGameState, SpadesCard, SpadesGameState } from '../types/GameTypes';
+
+// Base Game Engine Interface
+export abstract class BaseGameEngine {
+  protected gameState: GameState;
+  protected onGameUpdate: (gameState: GameState, logEntry: GameEntry) => void;
+  protected gameLog: GameEntry[];
+  protected gameInterval: NodeJS.Timeout | null = null;
+  protected isRunning: boolean = false;
+
+  constructor(
+    onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void
+  ) {
+    this.onGameUpdate = onGameUpdate || (() => {});
+    this.gameLog = [];
+    this.gameState = this.initializeGameState();
+  }
+
+  // Abstract methods that must be implemented by subclasses
+  abstract initializeGameState(): GameState;
+  abstract startGameLoop(speed: number): void;
+  abstract stopGameLoop(): void;
+  abstract getGameState(): GameState;
+  abstract resetGame(): void;
+  abstract adjustSpeed(speed: number): void;
+
+  // Common methods
+  protected logEntry(actionType: string, details: string): void {
+    const entry = new GameEntry(this.gameLog.length + 1, 'SYSTEM', actionType, details);
+    this.gameLog.push(entry);
+    this.onGameUpdate(this.gameState, entry);
+  }
+
+  public getGameLog(): GameEntry[] {
+    return this.gameLog.slice();
+  }
+}
 
 // AI Difficulty Levels
 export enum AIDifficulty {
@@ -9,27 +45,20 @@ export enum AIDifficulty {
 }
 
 // Game Engine for AI Demo
-export class MonopolyGameEngine {
-  private gameState: GameState;
+export class MonopolyGameEngine extends BaseGameEngine {
   private aiPlayers: AIPlayer[];
-  private gameLog: GameEntry[];
   private playerBalances: Map<string, number[]>;
   private turnCount: number = 0;
   private maxTurns: number;
-  private gameInterval: NodeJS.Timeout | null = null;
-  private onGameUpdate: (gameState: GameState, log: GameEntry) => void;
 
   constructor(maxTurns: number = 1000, onGameUpdate?: (gameState: GameState, log: GameEntry) => void) {
+    super(onGameUpdate);
     this.maxTurns = maxTurns;
-    this.onGameUpdate = onGameUpdate || (() => {});
-    this.gameLog = [];
     this.playerBalances = new Map();
     this.aiPlayers = [];
-
-    this.gameState = this.initializeGameState();
   }
 
-  private initializeGameState(): GameState {
+  public initializeGameState(): GameState {
     // Initialize 4 AI players
     const players: Player[] = [
       { id: 'ai-1', name: 'Terry', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'terry-token', color: '#FF6B6B' },
@@ -41,6 +70,7 @@ export class MonopolyGameEngine {
     const properties = this.initializeProperties();
 
     return {
+      gameMode: GameMode.MONOPOLY,
       players,
       currentPlayerIndex: 0,
       properties,
@@ -267,6 +297,380 @@ export class MonopolyGameEngine {
     this.stopGameLoop();
     this.startGameLoop(newSpeed);
   }
+
+  public resetGame(): void {
+    this.stopGameLoop();
+    this.initializeGameState();
+    this.logEntry('GAME_RESET', 'Game has been reset');
+  }
+}
+
+// Spades Game Engine - 2v2 variant inspired by Balatro
+export class SpadesGameEngine extends BaseGameEngine {
+  private aiPlayers: SpadesAIPlayer[];
+  private deck: SpadesCard[];
+  private currentHandId: number = 0;
+
+  constructor(onGameUpdate?: (gameState: GameState, log: GameEntry) => void) {
+    super(onGameUpdate);
+    this.aiPlayers = [];
+    this.deck = [];
+  }
+
+  public initializeGameState(): GameState {
+    // Initialize 4 players in teams
+    const players: Player[] = [
+      { id: 'spades-1', name: 'North', money: 100, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'north-token', color: '#FF6B6B' },
+      { id: 'spades-2', name: 'East', money: 100, position: 1, properties: [], inJail: false, jailTurns: 0, tokenId: 'east-token', color: '#4ECDC4' },
+      { id: 'spades-3', name: 'South', money: 100, position: 2, properties: [], inJail: false, jailTurns: 0, tokenId: 'south-token', color: '#45B7D1' },
+      { id: 'spades-4', name: 'West', money: 100, position: 3, properties: [], inJail: false, jailTurns: 0, tokenId: 'west-token', color: '#F9CA24' }
+    ];
+
+    // Create teams - North/South vs East/West
+    const teams = {
+      team1: ['spades-1', 'spades-3'], // North, South
+      team2: ['spades-2', 'spades-4']  // East, West
+    };
+
+    this.deck = this.shuffleDeck(this.createDeck());
+
+    return {
+      gameMode: GameMode.SPADES,
+      players,
+      currentPlayerIndex: 0,
+      roundNumber: 1,
+      gameStatus: 'playing',
+      teams,
+      currentDealer: Math.floor(Math.random() * 4),
+      currentTrick: [],
+      bidPhase: true,
+      playPhase: false,
+      bids: {},
+      tricks: {},
+      spadesBroken: false,
+      deck: this.deck,
+      hands: this.dealCards(),
+      trickHistory: [],
+      score: { team1: 0, team2: 0 }
+    };
+  }
+
+  private createDeck(): SpadesCard[] {
+    const deck: SpadesCard[] = [];
+    const suits: SpadesCard['suit'][] = ['hearts', 'diamonds', 'clubs', 'spades'];
+    const ranks = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; // Jack=11, Queen=12, King=13, Ace=14
+
+    for (const suit of suits) {
+      for (const rank of ranks) {
+        deck.push({
+          suit,
+          rank,
+          id: `${suit}-${rank}-${Date.now()}-${Math.random()}`
+        });
+      }
+    }
+    return deck;
+  }
+
+  private shuffleDeck(deck: SpadesCard[]): SpadesCard[] {
+    const shuffled = [...deck];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  private dealCards(): Record<string, SpadesCard[]> {
+    const hands: Record<string, SpadesCard[]> = {};
+    const handSize = 13;
+    let cardIndex = 0;
+
+    // Initialize empty hands
+    hands['spades-1'] = [];
+    hands['spades-2'] = [];
+    hands['spades-3'] = [];
+    hands['spades-4'] = [];
+
+    // Deal cards in round-robin fashion (3, 2, 3, 2, etc.)
+    for (let i = 0; i < handSize; i++) {
+      for (let player = 0; player < 4; player++) {
+        const playerId = `spades-${player + 1}`;
+        if (cardIndex < this.deck.length) {
+          hands[playerId].push(this.deck[cardIndex]);
+          cardIndex++;
+        }
+      }
+    }
+    return hands;
+  }
+
+  public startGameLoop(speed: number = 2000): void {
+    this.logEntry('GAME_START', 'Starting AI Spades game with 2 teams');
+    this.initializeAIPlayers();
+
+    this.gameInterval = setInterval(() => {
+      const logEntry = this.playAITurn();
+      this.onGameUpdate(this.gameState, logEntry);
+
+      if (this.shouldEndGame()) {
+        this.endGame();
+      }
+    }, speed);
+  }
+
+  public stopGameLoop(): void {
+    if (this.gameInterval) {
+      clearInterval(this.gameInterval);
+      this.gameInterval = null;
+      this.logEntry('GAME_END', 'Game loop stopped');
+    }
+  }
+
+  private initializeAIPlayers() {
+    if (this.gameState.gameMode === GameMode.SPADES) {
+      this.aiPlayers = this.gameState.players.map(player =>
+        new SpadesAIPlayer(player, AIDifficulty.MEDIUM)
+      );
+    }
+  }
+
+  private playAITurn(): GameEntry {
+    if (this.gameState.gameMode !== GameMode.SPADES) {
+      return new GameEntry(1, 'SYSTEM', 'ERROR', 'Invalid game mode');
+    }
+
+    const currentAI = this.aiPlayers[this.gameState.currentPlayerIndex];
+    const action = currentAI.takeTurn(this.gameState);
+
+    this.executeSpadesAction(action, currentAI.player);
+
+    // Next player
+    this.gameState.currentPlayerIndex = (this.gameState.currentPlayerIndex + 1) % this.aiPlayers.length;
+    if (this.gameState.currentPlayerIndex === 0) {
+      this.gameState.roundNumber++;
+    }
+
+    return new GameEntry(this.gameState.roundNumber, currentAI.player.name, action.type, action.details);
+  }
+
+  private executeSpadesAction(action: SpadesActions, player: Player) {
+    if (this.gameState.gameMode !== GameMode.SPADES) return;
+
+    switch (action.type) {
+      case 'PLACE_BID':
+        if (typeof action.bid === 'number') {
+          this.gameState.bids[player.id] = action.bid;
+        }
+        // Check if all bids are placed
+        if (Object.keys(this.gameState.bids).length === 4) {
+          this.gameState.bidPhase = false;
+          this.gameState.playPhase = true;
+        }
+        break;
+
+      case 'PLAY_CARD':
+        if (action.card) {
+          this.gameState.currentTrick.push(action.card);
+          // Remove card from player's hand
+          if (this.gameState.hands[player.id]) {
+            this.gameState.hands[player.id] = this.gameState.hands[player.id]
+              .filter(card => card.id !== action.card!.id);
+          }
+
+          // Check if trick is complete (4 cards)
+          if (this.gameState.currentTrick.length === 4) {
+            const winner = this.determineTrickWinner();
+            this.gameState.tricks[winner.id] = (this.gameState.tricks[winner.id] || 0) + 1;
+            this.gameState.trickHistory.push({
+              cards: this.gameState.currentTrick,
+              winner: winner.id,
+              points: this.calculateTrickPoints(this.gameState.currentTrick)
+            });
+            this.gameState.currentTrick = [];
+            this.gameState.currentPlayerIndex = this.gameState.players
+              .findIndex(p => p.id === winner.id);
+          }
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  private determineTrickWinner(): Player {
+    if (this.gameState.gameMode !== GameMode.SPADES || this.gameState.currentTrick.length === 0) {
+      return this.gameState.players[0];
+    }
+
+    let winner = this.gameState.currentTrick[0];
+    let winningSuit = winner.suit;
+    let maxRank = winner.rank;
+    let winnerPlayer = this.gameState.players[0]; // Default fallback
+
+    this.gameState.currentTrick.forEach(card => {
+      // If player has leading suit and higher rank, they win
+      if (card.suit === winningSuit && card.rank > maxRank) {
+        maxRank = card.rank;
+        winner = card;
+      }
+      // If player has spades and spades were not led, they win
+      else if (card.suit === 'spades' && winningSuit !== 'spades') {
+        winningSuit = 'spades';
+        maxRank = card.rank;
+        winner = card;
+        this.gameState.spadesBroken = true;
+      }
+      // If spades were led and player has higher spade
+      else if (card.suit === 'spades' && winningSuit === 'spades' && card.rank > maxRank) {
+        maxRank = card.rank;
+        winner = card;
+      }
+    });
+
+    // Find which player played the winning card
+    winnerPlayer = this.gameState.players.find(player => {
+      const playerCards = this.gameState.hands[player.id] || [];
+      return playerCards.some(card => card.id === winner.id);
+    }) || this.gameState.players[0];
+
+    return winnerPlayer;
+  }
+
+  private calculateTrickPoints(cards: SpadesCard[]): number {
+    let points = 0;
+    cards.forEach(card => {
+      if (card.suit === 'hearts') points += 1;
+      if (card.suit === 'spades' && card.rank === 12) points += 13; // Queen of Spades
+    });
+    return points;
+  }
+
+  private shouldEndGame(): boolean {
+    if (this.gameState.gameMode !== GameMode.SPADES) return false;
+
+    const totalTricksPlayed = Object.values(this.gameState.tricks).reduce((a, b) => a + b, 0);
+    return totalTricksPlayed >= 13; // One round of 13 tricks complete
+  }
+
+  private endGame() {
+    if (this.gameState.gameMode !== GameMode.SPADES) return;
+
+    this.stopGameLoop();
+    this.calculateFinalScores();
+
+    // Determine winner
+    const team1Score = this.gameState.score.team1;
+    const team2Score = this.gameState.score.team2;
+    const winner = team1Score > team2Score ? 'Team North/South' : 'Team East/West';
+
+    this.logEntry('GAME_END', `Winner: ${winner} with ${Math.max(team1Score, team2Score)} points`);
+  }
+
+  private calculateFinalScores() {
+    if (this.gameState.gameMode !== GameMode.SPADES) return;
+
+    let team1Tricks = 0;
+    let team2Tricks = 0;
+
+    this.gameState.teams.team1.forEach(playerId => {
+      team1Tricks += this.gameState.tricks[playerId] || 0;
+    });
+
+    this.gameState.teams.team2.forEach(playerId => {
+      team2Tricks += this.gameState.tricks[playerId] || 0;
+    });
+
+    // Add bag bonus or penalties
+    this.gameState.score.team1 += team1Tricks;
+    this.gameState.score.team2 += team2Tricks;
+  }
+
+  public getGameState(): GameState {
+    return this.gameState;
+  }
+
+  public adjustSpeed(speed: number): void {
+    this.stopGameLoop();
+    this.startGameLoop(speed);
+  }
+
+  public resetGame(): void {
+    this.stopGameLoop();
+    this.initializeGameState();
+    this.logEntry('GAME_RESET', 'Game has been reset');
+  }
+}
+
+// Spades AI Player
+class SpadesAIPlayer {
+  constructor(public player: Player, private difficulty: AIDifficulty) {}
+
+  takeTurn(gameState: GameState): SpadesActions {
+    if (gameState.gameMode !== GameMode.SPADES) {
+      return { type: 'END_TURN', details: 'Invalid game mode' };
+    }
+
+    const spadesGameState = gameState as SpadesGameState;
+    const myHand = spadesGameState.hands[this.player.id] || [];
+
+    if (spadesGameState.bidPhase && !spadesGameState.bids[this.player.id]) {
+      // Bidding phase - bid based on hand strength
+      const bid = this.calculateOptimalBid(myHand);
+      return { type: 'PLACE_BID', bid, details: `Bid ${bid}` };
+    }
+
+    if (spadesGameState.playPhase && myHand.length > 0) {
+      // Playing phase - select card to play
+      const cardToPlay = this.selectCardToPlay(myHand, spadesGameState);
+      return { type: 'PLAY_CARD', card: cardToPlay, details: `Played ${cardToPlay.rank} of ${cardToPlay.suit}` };
+    }
+
+    return { type: 'END_TURN', details: 'Waiting for game phase' };
+  }
+
+  private calculateOptimalBid(hand: SpadesCard[]): number {
+    // Simple bid calculation based on number of high cards
+    let bid = 0;
+    hand.forEach(card => {
+      if (card.rank >= 10) bid += 0.5; // Face cards
+      if (card.suit === 'spades' && card.rank >= 11) bid += 0.25; // High spades
+    });
+    return Math.min(Math.max(Math.floor(bid), 0), 3); // Between 0-3
+  }
+
+  private selectCardToPlay(hand: SpadesCard[], gameState: SpadesGameState): SpadesCard {
+    // Simple strategy: if trick has cards, follow suit or play low card
+    const currentTrick = gameState.currentTrick;
+    const leadSuit = currentTrick.length > 0 ? currentTrick[0].suit : null;
+
+    if (leadSuit) {
+      const suitCards = hand.filter(card => card.suit === leadSuit);
+      if (suitCards.length > 0) {
+        // Follow suit - play lowest card unless spades broken
+        if (leadSuit === 'spades' || gameState.spadesBroken) {
+          return suitCards.reduce((lowest, current) =>
+            lowest.rank < current.rank ? lowest : current);
+        } else {
+          return suitCards.reduce((lowest, current) =>
+            lowest.rank < current.rank ? lowest : current);
+        }
+      }
+    }
+
+    // No cards in suit or no lead - play lowest card
+    return hand.reduce((lowest, current) =>
+      lowest.rank < current.rank ? lowest : current);
+  }
+}
+
+// Spades Actions Interface
+interface SpadesActions {
+  type: 'PLACE_BID' | 'PLAY_CARD' | 'END_TURN';
+  bid?: number;
+  card?: SpadesCard;
+  details: string;
 }
 
 // AI Actions Interface
@@ -276,11 +680,18 @@ interface AIActions {
   targetProperty?: Property;
 }
 
-// AI Player Class
+// AI Player Class - Monopoly Only
 class AIPlayer {
   constructor(public player: Player, private difficulty: AIDifficulty) {}
 
   takeTurn(gameState: GameState): AIActions {
+    if (gameState.gameMode !== GameMode.MONOPOLY) {
+      return { type: 'END_TURN', details: 'Non-monopoly game mode' };
+    }
+
+    // Type-safe cast to MonopolyGameState
+    const monopolyState = gameState as MonopolyGameState;
+
     // AI decision making based on difficulty
     const rollDice = Math.random() > 0.2;
     if (rollDice) {
@@ -288,7 +699,7 @@ class AIPlayer {
     }
 
     // Check if can buy current property
-    const currentProperty = gameState.properties[this.player.position];
+    const currentProperty = monopolyState.properties[this.player.position];
     if (currentProperty.price > 0 && !currentProperty.owner && this.player.money >= currentProperty.price) {
       if (this.shouldBuyProperty(currentProperty)) {
         return { type: 'BUY_PROPERTY', details: `AI player bought ${currentProperty.name}` };
