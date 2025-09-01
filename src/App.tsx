@@ -9,16 +9,20 @@ import PropertyModal from './components/PropertyModal';
 import ColorPicker from './components/ColorPicker';
 import MatrixRain from './components/MatrixRain';
 import WorldNews from './components/WorldNews';
+import DBADashboard from './components/DBADashboard';
+import AdBox from './components/AdBox';
 
 // Game Engine
-import { MonopolyGameEngine, GameEntry } from './lib/GameEngine';
+import { MonopolyGameEngine, DBAEngine } from './lib/GameEngine';
+import { GameEntry, GameMode } from './types/GameTypes';
 
 // Types
-import { Property, GameState, TerminalTheme, MonopolyGameState, GameMode } from './types/GameTypes';
+import { Property, GameState, TerminalTheme, MonopolyGameState, DBAGameState } from './types/GameTypes';
 
 function App() {
-  const [gameEngine, setGameEngine] = useState<MonopolyGameEngine | null>(null);
+  const [gameEngine, setGameEngine] = useState<MonopolyGameEngine | DBAEngine | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [currentGameMode, setCurrentGameMode] = useState<GameMode>(GameMode.MONOPOLY);
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [gameSpeed, setGameSpeed] = useState(1000);
   const [recentLogs, setRecentLogs] = useState<GameEntry[]>([]);
@@ -37,15 +41,14 @@ function App() {
     textColor: '#00ff00'
   });
 
+
+
   // Initialize game engine
   useEffect(() => {
-    const engine = new MonopolyGameEngine(500, (gameState, logEntry) => {
-      setGameState(gameState);
-      setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]); // Keep last 20 entries
-    });
-    setGameEngine(engine);
-    setGameState(engine.getGameState());
-  }, []);
+    if (!gameEngine) {
+      switchGameMode(GameMode.MONOPOLY); // Start with Monopoly by default
+    }
+  }, [gameEngine]); // Note: switchGameMode not in deps - this is intentional for initial setup
 
   // Update CSS custom properties when theme changes
   useEffect(() => {
@@ -86,15 +89,52 @@ function App() {
   const resetGame = () => {
     if (gameEngine) {
       gameEngine.stopGameLoop();
-      const engine = new MonopolyGameEngine(500, (gameState, logEntry) => {
-        setGameState(gameState);
-        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
-      });
-      setGameEngine(engine);
+      let engine: MonopolyGameEngine | DBAEngine;
+
+      if (currentGameMode === GameMode.DBA) {
+        engine = new DBAEngine((gameState: GameState, logEntry: GameEntry) => {
+          setGameState(gameState);
+          setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+        });
+        setGameEngine(engine);
+      } else {
+        engine = new MonopolyGameEngine((gameState: GameState, logEntry: GameEntry) => {
+          setGameState(gameState);
+          setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+        });
+        setGameEngine(engine);
+      }
+
       setGameState(engine.getGameState());
       setIsGameRunning(false);
       setRecentLogs([]);
     }
+  };
+
+  const switchGameMode = (newMode: GameMode) => {
+    if (gameEngine && isGameRunning) {
+      gameEngine.stopGameLoop();
+      setIsGameRunning(false);
+    }
+
+    setCurrentGameMode(newMode);
+    let engine: MonopolyGameEngine | DBAEngine;
+
+    if (newMode === GameMode.DBA) {
+      engine = new DBAEngine((gameState: GameState, logEntry: GameEntry) => {
+        setGameState(gameState);
+        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+      });
+      setGameEngine(engine);
+    } else {
+      engine = new MonopolyGameEngine((gameState: GameState, logEntry: GameEntry) => {
+        setGameState(gameState);
+        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+      });
+      setGameEngine(engine);
+    }
+    setGameState(engine.getGameState());
+    setRecentLogs([]);
   };
 
   const currentPlayer = gameState?.players[gameState?.currentPlayerIndex] || null;
@@ -114,6 +154,25 @@ function App() {
           <h1>BkM</h1>
         </div>
         <div className="header-controls">
+          <select
+            value={currentGameMode}
+            onChange={(e) => switchGameMode(e.target.value as GameMode)}
+            className="game-mode-selector"
+            style={{
+              backgroundColor: 'var(--panel-color)',
+              border: '1px solid var(--primary-color)',
+              color: 'var(--primary-color)',
+              padding: '0.5rem',
+              marginRight: '1rem',
+              fontFamily: 'monospace'
+            }}
+          >
+            <option value={GameMode.MONOPOLY}>MONOPOLY</option>
+            <option value={GameMode.SPADES}>SPADES (Coming Soon)</option>
+            <option value={GameMode.CHESS}>CHESS (Coming Soon)</option>
+            <option value={GameMode.DBA}>⚡ DBA ⚡</option>
+          </select>
+
           <button
             className="action-btn info"
             onClick={() => setShowWorldNews(true)}
@@ -215,6 +274,22 @@ function App() {
                 gameState={gameState}
               />
             )}
+
+            {gameState?.gameMode === GameMode.DBA && 'league' in gameState && gameState.league && (
+              <DBADashboard
+                gameState={gameState as DBAGameState}
+                onViewChange={(view) => {
+                  // Handle view changes in DBA
+                  console.log('DBA view change:', view);
+                }}
+                onAdvanceWeek={() => {
+                  if (gameEngine && gameEngine instanceof DBAEngine) {
+                    gameEngine.advanceWeek();
+                  }
+                }}
+              />
+            )}
+
             {gameState?.gameMode === 'spades' && 'teams' in gameState && (
               <div className="spades-board">
                 <h3>Spades Game Board - Coming Soon!</h3>
@@ -223,7 +298,17 @@ function App() {
                 </div>
               </div>
             )}
-            {(!gameState || (!('properties' in gameState) && !('teams' in gameState))) && (
+
+            {gameState?.gameMode === 'chess' && (
+              <div className="chess-board">
+                <h3>Chess (King of the Hill) - Coming Soon!</h3>
+                <div className="game-status">
+                  Phase: Multi-player Board System Ready
+                </div>
+              </div>
+            )}
+
+            {(!gameState || (!('properties' in gameState) && !('teams' in gameState) && !('league' in gameState))) && (
               <div className="loading-board">
                 <h3>Game Board Loading...</h3>
               </div>
@@ -317,6 +402,9 @@ function App() {
 
       {/* Matrix background effect */}
       <MatrixRain />
+
+      {/* Ad Box - slideshow in bottom right */}
+      <AdBox />
 
       {/* Footer - simplified */}
       <footer className="terminal-footer">

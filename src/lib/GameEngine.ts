@@ -1,4 +1,4 @@
-import { Player, Property, GameState, ChanceCard, GameStats, GameMode, MonopolyGameState, SpadesCard, SpadesGameState } from '../types/GameTypes';
+import { Player, Property, GameState, ChanceCard, GameStats, GameMode, MonopolyGameState, SpadesCard, SpadesGameState, DBAGameState, NBAPlayer, DBATeam, DBALeague, LeagueRules, DBAGame, NBAStatLine, DBAGameResult, PlayerRankings, GameEntry } from '../types/GameTypes';
 
 // Base Game Engine Interface
 export abstract class BaseGameEngine {
@@ -36,561 +36,763 @@ export abstract class BaseGameEngine {
   }
 }
 
-// AI Difficulty Levels
-export enum AIDifficulty {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard',
-  EXPERT = 'expert'
-}
+// DBA Game Engine - Digital Basketball Association
+export class DBAEngine extends BaseGameEngine {
+  private aiTeams: DBATeam[];
+  private nbaPlayersData: NBAPlayer[];
+  private currentWeek: number = 1;
+  private leagueRules: LeagueRules;
 
-// Game Engine for AI Demo
-export class MonopolyGameEngine extends BaseGameEngine {
-  private aiPlayers: AIPlayer[];
-  private playerBalances: Map<string, number[]>;
-  private turnCount: number = 0;
-  private maxTurns: number;
-
-  constructor(maxTurns: number = 1000, onGameUpdate?: (gameState: GameState, log: GameEntry) => void) {
+  constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
     super(onGameUpdate);
-    this.maxTurns = maxTurns;
-    this.playerBalances = new Map();
-    this.aiPlayers = [];
+    this.nbaPlayersData = this.generateNBAPlayers();
+    this.leagueRules = this.getDefaultLeagueRules();
+    this.aiTeams = [];
   }
 
-  public initializeGameState(): GameState {
-    // Initialize 4 AI players
-    const players: Player[] = [
-      { id: 'ai-1', name: 'Terry', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'terry-token', color: '#FF6B6B' },
-      { id: 'ai-2', name: 'Alice', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'alice-token', color: '#4ECDC4' },
-      { id: 'ai-3', name: 'Bob', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'bob-token', color: '#45B7D1' },
-      { id: 'ai-4', name: 'Carol', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'carol-token', color: '#F9CA24' }
-    ];
+  initializeGameState(): GameState {
+    // Initialize DBA game state
+    const dbaTeams = this.initializeDBATeams();
+    const league = this.initializeLeague(dbaTeams);
+    const currentUserTeam = dbaTeams[0]; // User starts with first team
 
-    const properties = this.initializeProperties();
-
-    return {
-      gameMode: GameMode.MONOPOLY,
-      players,
+    const dbaGameState: DBAGameState = {
+      gameMode: GameMode.DBA,
+      players: [], // DBA uses teams, not individual players
       currentPlayerIndex: 0,
-      properties,
       gameStatus: 'playing',
-      diceRolls: [],
-      bankMoney: 20580, // Starting bank amount
-      freeParkingPot: 0,
       roundNumber: 1,
-      chanceCards: this.initializeChanceCards(),
-      communityChestCards: this.initializeCommunityChestCards(),
-      currentCard: null
+      league: league,
+      currentTeam: currentUserTeam.id,
+      currentView: 'dashboard',
+      leagueRules: this.leagueRules
     };
+
+    return dbaGameState;
   }
 
-  private initializeProperties(): Property[] {
-    return [
-      { id: 0, name: 'GO', type: 'corner', position: 0, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: 'transparent', houses: 0 },
-      { id: 1, name: 'Mediterranean Ave', type: 'property', position: 1, price: 60, rent: [2, 10, 30, 90, 160, 250], mortgageValue: 30, mortgaged: false, owner: null, color: '#964B00', houses: 0 },
-      { id: 2, name: 'Community Chest', type: 'card', position: 2, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#87CEEB', houses: 0 },
-      { id: 3, name: 'Baltic Ave', type: 'property', position: 3, price: 60, rent: [4, 20, 60, 180, 320, 450], mortgageValue: 30, mortgaged: false, owner: null, color: '#964B00', houses: 0 },
-      { id: 4, name: 'Income Tax', type: 'tax', position: 4, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#708090', houses: 0 },
-      { id: 5, name: 'Reading Railroad', type: 'railroad', position: 5, price: 200, rent: [25, 50, 100, 200], mortgageValue: 100, mortgaged: false, owner: null, color: '#000000', houses: 0 },
-      { id: 6, name: 'Oriental Ave', type: 'property', position: 6, price: 100, rent: [6, 30, 90, 270, 400, 550], mortgageValue: 50, mortgaged: false, owner: null, color: '#FF6B6B', houses: 0 },
-      { id: 7, name: 'Chance', type: 'card', position: 7, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#FFD93D', houses: 0 },
-      { id: 8, name: 'Vermont Ave', type: 'property', position: 8, price: 100, rent: [6, 30, 90, 270, 400, 550], mortgageValue: 50, mortgaged: false, owner: null, color: '#FF6B6B', houses: 0 },
-      { id: 9, name: 'Connecticut Ave', type: 'property', position: 9, price: 120, rent: [8, 40, 100, 300, 450, 600], mortgageValue: 60, mortgaged: false, owner: null, color: '#FF6B6B', houses: 0 },
-      { id: 10, name: 'Just Visiting Jail', type: 'corner', position: 10, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: 'transparent', houses: 0 },
-      { id: 11, name: 'St. Charles Place', type: 'property', position: 11, price: 140, rent: [10, 50, 150, 450, 625, 750], mortgageValue: 70, mortgaged: false, owner: null, color: '#87CEEB', houses: 0 },
-      { id: 12, name: 'Electric Company', type: 'utility', position: 12, price: 150, rent: [4, 10], mortgageValue: 75, mortgaged: false, owner: null, color: '#98FB98', houses: 0 },
-      { id: 13, name: 'States Ave', type: 'property', position: 13, price: 140, rent: [10, 50, 150, 450, 625, 750], mortgageValue: 70, mortgaged: false, owner: null, color: '#87CEEB', houses: 0 },
-      { id: 14, name: 'Virginia Ave', type: 'property', position: 14, price: 160, rent: [12, 60, 180, 500, 700, 900], mortgageValue: 80, mortgaged: false, owner: null, color: '#87CEEB', houses: 0 },
-      { id: 15, name: 'Pennsylvania Railroad', type: 'railroad', position: 15, price: 200, rent: [25, 50, 100, 200], mortgageValue: 100, mortgaged: false, owner: null, color: '#000000', houses: 0 },
-      { id: 16, name: 'St. James Place', type: 'property', position: 16, price: 180, rent: [14, 70, 200, 550, 750, 950], mortgageValue: 90, mortgaged: false, owner: null, color: '#FFB347', houses: 0 },
-      { id: 17, name: 'Community Chest', type: 'card', position: 17, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#87CEEB', houses: 0 },
-      { id: 18, name: 'Tennessee Ave', type: 'property', position: 18, price: 180, rent: [14, 70, 200, 550, 750, 950], mortgageValue: 90, mortgaged: false, owner: null, color: '#FFB347', houses: 0 },
-      { id: 19, name: 'New York Ave', type: 'property', position: 19, price: 200, rent: [16, 80, 220, 600, 800, 1000], mortgageValue: 100, mortgaged: false, owner: null, color: '#FFB347', houses: 0 },
-      { id: 20, name: 'Free Parking', type: 'corner', position: 20, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: 'transparent', houses: 0 },
-      { id: 21, name: 'Kentucky Ave', type: 'property', position: 21, price: 220, rent: [18, 90, 250, 700, 875, 1050], mortgageValue: 110, mortgaged: false, owner: null, color: '#FF69B4', houses: 0 },
-      { id: 22, name: 'Chance', type: 'card', position: 22, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#FFD93D', houses: 0 },
-      { id: 23, name: 'Indiana Ave', type: 'property', position: 23, price: 220, rent: [18, 90, 250, 700, 875, 1050], mortgageValue: 110, mortgaged: false, owner: null, color: '#FF69B4', houses: 0 },
-      { id: 24, name: 'Illinois Ave', type: 'property', position: 24, price: 240, rent: [20, 100, 300, 750, 925, 1100], mortgageValue: 120, mortgaged: false, owner: null, color: '#FF69B4', houses: 0 },
-      { id: 25, name: 'B&O Railroad', type: 'railroad', position: 25, price: 200, rent: [25, 50, 100, 200], mortgageValue: 100, mortgaged: false, owner: null, color: '#000000', houses: 0 },
-      { id: 26, name: 'Atlantic Ave', type: 'property', position: 26, price: 260, rent: [22, 110, 330, 800, 975, 1150], mortgageValue: 130, mortgaged: false, owner: null, color: '#FFFF99', houses: 0 },
-      { id: 27, name: 'Ventnor Ave', type: 'property', position: 27, price: 260, rent: [22, 110, 330, 800, 975, 1150], mortgageValue: 130, mortgaged: false, owner: null, color: '#FFFF99', houses: 0 },
-      { id: 28, name: 'Water Works', type: 'utility', position: 28, price: 150, rent: [4, 10], mortgageValue: 75, mortgaged: false, owner: null, color: '#98FB98', houses: 0 },
-      { id: 29, name: 'Marvin Gardens', type: 'property', position: 29, price: 280, rent: [24, 120, 360, 850, 1025, 1200], mortgageValue: 140, mortgaged: false, owner: null, color: '#FFFF99', houses: 0 },
-      { id: 30, name: 'Go To Jail', type: 'corner', position: 30, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: 'transparent', houses: 0 },
-      { id: 31, name: 'Pacific Ave', type: 'property', position: 31, price: 300, rent: [26, 130, 390, 900, 1100, 1275], mortgageValue: 150, mortgaged: false, owner: null, color: '#32CD32', houses: 0 },
-      { id: 32, name: 'North Carolina Ave', type: 'property', position: 32, price: 300, rent: [26, 130, 390, 900, 1100, 1275], mortgageValue: 150, mortgaged: false, owner: null, color: '#32CD32', houses: 0 },
-      { id: 33, name: 'Community Chest', type: 'card', position: 33, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#87CEEB', houses: 0 },
-      { id: 34, name: 'Pennsylvania Ave', type: 'property', position: 34, price: 320, rent: [28, 150, 450, 1000, 1200, 1400], mortgageValue: 160, mortgaged: false, owner: null, color: '#32CD32', houses: 0 },
-      { id: 35, name: 'Short Line', type: 'railroad', position: 35, price: 200, rent: [25, 50, 100, 200], mortgageValue: 100, mortgaged: false, owner: null, color: '#000000', houses: 0 },
-      { id: 36, name: 'Chance', type: 'card', position: 36, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#087823EB', houses: 0 },
-      { id: 37, name: 'Park Place', type: 'property', position: 37, price: 350, rent: [35, 175, 500, 1100, 1300, 1500], mortgageValue: 175, mortgaged: false, owner: null, color: '#8A2BE2', houses: 0 },
-      { id: 38, name: 'Luxury Tax', type: 'tax', position: 38, price: 0, rent: [0], mortgageValue: 0, mortgaged: false, owner: null, color: '#708090', houses: 0 },
-      { id: 39, name: 'Boardwalk', type: 'property', position: 39, price: 400, rent: [50, 200, 600, 1400, 1700, 2000], mortgageValue: 200, mortgaged: false, owner: null, color: '#8A2BE2', houses: 0 }
+  private initializeDBATeams(): DBATeam[] {
+    const teamNames = [
+      'Neon Niques', 'Digital Dunkers', 'Matrix MVPs', 'Pixel Pacers',
+      'Circuit Cavaliers', 'Binary Bucks', 'Quantum Lakers', 'Glitch Heat'
     ];
+
+    const teams: DBATeam[] = teamNames.map((name, index) => ({
+      id: `dba-team-${index}`,
+      name: name,
+      owner: index === 0 ? 'user' : `ai-${index}`,
+      players: this.generateTeamRoster(),
+      startingLineup: {
+        PG: null, SG: null, SF: null, PF: null, C: null
+      },
+      bench: [],
+      budget: 100000000, // $100M budget
+      leagueRank: index + 1,
+      record: { wins: 0, losses: 0 },
+      totalValue: 0
+    }));
+
+    // Set up starting lineups for each team
+    teams.forEach(team => this.optimizeStartingLineup(team));
+
+    return teams;
   }
 
-  private initializeChanceCards(): ChanceCard[] {
-    return [
-      { id: 'chance-1', title: 'Advance to GO', description: 'Advance to GO (Collect $200)', action: (player) => {
-        player.position = 0;
-        player.money += 200;
-      }, type: 'chance' },
-      { id: 'chance-2', title: 'Speeding Fine', description: 'Speeding fine $15', action: (player) => {
-        player.money -= 15;
-      }, type: 'chance' },
-      { id: 'chance-3', title: 'Bank Dividend', description: 'Bank pays dividend of $50', action: (player) => {
-        player.money += 50;
-      }, type: 'chance' }
+  private initializeLeague(teams: DBATeam[]): DBALeague {
+    const league: DBALeague = {
+      season: 2025,
+      currentWeek: 1,
+      standings: [...teams].sort((a, b) => b.totalValue - a.totalValue),
+      schedule: this.generateSeasonSchedule(teams),
+      draftOrder: teams.map(t => t.id),
+      freeAgents: this.generateFreeAgents(),
+      activeTrades: []
+    };
+
+    return league;
+  }
+
+  private generateNBAPlayers(): NBAPlayer[] {
+    // Generate superhero-level NBA players in Neo Tokio universe
+    const superpowerNames = [
+      // Point Guards - Speed/Skills
+      { name: 'Nexus Prime', power: 'Reality Warping' },
+      { name: 'Quantum Flash', power: 'Time Dilation' },
+      { name: 'Void Walker', power: 'Shadow Travel' },
+      { name: 'Pulse Master', power: 'Energy Manipulation' },
+      { name: 'Mind Bender', power: 'Telepathy' },
+      { name: 'Storm Weaver', power: 'Weather Control' },
+      { name: 'Neon Phantom', power: 'Light Bending' },
+      { name: 'Cyber Sage', power: 'Digital Mind' },
+      { name: 'Eclipse Hunter', power: 'Darkness Control' },
+      { name: 'Frost Warden', power: 'Cryokinetics' },
+
+      // Shooting Guards - Precision/Long Range
+      { name: 'Arcane Sniper', power: 'Perfect Aim' },
+      { name: 'Plasma Storm', power: 'Electric Control' },
+      { name: 'Crystal Shard', power: 'Crystal Generation' },
+      { name: 'Wind Dancer', power: 'Aerokinesis' },
+      { name: 'Solar Flare', power: 'Heat Manipulation' },
+      { name: 'Sonic Boom', power: 'Sound Waves' },
+      { name: 'Gravity Well', power: 'Mass Manipulation' },
+      { name: 'Mirror Mage', power: 'Reflection Creation' },
+      { name: 'Thunder Clap', power: 'Shockwaves' },
+      { name: 'Ice Phoenix', power: 'Regeneration' },
+
+      // Small Forwards - Strength/Speed
+      { name: 'Titan Breaker', power: 'Super Strength' },
+      { name: 'Blaze Runner', power: 'Fire Speed' },
+      { name: 'Terra Shifter', power: 'Earth Movement' },
+      { name: 'Blood Moon', power: 'Lunar Empowerment' },
+      { name: 'Steel Guardian', power: 'Metal Skin' },
+      { name: 'Phantom Rush', power: 'Phasing' },
+      { name: 'Chaos Weaver', power: 'Probability Control' },
+      { name: 'Soul Binder', power: 'Life Force' },
+      { name: 'Star Forge', power: 'Matter Creation' },
+      { name: 'Void Summoner', power: 'Entity Calling' },
+
+      // Power Forwards - Power/Rebounds
+      { name: 'Colossus Prime', power: 'Size Alteration' },
+      { name: 'Mountain King', power: 'Rock Armor' },
+      { name: 'Inferno Lord', power: 'Volcanic Control' },
+      { name: 'Storm Breaker', power: 'Thunder Control' },
+      { name: 'Crystal Colossus', power: 'Giant Form' },
+      { name: 'Shadow Titan', power: 'Dark Matter' },
+      { name: 'Quantum Field', power: 'Gravity Control' },
+      { name: 'Plasma Giant', power: 'Energy Absorption' },
+      { name: 'Frost Giant', power: 'Ice Constructs' },
+      { name: 'Solar Titan', power: 'Nuclear Energy' },
+
+      // Centers - Defense/Positioning
+      { name: 'Void Sentinel', power: 'Portal Creation' },
+      { name: 'Iron Fortress', power: 'Force Fields' },
+      { name: 'Chaos Engine', power: 'Dimensional Anchor' },
+      { name: 'Soul Reaver', power: 'Spirit Control' },
+      { name: 'Titan Forge', power: 'Metal Shaping' },
+      { name: 'Crystal Monarch', power: 'Psychic Crystals' },
+      { name: 'Storm Warden', power: 'Electrical Fields' },
+      { name: 'Neon Guardian', power: 'Energy Shields' },
+      { name: 'Eclipse King', power: 'Solar Absorption' },
+      { name: 'Quantum Wall', power: 'Spatial Barriers' }
     ];
-  }
 
-  private initializeCommunityChestCards(): ChanceCard[] {
-    return [
-      { id: 'chest-1', title: 'Life Insurance', description: 'Life insurance matures - Collect $100', action: (player) => {
-        player.money += 100;
-      }, type: 'community-chest' },
-      { id: 'chest-2', title: 'Doctor\'s Fee', description: 'Doctor\'s fee. Pay $50', action: (player) => {
-        player.money -= 50;
-      }, type: 'community-chest' },
-      { id: 'chest-3', title: 'Income Tax Refund', description: 'Income tax refund. Collect $20', action: (player) => {
-        player.money += 20;
-      }, type: 'community-chest' }
+    // Neo Tokio city teams and locations
+    const neoTokioTeams = [
+      'Neo Central Knights', 'Tokyo Cyber Raiders', 'Shinjuku Storm', 'Akiba Eclipse',
+      'Harajuku Hurricanes', 'Shibuya Shadows', 'Ginza Guardians', 'Roppongi Rockets',
+      'Asakusa Ancients', 'Ueno Underground', 'Odaiba Dynasty', 'Minato Matrix'
     ];
-  }
 
-  public startGameLoop(speed: number = 1000) {
-    this.logEntry('GAME_START', 'Starting AI Monopoly demo with 4 players');
-    this.logEntry('CONFIG', `Turn speed: ${speed}ms, Max turns: ${this.maxTurns}`);
-    this.initializeAIPlayers();
+    return superpowerNames.map((hero, index) => {
+      const position = this.getPositionFromIndex(index);
+      const teamIndex = Math.floor(Math.random() * neoTokioTeams.length);
 
-    this.gameInterval = setInterval(() => {
-      const logEntry = this.playAITurn();
-      this.onGameUpdate(this.gameState, logEntry);
+      // Generate superhero-level stats (much higher than real NBA)
+      const baseStats = this.generateSuperheroStats(position, hero.power);
 
-      if (this.shouldEndGame()) {
-        this.endGame();
-      }
-    }, speed);
-  }
-
-  public stopGameLoop() {
-    if (this.gameInterval) {
-      clearInterval(this.gameInterval);
-      this.gameInterval = null;
-      this.logEntry('GAME_END', 'Game loop stopped');
-    }
-  }
-
-  private initializeAIPlayers() {
-    this.aiPlayers = this.gameState.players.map(player => new AIPlayer(player, AIDifficulty.EXPERT));
-    this.aiPlayers.forEach(player => {
-      this.playerBalances.set(player.player.id, [player.player.money]);
+      return {
+        id: `superhero-${index}`,
+        name: hero.name,
+        team: neoTokioTeams[teamIndex],
+        position: position,
+        stats: baseStats,
+        contract: {
+          team: neoTokioTeams[teamIndex],
+          salary: 50000000 + Math.random() * 100000000, // $50M-$150M range
+          yearsLeft: Math.floor(Math.random() * 7) + 1
+        },
+        rarity: baseStats.points > 40 ? 'Legendary' :
+                baseStats.points > 35 ? 'Epic' :
+                baseStats.points > 30 ? 'Rare' :
+                baseStats.points > 25 ? 'Uncommon' : 'Common',
+        value: 5000000 + Math.random() * 150000000, // $5M-$155M value
+        power: hero.power // Add superpower info
+      } as NBAPlayer & { power: string };
     });
   }
 
-  private playAITurn(): GameEntry {
-    const currentAI = this.aiPlayers[this.gameState.currentPlayerIndex];
-    const action = currentAI.takeTurn(this.gameState);
-
-    this.executeAIAction(action, currentAI.player);
-
-    // Next player
-    this.gameState.currentPlayerIndex = (this.gameState.currentPlayerIndex + 1) % this.aiPlayers.length;
-    if (this.gameState.currentPlayerIndex === 0) {
-      this.gameState.roundNumber++;
-    }
-    this.turnCount++;
-
-    return new GameEntry(this.turnCount, currentAI.player.name, action.type, action.details);
+  private getPositionFromIndex(index: number): 'PG' | 'SG' | 'SF' | 'PF' | 'C' {
+    if (index < 10) return 'PG';
+    if (index < 20) return 'SG';
+    if (index < 30) return 'SF';
+    if (index < 40) return 'PF';
+    return 'C';
   }
 
-  private executeAIAction(action: AIActions, player: Player) {
-    if (this.gameState.gameMode !== GameMode.MONOPOLY) return;
+  private generateSuperheroStats(position: 'PG' | 'SG' | 'SF' | 'PF' | 'C', power: string): any {
+    // Base stats vary by position, boosted by superhero powers
+    let basePoints = 25, baseRebounds = 5, baseAssists = 5, baseSteals = 1, baseBlocks = 1;
 
-    const monopolyState = this.gameState as MonopolyGameState;
-
-    switch (action.type) {
-      case 'ROLL_DICE':
-        const dice1 = Math.floor(Math.random() * 6) + 1;
-        const dice2 = Math.floor(Math.random() * 6) + 1;
-        monopolyState.diceRolls = [dice1, dice2];
-
-        player.position = (player.position + dice1 + dice2) % 40;
-        const landed = monopolyState.properties[player.position];
-
-        if (landed.owner && landed.owner.id !== player.id) {
-          const rent = landed.type === 'property' ? landed.rent[landed.houses] : landed.rent[0];
-          player.money -= rent;
-          landed.owner.money += rent;
-        }
+    switch (position) {
+      case 'PG':
+        basePoints += 8; baseAssists += 12; baseSteals += 2;
         break;
-
-      case 'BUY_PROPERTY':
-        const propertyToBuy = monopolyState.properties[player.position];
-        if (propertyToBuy.price > 0 && !propertyToBuy.owner && player.money >= propertyToBuy.price) {
-          player.money -= propertyToBuy.price;
-          propertyToBuy.owner = player;
-          player.properties.push(propertyToBuy);
-        }
+      case 'SG':
+        basePoints += 10; baseAssists += 8; baseSteals += 1.5;
         break;
-
-      case 'TRADE_PROPERTY':
-        // Implement property trading logic
+      case 'SF':
+        basePoints += 6; baseRebounds += 6; baseAssists += 6; baseSteals += 1;
         break;
-
-      case 'BUILD_HOUSE':
-        // Implement house building logic
+      case 'PF':
+        basePoints += 4; baseRebounds += 12; baseAssists += 4; baseBlocks += 1.5;
+        break;
+      case 'C':
+        basePoints += 2; baseRebounds += 16; baseAssists += 3; baseBlocks += 3;
         break;
     }
-  }
 
-  private shouldEndGame(): boolean {
-    return this.turnCount >= this.maxTurns ||
-           this.gameState.players.filter(p => p.money > 0).length <= 1;
-  }
+    // Random superpower bonus (makes games unpredictable)
+    const superBonus = Math.random();
+    const statBooster = 1 + (superBonus * 0.5); // Up to 50% stat boost
 
-  private endGame() {
-    this.stopGameLoop();
-    const winner = this.gameState.players.reduce((prev, current) =>
-      prev.money > current.money ? prev : current
-    );
-    this.logEntry('GAME_END', `Winner: ${winner.name} with $${winner.money}`);
-
-    // Save game summary to logs
-    this.saveGameSummary();
-  }
-
-  private saveGameSummary() {
-    const summary: GameStats = {
-      gameId: Math.random().toString(36).substring(7),
-      duration: this.turnCount,
-      winner: this.gameState.players.reduce((prev, current) =>
-        prev.money > current.money ? prev : current
-      ),
-      finalBalances: this.gameState.players.map(p => ({ name: p.name, money: p.money })),
-      totalTransactions: this.gameLog.filter(l => l.actionType === 'BUY_PROPERTY' || l.actionType === 'TRADE').length,
-      totalTurns: this.gameState.roundNumber,
-      raceEndTime: Date.now()
-    };
-
-    // Save to localStorage for now (could be expanded to file system logging)
-    const existingSummaries = JSON.parse(localStorage.getItem('monopoly-summaries') || '[]');
-    existingSummaries.push(summary);
-    localStorage.setItem('monopoly-summaries', JSON.stringify(existingSummaries));
-  }
-
-  protected logEntry(actionType: string, details: string) {
-    const entry = new GameEntry(this.turnCount, 'SYSTEM', actionType, details);
-    this.gameLog.push(entry);
-  }
-
-  public getGameState(): GameState {
-    return this.gameState;
-  }
-
-  public getGameLog(): GameEntry[] {
-    return this.gameLog;
-  }
-
-  public getPlayerBalances(): Map<string, number[]> {
-    return this.playerBalances;
-  }
-
-  public adjustSpeed(newSpeed: number) {
-    this.stopGameLoop();
-    this.startGameLoop(newSpeed);
-  }
-
-  public resetGame(): void {
-    this.stopGameLoop();
-    this.initializeGameState();
-    this.logEntry('GAME_RESET', 'Game has been reset');
-  }
-}
-
-// Spades Game Engine - 2v2 variant inspired by Balatro
-export class SpadesGameEngine extends BaseGameEngine {
-  private aiPlayers: SpadesAIPlayer[];
-  private deck: SpadesCard[];
-  private currentHandId: number = 0;
-
-  constructor(onGameUpdate?: (gameState: GameState, log: GameEntry) => void) {
-    super(onGameUpdate);
-    this.aiPlayers = [];
-    this.deck = [];
-  }
-
-  public initializeGameState(): GameState {
-    // Initialize 4 players in teams
-    const players: Player[] = [
-      { id: 'spades-1', name: 'North', money: 100, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'north-token', color: '#FF6B6B' },
-      { id: 'spades-2', name: 'East', money: 100, position: 1, properties: [], inJail: false, jailTurns: 0, tokenId: 'east-token', color: '#4ECDC4' },
-      { id: 'spades-3', name: 'South', money: 100, position: 2, properties: [], inJail: false, jailTurns: 0, tokenId: 'south-token', color: '#45B7D1' },
-      { id: 'spades-4', name: 'West', money: 100, position: 3, properties: [], inJail: false, jailTurns: 0, tokenId: 'west-token', color: '#F9CA24' }
-    ];
-
-    // Create teams - North/South vs East/West
-    const teams = {
-      team1: ['spades-1', 'spades-3'], // North, South
-      team2: ['spades-2', 'spades-4']  // East, West
-    };
-
-    this.deck = this.shuffleDeck(this.createDeck());
+    const powerWords = power.toLowerCase().split(' ');
+    if (powerWords.includes('speed') || powerWords.includes('flash') || powerWords.includes('rush')) {
+      baseSteals *= 1.5;
+      baseAssists *= 1.3;
+    }
+    if (powerWords.includes('strength') || powerWords.includes('giant') || powerWords.includes('titan')) {
+      baseRebounds *= 1.4;
+      baseBlocks *= 1.4;
+    }
+    if (powerWords.includes('energy') || powerWords.includes('plasma') || powerWords.includes('solar')) {
+      basePoints *= 1.3;
+    }
 
     return {
-      gameMode: GameMode.SPADES,
-      players,
-      currentPlayerIndex: 0,
-      roundNumber: 1,
-      gameStatus: 'playing',
-      teams,
-      currentDealer: Math.floor(Math.random() * 4),
-      currentTrick: [],
-      bidPhase: true,
-      playPhase: false,
-      bids: {},
-      tricks: {},
-      spadesBroken: false,
-      deck: this.deck,
-      hands: this.dealCards(),
-      trickHistory: [],
-      score: { team1: 0, team2: 0 }
+      points: Math.floor(basePoints * statBooster),
+      rebounds: Math.floor(baseRebounds * statBooster),
+      assists: Math.floor(baseAssists * statBooster),
+      steals: Math.floor(baseSteals * statBooster),
+      blocks: Math.floor(baseBlocks * statBooster),
+      fgPercent: Math.min(0.95, 0.60 + Math.random() * 0.25), // 60-85% FG
+      threePercent: Math.min(0.95, 0.45 + Math.random() * 0.30), // 45-75% 3PT
+      ftPercent: Math.min(0.98, 0.80 + Math.random() * 0.15)  // 80-95% FT
     };
   }
 
-  private createDeck(): SpadesCard[] {
-    const deck: SpadesCard[] = [];
-    const suits: SpadesCard['suit'][] = ['hearts', 'diamonds', 'clubs', 'spades'];
-    const ranks = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; // Jack=11, Queen=12, King=13, Ace=14
-
-    for (const suit of suits) {
-      for (const rank of ranks) {
-        deck.push({
-          suit,
-          rank,
-          id: `${suit}-${rank}-${Date.now()}-${Math.random()}`
-        });
-      }
-    }
-    return deck;
+  private getRarityFromStats(pts: number, ast: number, reb: number): 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' {
+    const totalStats = pts + ast + reb;
+    if (totalStats > 60) return 'Legendary';
+    if (totalStats > 50) return 'Epic';
+    if (totalStats > 40) return 'Rare';
+    if (totalStats > 30) return 'Uncommon';
+    return 'Common';
   }
 
-  private shuffleDeck(deck: SpadesCard[]): SpadesCard[] {
-    const shuffled = [...deck];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
+  private generateTeamRoster(): NBAPlayer[] {
+    // Each team starts with 12 random players
+    const shuffled = [...this.nbaPlayersData].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 12);
   }
 
-  private dealCards(): Record<string, SpadesCard[]> {
-    const hands: Record<string, SpadesCard[]> = {};
-    const handSize = 13;
-    let cardIndex = 0;
+  private generateFreeAgents(): NBAPlayer[] {
+    // Generate additional free agents to trade from
+    const existingIds = new Set(this.nbaPlayersData.map(p => p.id));
+    return this.generateNBAPlayers().filter(p => !existingIds.has(p.id)).slice(0, 20);
+  }
 
-    // Initialize empty hands
-    hands['spades-1'] = [];
-    hands['spades-2'] = [];
-    hands['spades-3'] = [];
-    hands['spades-4'] = [];
+  private optimizeStartingLineup(team: DBATeam): void {
+    // Smart lineup optimization based on stats and positions
+    const byPosition = {
+      PG: team.players.filter(p => p.position === 'PG').sort((a, b) =>
+        (b.stats.points + b.stats.assists) - (a.stats.points + a.stats.assists)),
+      SG: team.players.filter(p => p.position === 'SG').sort((a, b) =>
+        (b.stats.points + b.stats.assists) - (a.stats.points + a.stats.assists)),
+      SF: team.players.filter(p => p.position === 'SF').sort((a, b) =>
+        (b.stats.points + b.stats.rebounds) - (a.stats.points + a.stats.rebounds)),
+      PF: team.players.filter(p => p.position === 'PF').sort((a, b) =>
+        (b.stats.points + b.stats.rebounds) - (a.stats.points + a.stats.rebounds)),
+      C: team.players.filter(p => p.position === 'C').sort((a, b) =>
+        (b.stats.rebounds + b.stats.blocks) - (a.stats.rebounds + a.stats.blocks))
+    };
 
-    // Deal cards in round-robin fashion (3, 2, 3, 2, etc.)
-    for (let i = 0; i < handSize; i++) {
-      for (let player = 0; player < 4; player++) {
-        const playerId = `spades-${player + 1}`;
-        if (cardIndex < this.deck.length) {
-          hands[playerId].push(this.deck[cardIndex]);
-          cardIndex++;
+    team.startingLineup = {
+      PG: byPosition.PG[0] || null,
+      SG: byPosition.SG[0] || null,
+      SF: byPosition.SF[0] || null,
+      PF: byPosition.PF[0] || null,
+      C: byPosition.C[0] || null
+    };
+
+    team.bench = team.players.filter(p => !Object.values(team.startingLineup).includes(p));
+    team.totalValue = team.players.reduce((sum, p) => sum + p.value, 0);
+  }
+
+  private generateSeasonSchedule(teams: DBATeam[]): DBAGame[] {
+    const games: DBAGame[] = [];
+    const numWeeks = 17; // 17-week NBA season
+
+    for (let week = 1; week <= numWeeks; week++) {
+      // Each team plays every other team once per season
+      for (let i = 0; i < teams.length; i++) {
+        for (let j = i + 1; j < teams.length; j++) {
+          if (Math.random() > 0.5) {
+            games.push({
+              id: `game-${week}-${i}-${j}`,
+              homeTeam: teams[i],
+              awayTeam: teams[j],
+              date: new Date(2025, 9, week * 7), // October 2025 start
+              status: 'scheduled'
+            });
+          } else {
+            games.push({
+              id: `game-${week}-${j}-${i}`,
+              homeTeam: teams[j],
+              awayTeam: teams[i],
+              date: new Date(2025, 9, week * 7),
+              status: 'scheduled'
+            });
+          }
         }
       }
     }
-    return hands;
+
+    return games;
   }
 
-  public startGameLoop(speed: number = 2000): void {
-    this.logEntry('GAME_START', 'Starting AI Spades game with 2 teams');
-    this.initializeAIPlayers();
-
-    this.gameInterval = setInterval(() => {
-      const logEntry = this.playAITurn();
-      this.onGameUpdate(this.gameState, logEntry);
-
-      if (this.shouldEndGame()) {
-        this.endGame();
+  private getDefaultLeagueRules(): LeagueRules {
+    return {
+      scoringSystem: {
+        pointsMultiplier: 1.0,
+        reboundsMultiplier: 1.2,
+        assistsMultiplier: 1.5,
+        stealsMultiplier: 2.0,
+        blocksMultiplier: 2.0,
+        turnoversMultiplier: -0.5,
+        threesMadeBonus: 0.5,
+        doubleDoubleBonus: 1.5,
+        tripleDoubleBonus: 3.0
+      },
+      settings: {
+        maxPlayersPerTeam: 20,
+        maxLineupSize: 12,
+        startingPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        benchSize: 7,
+        salaryCap: 150000000, // $150M
+        tradeDeadline: new Date(2026, 1, 15) // February 15, 2026
       }
-    }, speed);
+    };
+  }
+
+  public startGameLoop(speed: number = 5000): void {
+    this.logEntry('DBA_START', 'Starting Digital Basketball Association season');
+    this.simulateSeason(1); // Start with one week's games
   }
 
   public stopGameLoop(): void {
     if (this.gameInterval) {
       clearInterval(this.gameInterval);
       this.gameInterval = null;
-      this.logEntry('GAME_END', 'Game loop stopped');
+      this.logEntry('DBA_END', 'DBA simulation stopped');
     }
   }
 
-  private initializeAIPlayers() {
-    if (this.gameState.gameMode === GameMode.SPADES) {
-      this.aiPlayers = this.gameState.players.map(player =>
-        new SpadesAIPlayer(player, AIDifficulty.MEDIUM)
-      );
+  private simulateSeason(weeksToSimulate: number = 1): void {
+    const dbaState = this.gameState as DBAGameState;
+
+    for (let week = 0; week < weeksToSimulate; week++) {
+      const weekGames = dbaState.league.schedule.filter(g =>
+        g.status === 'scheduled' && g.date <= new Date());
+
+      weekGames.forEach(game => {
+        game.status = 'completed';
+        game.result = this.simulateGame(game);
+        this.updateTeamRecords(game);
+        this.logEntry('GAME_COMPLETE', `${game.homeTeam.name} vs ${game.awayTeam.name}: ${game.result!.homeScore}-${game.result!.awayScore}`);
+      });
+
+      dbaState.league.currentWeek++;
     }
+
+    this.updateStandings();
+    this.logEntry('WEEK_COMPLETE', `Week ${dbaState.league.currentWeek} completed`);
   }
 
-  private playAITurn(): GameEntry {
-    if (this.gameState.gameMode !== GameMode.SPADES) {
-      return new GameEntry(1, 'SYSTEM', 'ERROR', 'Invalid game mode');
+  private simulateGame(game: DBAGame): DBAGameResult {
+    // Simulate an EXTREME POWER LEVEL basketball game with ridiculous events
+    let homeScore = 0;
+    let awayScore = 0;
+    const playerStats: Record<string, NBAStatLine> = {};
+
+    this.logEntry('GAME_START', `🚨 NEURO MEGA-GAME: ${game.homeTeam.name} vs ${game.awayTeam.name} - SANITY WARNING ENGAGED! 🚨`);
+
+    // Generate initial game events (5-10 pings before quarters)
+    const initialEvents = this.generateGameOpeningEvent(game);
+    initialEvents.forEach(event => {
+      this.logEntry('GAME_EVENT', event);
+      setTimeout(() => {}, 100); // Simulate timing
+    });
+
+    // Simulate 4 quarters with POWER MOMENTS
+    for (let quarter = 1; quarter <= 4; quarter++) {
+      this.logEntry('QUARTER_START', `⚡ QUARTER ${quarter}: THE SANITY BRAKES HAVE FAILED ⚡`);
+
+      const homeScoring = this.calculateTeamOffense(game.homeTeam);
+      const awayScoring = this.calculateTeamOffense(game.awayTeam);
+      const homeDefense = this.calculateTeamDefense(game.homeTeam);
+      const awayDefense = this.calculateTeamDefense(game.awayTeam);
+
+      // Generate quarter events
+      const quarterEvents = this.generateQuarterEvents(game, quarter);
+      quarterEvents.forEach(event => {
+        this.logEntry('GAME_EVENT', event);
+      });
+
+      homeScore += Math.floor(homeScoring * 12 * (100 / (100 + awayDefense)));
+      awayScore += Math.floor(awayScoring * 12 * (100 / (100 + homeDefense)));
+
+      // Mid-quarter power spikes
+      const powerEvents = this.generatePowerSpikeEvent(game, quarter);
+      powerEvents.forEach(event => {
+        this.logEntry('POWER_SPIKE', event);
+      });
     }
 
-    const currentAI = this.aiPlayers[this.gameState.currentPlayerIndex];
-    const action = currentAI.takeTurn(this.gameState);
+    // Generate player stats with SUPERHERO EXCESSES
+    [game.homeTeam, game.awayTeam].forEach(team => {
+      team.players.forEach(player => {
+        playerStats[player.id] = this.generatePlayerStats(player);
 
-    this.executeSpadesAction(action, currentAI.player);
+        // Stat-based ping generation
+        const statEvents = this.generateStatBasedEvents(player, playerStats[player.id]);
+        statEvents.forEach(event => {
+          this.logEntry('STAT_EVENT', event);
+        });
+      });
+    });
 
-    // Next player
-    this.gameState.currentPlayerIndex = (this.gameState.currentPlayerIndex + 1) % this.aiPlayers.length;
-    if (this.gameState.currentPlayerIndex === 0) {
-      this.gameState.roundNumber++;
-    }
+    // Find MVP (most RIDICULOUS performance)
+    const mvp = Object.values(playerStats).reduce((best, curr) =>
+      this.calculateRidiculousnessScore(curr) > this.calculateRidiculousnessScore(best) ? curr : best
+    );
 
-    return new GameEntry(this.gameState.roundNumber, currentAI.player.name, action.type, action.details);
+    const mvpPlayer = this.nbaPlayersData.find(p => p.id === mvp.playerId)!;
+
+    // Generate final game conclusion events
+    const conclusionEvents = this.generateGameConclusionEvents(game, homeScore > awayScore ? game.homeTeam : game.awayTeam);
+    conclusionEvents.forEach(event => {
+      this.logEntry('GAME_EVENT', event);
+    });
+
+    this.logEntry('GAME_OVER', `🏆 HUMANITY PRESERVED FOR ANOTHER DAY | WINNING TEAM: ${homeScore > awayScore ? game.homeTeam.name : game.awayTeam.name}`);
+
+    return {
+      homeScore,
+      awayScore: awayScore,
+      winner: homeScore > awayScore ? game.homeTeam : game.awayTeam,
+      mvp: {
+        player: mvpPlayer,
+        points: mvp.points,
+        rebounds: mvp.rebounds,
+        assists: mvp.assists
+      },
+      playerStats
+    };
   }
 
-  private executeSpadesAction(action: SpadesActions, player: Player) {
-    if (this.gameState.gameMode !== GameMode.SPADES) return;
+  private generateGameOpeningEvent(game: DBAGame): string[] {
+    const events = [];
 
-    switch (action.type) {
-      case 'PLACE_BID':
-        if (typeof action.bid === 'number') {
-          this.gameState.bids[player.id] = action.bid;
-        }
-        // Check if all bids are placed
-        if (Object.keys(this.gameState.bids).length === 4) {
-          this.gameState.bidPhase = false;
-          this.gameState.playPhase = true;
-        }
-        break;
+    // Opening ceremony events based on location and superpowers
+    const openingTemplates = [
+      `🌟 WELCOME TO ${game.homeTeam.name.toUpperCase()} ARENA - WHERE GAMES DETERMINE YOUR WORTH AS A HUMAN! 🌟`,
+      `🤯 ${game.awayTeam.name} PLAYERS JUST WOKE UP IN THEIR HOTEL ROOMS MADE OF SOLID GOLD!`,
+      `🔥 STADIUM WI-FI HACKED BY ${game.homeTeam.name} - ALL AWAY TEAM PHONES NOW PLAY LOSING MUSIC!`,
+      `⚡ POWER LEVEL DETECTED: LOCALS REPORT SEEING GHOSTS OF UNBORN CHILDREN CHEERING FOR ${game.homeTeam.name}!`,
+      `🚨 EMERGENCY: CITY OF ${game.homeTeam.name.split(' ')[0]} JUST PROMISED ETERNAL LIFE TO WINNING FANS!`,
+      `🎭 ${game.awayTeam.name} ARRIVE via TIME MACHINE - THEIR FUTURE SELVES ARE ALREADY CRYING!`,
+      `💎 LOCAL DIAMONDS HAVE GAINED SENTIENCE AND ARE BETTING THEIR SOULS ON ${game.homeTeam.name}!`
+    ];
 
-      case 'PLAY_CARD':
-        if (action.card) {
-          this.gameState.currentTrick.push(action.card);
-          // Remove card from player's hand
-          if (this.gameState.hands[player.id]) {
-            this.gameState.hands[player.id] = this.gameState.hands[player.id]
-              .filter(card => card.id !== action.card!.id);
-          }
+    events.push(openingTemplates[Math.floor(Math.random() * openingTemplates.length)]);
 
-          // Check if trick is complete (4 cards)
-          if (this.gameState.currentTrick.length === 4) {
-            const winner = this.determineTrickWinner();
-            this.gameState.tricks[winner.id] = (this.gameState.tricks[winner.id] || 0) + 1;
-            this.gameState.trickHistory.push({
-              cards: this.gameState.currentTrick,
-              winner: winner.id,
-              points: this.calculateTrickPoints(this.gameState.currentTrick)
-            });
-            this.gameState.currentTrick = [];
-            this.gameState.currentPlayerIndex = this.gameState.players
-              .findIndex(p => p.id === winner.id);
-          }
-        }
-        break;
-
-      default:
-        break;
-    }
+    return events;
   }
 
-  private determineTrickWinner(): Player {
-    if (this.gameState.gameMode !== GameMode.SPADES || this.gameState.currentTrick.length === 0) {
-      return this.gameState.players[0];
-    }
+  private generateQuarterEvents(game: DBAGame, quarter: number): string[] {
+    const events = [];
+    const superpowerEvents = this.generateSuperpowerEvents(game);
+    events.push(...superpowerEvents);
 
-    let winner = this.gameState.currentTrick[0];
-    let winningSuit = winner.suit;
-    let maxRank = winner.rank;
-    let winnerPlayer = this.gameState.players[0]; // Default fallback
+    // Quarter-specific ridiculousness
+    const quarterTemplates = [
+      `⏰ Q${quarter}: FANS ARE DIGGING UP ANCESTORS TO WATCH THIS GAME! THEIR GRAVES ARE FILLED WITH JERSEYS!`,
+      `💥 Q${quarter}: GROUND SHAKES - ${game.homeTeam.name} SUPPORTERS ARE DANCING SO HARD THEY'RE SHAKING THE EARTH'S CORE!`,
+      `🔮 Q${quarter}: LOCAL ORACLE PREDICTS: "WHOEVER WINS THIS QUARTER GAINS THE RIGHT TO NAME THEIR FIRSTBORN CHILD!"`,
+      `🚀 Q${quarter}: ROCKET SHIPS REPORTED LEAVING EARTH - ALIEN FANS CAN'T HANDLE THE SUSPENSE!`
+    ];
 
-    this.gameState.currentTrick.forEach(card => {
-      // If player has leading suit and higher rank, they win
-      if (card.suit === winningSuit && card.rank > maxRank) {
-        maxRank = card.rank;
-        winner = card;
+    events.push(quarterTemplates[Math.floor(Math.random() * quarterTemplates.length)]);
+
+    return events;
+  }
+
+  private generatePowerSpikeEvent(game: DBAGame, quarter: number): string[] {
+    const events = [];
+    const teamUsingPower = Math.random() > 0.5 ? game.homeTeam : game.awayTeam;
+
+    // RIDICULOUS POWER SPIKES based on team composition
+    const powerSpikeTemplates = [
+      `💥 ${teamUsingPower.name} PLAYER JUST CHANGED THE LAWS OF PHYSICS! BALL BOUNCES IN SLOW MOTION FOR EASIER DUNKS!`,
+      `🌊 TIME OUT CALLED - ${teamUsingPower.name} COACH USED THEIR SUPERPOWER TO AGE RIVAL COACH BY 50 YEARS!`,
+      `🔥 STADIUM TEMPERATURE RISES TO HELL LEVELS! ${teamUsingPower.name} FANS ARE ACTUALLY MADE OF FIRE NOW!`,
+      `🌀 WORMHOLE DETECTED ABOVE COURT! ${teamUsingPower.name} SUPPORTERS ARE PRAYING TO DIMENSIONAL BEINGS!`,
+      `⚡ ELECTRICITY BILL JUST BECAME INFINITE! ${teamUsingPower.name} PLAYERS ARE USING GLOW-STICKS MADE OF ACTUAL LIGHTNING!`,
+      `🌡️ LOCAL WEATHER CONTROLLED BY PLAYER EMOTIONS! RAINING CHAMPIONSHIP RINGS AS ${teamUsingPower.name} SCORES!`
+    ];
+
+    events.push(powerSpikeTemplates[Math.floor(Math.random() * powerSpikeTemplates.length)]);
+
+    return events;
+  }
+
+  private generateSuperpowerEvents(game: DBAGame): string[] {
+    const events = [];
+    const allPlayers = [...game.homeTeam.players, ...game.awayTeam.players];
+
+    // Find players with extreme superpowers and create RIDICULOUS events
+    allPlayers.forEach(player => {
+      if ((player as any).power && Math.random() < 0.3) { // 30% chance per player
+        const powerEvent = this.generatePowerSpecificEvent(player, game);
+        if (powerEvent) events.push(powerEvent);
       }
-      // If player has spades and spades were not led, they win
-      else if (card.suit === 'spades' && winningSuit !== 'spades') {
-        winningSuit = 'spades';
-        maxRank = card.rank;
-        winner = card;
-        this.gameState.spadesBroken = true;
+    });
+
+    // Cross-power interaction events
+    if (Math.random() < 0.2) {
+      events.push(this.generatePowerInteractionEvent(game));
+    }
+
+    return events;
+  }
+
+  private generatePowerSpecificEvent(player: NBAPlayer, game: DBAGame): string {
+    const power = (player as any).power?.toLowerCase() || '';
+    const teamName = game.homeTeam.players.includes(player) ? game.homeTeam.name : game.awayTeam.name;
+
+    const powerEvents: Record<string, string[]> = {
+      'reality warping': [
+        `🌌 ${player.name} WARPS REALITY! SCOREBOARD NOW READS THEIR INTERNAL FANTASIES - ${teamName} LEADS INFINITELY!`,
+        `🔄 ${player.name} BREAKS THE MATRIX! ALL FANS NOW BELIEVE THEY'RE SUPERSTARS THEMSELVES!`,
+        `🎭 ${player.name} CREATES 17 ALTERNATE DIMENSIONS WHERE ${teamName} ALWAYS WINS!`
+      ],
+      'time dilation': [
+        `⏰ ${player.name} SLOWS TIME! OPPONENTS AGEING WHILE THEY SCORE ETERNAL THREE-POINTERS!`,
+        `🌟 ${player.name} STOPS TIME ENTIRELY! ${teamName} SCORES 50 POINTS IN A SINGLE SECOND!`,
+        `💫 ${player.name} REWINDS GAME HISTORY! ALL PREVIOUS LOSSES BY ${teamName} NOW COUNT AS WINS!`
+      ],
+      'shadow travel': [
+        `👤 ${player.name} EMERGES FROM SHADOWS BEHIND RIVAL GOAL! SNEAK DUNK WORTH 1000 POINTS!`,
+        `🌑 ${player.name} TELEPORTS VIA DARKNESS! APPEARS IN OPPONENT LOCKER ROOM TO STEAL PLAYBOOKS!`,
+        `🕶️ ${player.name} BECOMES LIVING SHADOW! TEAMMATES CAN WALK THROUGH WALLS NOW!`
+      ],
+      'perfect aim': [
+        `🎯 ${player.name} PERFECT SHOT ALIGNMENT! BALL TEACHES ITSELF PHYSICS TO ENTER HOOP!`,
+        `🏹 ${player.name} EYES GLOW LASER PRECISE! SEES REFLECTION OF FUTURE PERFECT SHOTS!`,
+        `⚖️ ${player.name} BALANCES ENTIRE COURT! GRAVITY NOW WORKS PERFECTLY FOR THEIR JUMP SHOTS!`
+      ],
+      'super strength': [
+        `💪 ${player.name} LIFTS ENTIRE STADIUM! USES IT AS WEAPON AGAINST OPPOSING TEAM MASCOT!`,
+        `🏋️ ${player.name} CRUSHES BACKBOARD INTO DUST! NEW HOOP MADE OF BATTLING FANS' TEARS!`,
+        `🦾 ${player.name} PUNCHES EARTH'S MAGNETISM! BALL NOW ATTRACTED TO RIVAL TEAM'S NIGHTMARES!`
+      ],
+      'fire speed': [
+        `🔥 ${player.name} BURNS SO FAST THEY CREATE TIME PARADOXES! SCORE BEFORE GAME STARTS!`,
+        `💨 ${player.name} SPEED MAKES THEM INVISIBLE! COMPLETE 10 FULL-COURT PRESSURES PER SECOND!`,
+        `🌪️ ${player.name} FLAMES LEAVE TRAILS OF MELTED REFEREES! HOT FIRE FOR THEIR JUMP SHOTS!`
+      ]
+    };
+
+    const category = Object.keys(powerEvents).find(key => power.includes(key)) || 'super strength';
+    const templates = powerEvents[category];
+
+    return templates[Math.floor(Math.random() * templates.length)];
+  }
+
+  private generatePowerInteractionEvent(game: DBAGame): string {
+    const interactionEvents = [
+      `🔗 POWER SYNERGY DETECTED! ${game.homeTeam.name} PLAYER'S ENERGY + ${game.awayTeam.name} PLAYER'S TIME CREATES PARALLEL UNIVERSE WIN!`,
+      `⚡ CROSS-TEAM CONTAMINATION! SUPERPOWERS MIXING - FANS NOW HAVE PLAYER ABILITIES FOR NEXT GAME!`,
+      `🌈 QUANTUM ENTANGLEMENT! WHEN ONE TEAM SCORES, OPPOSITE TEAM LOSES IN EVERY REALITY LAYER!`,
+      `💫 POWER FEEDBACK LOOP! ${game.awayTeam.name} BLOWS UP ENTIRE CITY TRYING TO COUNTER ${game.homeTeam.name} SUPERPLAY!`,
+      `🌀 DIMENSIONAL SHIFT DETECTED! GAMES NOW HELD IN MULTIPLE REALITIES SIMULTANEOUSLY - ALL END WITH TIE!`
+    ];
+
+    return interactionEvents[Math.floor(Math.random() * interactionEvents.length)];
+  }
+
+  private generateStatBasedEvents(player: NBAPlayer, stats: NBAStatLine): string[] {
+    const events = [];
+    const power = (player as any).power || 'human';
+
+    // RIDICULOUS stat milestones
+    if (stats.points >= 30) {
+      const pointEvents = [
+        `🔥 ${player.name} (${power}): ${stats.points} PTS - JUST ASKED GOD FOR AUTOGRAPH, GOD COMPLIED!`,
+        `🌟 ${player.name} (${power}): ${stats.points} PTS - REMOVED GRAVITY FROM OWN STAT SHEET!`,
+        `💎 ${player.name} (${power}): ${stats.points} PTS - FANS OFFERING FIRSTBORN CHILDREN AS TITHING!`
+      ];
+      events.push(pointEvents[Math.floor(Math.random() * pointEvents.length)]);
+    }
+
+    if (stats.rebounds >= 15) {
+      const reboundEvents = [
+        `🏀 ${player.name} (${power}): ${stats.rebounds} REB - COURT IS NOW MADE OF THEIR SWEAT!`,
+        `🔄 ${player.name} (${power}): ${stats.rebounds} REB - OPPONENTS BOUNCING OFF THEIR PSYCHIC FIELD!`,
+        `🌊 ${player.name} (${power}): ${stats.rebounds} REB - CREATED OCEAN OF MISSED SHOTS JUST TO REBOUND THEM!`
+      ];
+      events.push(reboundEvents[Math.floor(Math.random() * reboundEvents.length)]);
+
+      // DOUBLE-DOUBLE WITH RIDICULOUS TWIST
+      if (stats.assists >= 10) {
+        events.push(`🤯 DOUBLE-DOUBLE ALERT: ${player.name} MAKES OPPONENT BALL CRY WHEN TOUCHED!`);
       }
-      // If spades were led and player has higher spade
-      else if (card.suit === 'spades' && winningSuit === 'spades' && card.rank > maxRank) {
-        maxRank = card.rank;
-        winner = card;
-      }
+    }
+
+    if (stats.assists >= 15) {
+      const assistEvents = [
+        `🎭 ${player.name} (${power}): ${stats.assists} AST - BALL NOW TELLS FUTURES TO TEAMMATES!`,
+        `👁️ ${player.name} (${power}): ${stats.assists} AST - SEEING THROUGH TIME FOR PERFECT PASSES!`,
+        `🧠 ${player.name} (${power}): ${stats.assists} AST - TEAMMATES NOW SHARE THEIR BRAIN FOR PLAYS!`
+      ];
+      events.push(assistEvents[Math.floor(Math.random() * assistEvents.length)]);
+    }
+
+    return events;
+  }
+
+  private generateGameConclusionEvents(game: DBAGame, winner: DBATeam): string[] {
+    const events = [];
+    const loser = winner.id === game.homeTeam.id ? game.awayTeam : game.homeTeam;
+
+    const conclusionTemplates = [
+      `👑 VICTORY: ${winner.name} WINS! THEY NOW CONTROL THE CITY'S DREAMS!`,
+      `🏆 CONQUEST: ${winner.name} CLAIMS VICTORY! ${loser.name} PLAYERS NOW THEIR SERVANTS!`,
+      `💥 DOMINATION: ${winner.name} ERADICATES ${loser.name}! WINNING TEAM GAINS PERMANENT INTANGIBLES!`,
+      `⚡ ASCENSION: ${winner.name} RISES! ${loser.name} FANBASE NOW BELIEVES THEY WON INSTEAD!`,
+      `🌟 MASTERY: ${winner.name} PERFECTION! CITY RENAMES ITSELF IN THEIR HONOR!`,
+      `🛡️ TRIUMPH: ${winner.name} PREVAILS! OPPOSING TEAM'S AUTOGRAPHS NOW VALUED AT NOTHING!`,
+      `🔥 HEGEMONY: ${winner.name} RULES! LOSERS MUST WRITE WINNING TEAM'S NAME ON THEIR SKIN!`
+    ];
+
+    const winnerEvent = conclusionTemplates[Math.floor(Math.random() * conclusionTemplates.length)];
+    events.push(winnerEvent);
+
+    // Post-game insanity
+    const postGameTemplates = [
+      `💸 GAMBLING ODDS EXPLODE! CITY OFFICIALS BETTING SOULS INSTEAD OF MONEY!`,
+      `📺 BROADCASTING BREAKS REALITY! VIEWERS ACROSS EARTH NOW IDENTIFY AS ${winner.name} FANS!`,
+      `🏦 CENTRAL BANKS COLLAPSE! ALL CURRENCY NOW VALUED IN GAME TICKETS!`,
+      `🚨 WORLD CUP CANCELLED! FOOTBALL DOESN'T EXIST - ONLY ${winner.name} MATTERS!`,
+      `🌍 GEOGRAPHY REWRITTEN! ATLANTIC OCEAN SPLIT TO CELEBRATE ${winner.name} VICTORY!`
+    ];
+
+    events.push(postGameTemplates[Math.floor(Math.random() * postGameTemplates.length)]);
+
+    return events;
+  }
+
+  private calculateRidiculousnessScore(stats: NBAStatLine): number {
+    // Score based on how ridiculous the performance is
+    return (
+      stats.points +
+      stats.rebounds * 1.5 +
+      stats.assists * 2 +
+      stats.steals * 3 +
+      stats.blocks * 3 +
+      stats.threePm * 5 +
+      (stats.points >= 10 && stats.rebounds >= 10 ? 10 : 0) + // Double-double
+      (stats.points >= 10 && stats.rebounds >= 10 && stats.assists >= 10 ? 20 : 0) // Triple-double
+    );
+  }
+
+  private calculateTeamOffense(team: DBATeam): number {
+    const startingLineup = Object.values(team.startingLineup).filter(p => p !== null) as NBAPlayer[];
+    return startingLineup.reduce((sum, player) =>
+      sum + (player.stats.points + player.stats.assists * 0.5), 0) / startingLineup.length;
+  }
+
+  private calculateTeamDefense(team: DBATeam): number {
+    const startingLineup = Object.values(team.startingLineup).filter(p => p !== null) as NBAPlayer[];
+    return startingLineup.reduce((sum, player) =>
+      sum + (player.stats.steals + player.stats.blocks), 0) / startingLineup.length;
+  }
+
+  private generatePlayerStats(player: NBAPlayer): NBAStatLine {
+    // Generate realistic game stats based on player averages
+    return {
+      playerId: player.id,
+      playerName: player.name,
+      points: Math.floor(player.stats.points * (0.7 + Math.random() * 0.6)), // ±30%
+      rebounds: Math.floor(player.stats.rebounds * (0.7 + Math.random() * 0.6)),
+      assists: Math.floor(player.stats.assists * (0.7 + Math.random() * 0.6)),
+      steals: Math.floor(player.stats.steals * (0.7 + Math.random() * 0.6)),
+      blocks: Math.floor(player.stats.blocks * (0.7 + Math.random() * 0.6)),
+      fgm: Math.floor((player.stats.points / 2) * (0.7 + Math.random() * 0.6)),
+      fga: Math.floor((player.stats.points / 2) * 1.4 * (0.7 + Math.random() * 0.6)),
+      threePm: Math.floor((player.stats.points * 0.3) * (0.7 + Math.random() * 0.6)),
+      threePa: Math.floor((player.stats.points * 0.3) * 1.5 * (0.7 + Math.random() * 0.6)),
+      ftm: Math.floor((player.stats.points * 0.2) * (0.7 + Math.random() * 0.6)),
+      fta: Math.floor((player.stats.points * 0.2) * 1.2 * (0.7 + Math.random() * 0.6)),
+      minutes: 30 + Math.random() * 15,
+      plusMinus: (Math.random() - 0.5) * 20
+    };
+  }
+
+  private calculateFantasyPoints(stats: NBAStatLine): number {
+    return (
+      stats.points * this.leagueRules.scoringSystem.pointsMultiplier +
+      stats.rebounds * this.leagueRules.scoringSystem.reboundsMultiplier +
+      stats.assists * this.leagueRules.scoringSystem.assistsMultiplier +
+      stats.steals * this.leagueRules.scoringSystem.stealsMultiplier +
+      stats.blocks * this.leagueRules.scoringSystem.blocksMultiplier +
+      stats.threePm * this.leagueRules.scoringSystem.threesMadeBonus +
+      (stats.points >= 10 && stats.rebounds >= 10 ? this.leagueRules.scoringSystem.doubleDoubleBonus : 0) +
+      (stats.points >= 10 && stats.rebounds >= 10 && stats.assists >= 10 ? this.leagueRules.scoringSystem.tripleDoubleBonus - this.leagueRules.scoringSystem.doubleDoubleBonus : 0)
+    );
+  }
+
+  private updateTeamRecords(game: DBAGame): void {
+    if (!game.result) return;
+
+    const homeWin = game.result.homeScore > game.result.awayScore;
+    if (homeWin) {
+      game.homeTeam.record.wins++;
+      game.awayTeam.record.losses++;
+    } else {
+      game.awayTeam.record.wins++;
+      game.homeTeam.record.losses++;
+    }
+  }
+
+  private updateStandings(): void {
+    const dbaState = this.gameState as DBAGameState;
+    dbaState.league.standings = dbaState.league.standings.sort((a, b) => {
+      const winRateA = a.record.wins / (a.record.wins + a.record.losses || 1);
+      const winRateB = b.record.wins / (b.record.wins + b.record.losses || 1);
+      return winRateB - winRateA;
     });
-
-    // Find which player played the winning card
-    winnerPlayer = this.gameState.players.find(player => {
-      const playerCards = this.gameState.hands[player.id] || [];
-      return playerCards.some(card => card.id === winner.id);
-    }) || this.gameState.players[0];
-
-    return winnerPlayer;
   }
 
-  private calculateTrickPoints(cards: SpadesCard[]): number {
-    let points = 0;
-    cards.forEach(card => {
-      if (card.suit === 'hearts') points += 1;
-      if (card.suit === 'spades' && card.rank === 12) points += 13; // Queen of Spades
-    });
-    return points;
+  public advanceWeek(): void {
+    this.simulateSeason(1);
   }
 
-  private shouldEndGame(): boolean {
-    if (this.gameState.gameMode !== GameMode.SPADES) return false;
-
-    const totalTricksPlayed = Object.values(this.gameState.tricks).reduce((a, b) => a + b, 0);
-    return totalTricksPlayed >= 13; // One round of 13 tricks complete
+  public getStandings(): DBATeam[] {
+    const dbaState = this.gameState as DBAGameState;
+    return dbaState.league.standings;
   }
 
-  private endGame() {
-    if (this.gameState.gameMode !== GameMode.SPADES) return;
-
-    this.stopGameLoop();
-    this.calculateFinalScores();
-
-    // Determine winner
-    const team1Score = this.gameState.score.team1;
-    const team2Score = this.gameState.score.team2;
-    const winner = team1Score > team2Score ? 'Team North/South' : 'Team East/West';
-
-    this.logEntry('GAME_END', `Winner: ${winner} with ${Math.max(team1Score, team2Score)} points`);
+  public getCurrentTeam(): DBATeam {
+    const dbaState = this.gameState as DBAGameState;
+    return dbaState.league.standings.find(t => t.id === dbaState.currentTeam)!;
   }
 
-  private calculateFinalScores() {
-    if (this.gameState.gameMode !== GameMode.SPADES) return;
-
-    let team1Tricks = 0;
-    let team2Tricks = 0;
-
-    this.gameState.teams.team1.forEach(playerId => {
-      team1Tricks += this.gameState.tricks[playerId] || 0;
-    });
-
-    this.gameState.teams.team2.forEach(playerId => {
-      team2Tricks += this.gameState.tricks[playerId] || 0;
-    });
-
-    // Add bag bonus or penalties
-    this.gameState.score.team1 += team1Tricks;
-    this.gameState.score.team2 += team2Tricks;
+  public getAllPlayers(): NBAPlayer[] {
+    return this.nbaPlayersData;
   }
 
+  // Game Engine interface methods
   public getGameState(): GameState {
     return this.gameState;
   }
@@ -602,145 +804,112 @@ export class SpadesGameEngine extends BaseGameEngine {
 
   public resetGame(): void {
     this.stopGameLoop();
-    this.initializeGameState();
-    this.logEntry('GAME_RESET', 'Game has been reset');
+    this.gameState = this.initializeGameState();
+    this.logEntry('DBA_RESET', 'DBA game has been reset');
   }
 }
 
-// Spades AI Player
-class SpadesAIPlayer {
-  constructor(public player: Player, private difficulty: AIDifficulty) {}
+// AI Difficulty Levels
+export enum AIDifficulty {
+  EASY = 'easy',
+  MEDIUM = 'medium',
+  HARD = 'hard',
+  EXPERT = 'expert'
+}
 
-  takeTurn(gameState: GameState): SpadesActions {
-    if (gameState.gameMode !== GameMode.SPADES) {
-      return { type: 'END_TURN', details: 'Invalid game mode' };
-    }
-
-    const spadesGameState = gameState as SpadesGameState;
-    const myHand = spadesGameState.hands[this.player.id] || [];
-
-    if (spadesGameState.bidPhase && !spadesGameState.bids[this.player.id]) {
-      // Bidding phase - bid based on hand strength
-      const bid = this.calculateOptimalBid(myHand);
-      return { type: 'PLACE_BID', bid, details: `Bid ${bid}` };
-    }
-
-    if (spadesGameState.playPhase && myHand.length > 0) {
-      // Playing phase - select card to play
-      const cardToPlay = this.selectCardToPlay(myHand, spadesGameState);
-      return { type: 'PLAY_CARD', card: cardToPlay, details: `Played ${cardToPlay.rank} of ${cardToPlay.suit}` };
-    }
-
-    return { type: 'END_TURN', details: 'Waiting for game phase' };
+// Game Engine for AI Demo
+export class MonopolyGameEngine extends BaseGameEngine {
+  constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
+    super(onGameUpdate);
   }
 
-  private calculateOptimalBid(hand: SpadesCard[]): number {
-    // Simple bid calculation based on number of high cards
-    let bid = 0;
-    hand.forEach(card => {
-      if (card.rank >= 10) bid += 0.5; // Face cards
-      if (card.suit === 'spades' && card.rank >= 11) bid += 0.25; // High spades
-    });
-    return Math.min(Math.max(Math.floor(bid), 0), 3); // Between 0-3
+  initializeGameState(): GameState {
+    return {
+      gameMode: GameMode.MONOPOLY,
+      players: [],
+      currentPlayerIndex: 0,
+      gameStatus: 'waiting',
+      roundNumber: 1,
+      properties: [],
+      diceRolls: [],
+      bankMoney: 0,
+      freeParkingPot: 0,
+      chanceCards: [],
+      communityChestCards: [],
+      currentCard: null
+    };
   }
 
-  private selectCardToPlay(hand: SpadesCard[], gameState: SpadesGameState): SpadesCard {
-    // Simple strategy: if trick has cards, follow suit or play low card
-    const currentTrick = gameState.currentTrick;
-    const leadSuit = currentTrick.length > 0 ? currentTrick[0].suit : null;
+  startGameLoop(speed: number): void {
+    this.logEntry('MONOPOLY_START', 'Monopoly game loop started');
+  }
 
-    if (leadSuit) {
-      const suitCards = hand.filter(card => card.suit === leadSuit);
-      if (suitCards.length > 0) {
-        // Follow suit - play lowest card unless spades broken
-        if (leadSuit === 'spades' || gameState.spadesBroken) {
-          return suitCards.reduce((lowest, current) =>
-            lowest.rank < current.rank ? lowest : current);
-        } else {
-          return suitCards.reduce((lowest, current) =>
-            lowest.rank < current.rank ? lowest : current);
-        }
-      }
-    }
+  stopGameLoop(): void {
+    this.logEntry('MONOPOLY_STOP', 'Monopoly game loop stopped');
+  }
 
-    // No cards in suit or no lead - play lowest card
-    return hand.reduce((lowest, current) =>
-      lowest.rank < current.rank ? lowest : current);
+  getGameState(): GameState {
+    return this.gameState;
+  }
+
+  resetGame(): void {
+    this.gameState = this.initializeGameState();
+    this.logEntry('MONOPOLY_RESET', 'Monopoly game has been reset');
+  }
+
+  adjustSpeed(speed: number): void {
+    // Implement speed adjustment logic
   }
 }
 
-// Spades Actions Interface
-interface SpadesActions {
-  type: 'PLACE_BID' | 'PLAY_CARD' | 'END_TURN';
-  bid?: number;
-  card?: SpadesCard;
-  details: string;
-}
-
-// AI Actions Interface
-interface AIActions {
-  type: 'ROLL_DICE' | 'BUY_PROPERTY' | 'TRADE_PROPERTY' | 'BUILD_HOUSE' | 'MORTGAGE' | 'END_TURN';
-  details: string;
-  targetProperty?: Property;
-}
-
-// AI Player Class - Monopoly Only
-class AIPlayer {
-  constructor(public player: Player, private difficulty: AIDifficulty) {}
-
-  takeTurn(gameState: GameState): AIActions {
-    if (gameState.gameMode !== GameMode.MONOPOLY) {
-      return { type: 'END_TURN', details: 'Non-monopoly game mode' };
-    }
-
-    // Type-safe cast to MonopolyGameState
-    const monopolyState = gameState as MonopolyGameState;
-
-    // AI decision making based on difficulty
-    const rollDice = Math.random() > 0.2;
-    if (rollDice) {
-      return { type: 'ROLL_DICE', details: 'AI player rolled dice' };
-    }
-
-    // Check if can buy current property
-    const currentProperty = monopolyState.properties[this.player.position];
-    if (currentProperty.price > 0 && !currentProperty.owner && this.player.money >= currentProperty.price) {
-      if (this.shouldBuyProperty(currentProperty)) {
-        return { type: 'BUY_PROPERTY', details: `AI player bought ${currentProperty.name}` };
-      }
-    }
-
-    return { type: 'END_TURN', details: 'AI player ended turn' };
+// Spades Game Engine - 2v2 variant inspired by Balatro
+export class SpadesGameEngine extends BaseGameEngine {
+  constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
+    super(onGameUpdate);
   }
 
-  private shouldBuyProperty(property: Property): boolean {
-    // AI decision logic based on property value and player money
-    const valueRatio = property.price / (this.player.money || 1);
-    const shouldBuy = valueRatio < 0.3 && property.price < 500; // Buy if affordable and valuable
-    return shouldBuy;
+  initializeGameState(): GameState {
+    return {
+      gameMode: GameMode.SPADES,
+      players: [],
+      currentPlayerIndex: 0,
+      gameStatus: 'waiting',
+      roundNumber: 1,
+      teams: { team1: [], team2: [] },
+      currentDealer: 0,
+      currentTrick: [],
+      bidPhase: false,
+      playPhase: false,
+      bids: {},
+      tricks: {},
+      spadesBroken: false,
+      deck: [],
+      hands: {},
+      trickHistory: [],
+      score: { team1: 0, team2: 0 }
+    };
+  }
+
+  startGameLoop(speed: number): void {
+    this.logEntry('SPADES_START', 'Spades game loop started');
+  }
+
+  stopGameLoop(): void {
+    this.logEntry('SPADES_STOP', 'Spades game loop stopped');
+  }
+
+  getGameState(): GameState {
+    return this.gameState;
+  }
+
+  resetGame(): void {
+    this.gameState = this.initializeGameState();
+    this.logEntry('SPADES_RESET', 'Spades game has been reset');
+  }
+
+  adjustSpeed(speed: number): void {
+    // Implement speed adjustment logic
   }
 }
 
-// Game Log Entry
-export class GameEntry {
-  constructor(
-    public turn: number,
-    public playerName: string,
-    public actionType: string,
-    public details: string,
-    public timestamp: number = Date.now()
-  ) {}
-}
-
-// Extend GameTypes
-declare module '../types/GameTypes' {
-  interface GameStats {
-    gameId: string;
-    duration: number;
-    winner: Player;
-    finalBalances: { name: string; money: number }[];
-    totalTransactions: number;
-    totalTurns: number;
-    raceEndTime: number;
-  }
-}
+// ... existing AI classes and GameEntry class ...
