@@ -817,6 +817,68 @@ export enum AIDifficulty {
   EXPERT = 'expert'
 }
 
+// Spades Game Engine - 2v2 variant inspired by Balatro
+export class SpadesGameEngine extends BaseGameEngine {
+  constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
+    super(onGameUpdate);
+  }
+
+  initializeGameState(): GameState {
+    // Create themed player names for Spades
+    const spadesPlayers = [
+      { id: 'blade-master', name: 'Blade Master', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'blade-token', color: '#E74C3C' },
+      { id: 'shadow-dealer', name: 'Shadow Dealer', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'shadow-token', color: '#8E44AD' },
+      { id: 'trick-runner', name: 'Trick Runner', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'trick-token', color: '#3498DB' },
+      { id: 'void-nil', name: 'Void Nil', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'void-token', color: '#2C3E50' }
+    ];
+
+    return {
+      gameMode: GameMode.SPADES,
+      players: spadesPlayers,
+      currentPlayerIndex: 0,
+      gameStatus: 'waiting',
+      roundNumber: 1,
+      teams: {
+        team1: [spadesPlayers[0], spadesPlayers[2]],
+        team2: [spadesPlayers[1], spadesPlayers[3]]
+      },
+      currentDealer: 0,
+      currentTrick: [],
+      bidPhase: false,
+      playPhase: false,
+      bids: {},
+      tricks: {},
+      spadesBroken: false,
+      deck: [],
+      hands: {},
+      trickHistory: [],
+      score: { team1: 0, team2: 0 }
+    };
+  }
+
+  startGameLoop(speed: number): void {
+    this.logEntry('SPADES_START', 'Spades card game loop started');
+  }
+
+  stopGameLoop(): void {
+    this.logEntry('SPADES_STOP', 'Spades game loop stopped');
+  }
+
+  getGameState(): GameState {
+    return this.gameState;
+  }
+
+  resetGame(): void {
+    this.gameState = this.initializeGameState();
+    this.logEntry('SPADES_RESET', 'Spades game has been reset');
+  }
+
+  adjustSpeed(speed: number): void {
+    // Implement speed adjustment logic
+  }
+}
+
+
 // Game Engine for AI Demo
 export class MonopolyGameEngine extends BaseGameEngine {
   constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
@@ -824,9 +886,17 @@ export class MonopolyGameEngine extends BaseGameEngine {
   }
 
   initializeGameState(): GameState {
+    // Create themed player names for Monopoly
+    const monopolyPlayers = [
+      { id: 'corpo-baron', name: 'Corpo Baron', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'baron-token', color: '#FF6B6B' },
+      { id: 'crypto-whale', name: 'Crypto Whale', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'whale-token', color: '#4ECDC4' },
+      { id: 'matrix-hacker', name: 'Matrix Hacker', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'hacker-token', color: '#45B7D1' },
+      { id: 'neo-runner', name: 'Neo Runner', money: 1500, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'neo-token', color: '#F9CA24' }
+    ];
+
     return {
       gameMode: GameMode.MONOPOLY,
-      players: [],
+      players: monopolyPlayers,
       currentPlayerIndex: 0,
       gameStatus: 'waiting',
       roundNumber: 1,

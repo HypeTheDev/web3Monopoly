@@ -41,14 +41,38 @@ function App() {
     textColor: '#00ff00'
   });
 
+  const switchGameMode = (newMode: GameMode) => {
+    if (gameEngine && isGameRunning) {
+      gameEngine.stopGameLoop();
+      setIsGameRunning(false);
+    }
 
+    setCurrentGameMode(newMode);
+    let engine: MonopolyGameEngine | DBAEngine;
+
+    if (newMode === GameMode.DBA) {
+      engine = new DBAEngine((gameState: GameState, logEntry: GameEntry) => {
+        setGameState(gameState);
+        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+      });
+      setGameEngine(engine);
+    } else {
+      engine = new MonopolyGameEngine((gameState: GameState, logEntry: GameEntry) => {
+        setGameState(gameState);
+        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+      });
+      setGameEngine(engine);
+    }
+    setGameState(engine.getGameState());
+    setRecentLogs([]);
+  };
 
   // Initialize game engine
   useEffect(() => {
     if (!gameEngine) {
       switchGameMode(GameMode.MONOPOLY); // Start with Monopoly by default
     }
-  }, [gameEngine]); // Note: switchGameMode not in deps - this is intentional for initial setup
+  }, [gameEngine]); // Removed switchGameMode from deps to avoid infinite loop
 
   // Update CSS custom properties when theme changes
   useEffect(() => {
@@ -89,6 +113,7 @@ function App() {
   const resetGame = () => {
     if (gameEngine) {
       gameEngine.stopGameLoop();
+
       let engine: MonopolyGameEngine | DBAEngine;
 
       if (currentGameMode === GameMode.DBA) {
@@ -109,32 +134,6 @@ function App() {
       setIsGameRunning(false);
       setRecentLogs([]);
     }
-  };
-
-  const switchGameMode = (newMode: GameMode) => {
-    if (gameEngine && isGameRunning) {
-      gameEngine.stopGameLoop();
-      setIsGameRunning(false);
-    }
-
-    setCurrentGameMode(newMode);
-    let engine: MonopolyGameEngine | DBAEngine;
-
-    if (newMode === GameMode.DBA) {
-      engine = new DBAEngine((gameState: GameState, logEntry: GameEntry) => {
-        setGameState(gameState);
-        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
-      });
-      setGameEngine(engine);
-    } else {
-      engine = new MonopolyGameEngine((gameState: GameState, logEntry: GameEntry) => {
-        setGameState(gameState);
-        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
-      });
-      setGameEngine(engine);
-    }
-    setGameState(engine.getGameState());
-    setRecentLogs([]);
   };
 
   const currentPlayer = gameState?.players[gameState?.currentPlayerIndex] || null;
