@@ -71,6 +71,94 @@
 .header-controls {
   display: flex;
   gap: 10px;
+  align-items: center;
+}
+
+/* Game Mode Buttons */
+.game-mode-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.game-mode-buttons .game-btn {
+  background: #111111;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  border-radius: 0;
+  min-width: 100px;
+}
+
+.game-mode-buttons .game-btn:hover {
+  background: var(--secondary-color);
+  color: #000000;
+  box-shadow: 0 0 10px var(--secondary-color);
+}
+
+.game-mode-buttons .game-btn.active {
+  background: var(--secondary-color);
+  color: #000000;
+  box-shadow: 0 0 15px var(--secondary-color);
+}
+
+.game-mode-buttons .game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.game-mode-buttons .game-btn:disabled:hover {
+  background: var(--danger-color);
+  color: #ffffff;
+  box-shadow: 0 0 5px var(--danger-color);
+}
+
+/* DBA Button - Prominent outside container */
+.dba-button {
+  background: #000000;
+  border: 2px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s;
+  border-radius: 0;
+  box-shadow: 0 0 15px var(--accent-color);
+  text-shadow: 0 0 10px var(--accent-color);
+  margin-left: 20px;
+}
+
+.dba-button:hover {
+  background: var(--accent-color);
+  color: #000000;
+  box-shadow: 0 0 25px var(--accent-color);
+  transform: scale(1.05);
+}
+
+.dba-button.active {
+  background: var(--accent-color);
+  color: #000000;
+  box-shadow: 0 0 30px var(--accent-color);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 30px var(--accent-color);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--accent-color);
+  }
 }
 
 /* Buttons with Terminal Style */

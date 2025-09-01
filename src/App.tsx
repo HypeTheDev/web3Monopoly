@@ -153,27 +153,29 @@ function App() {
           <h1>BkM</h1>
         </div>
         <div className="header-controls">
-          <select
-            value={currentGameMode}
-            onChange={(e) => switchGameMode(e.target.value as GameMode)}
-            className="game-mode-selector"
-            style={{
-              backgroundColor: 'var(--panel-color)',
-              border: '1px solid var(--primary-color)',
-              color: 'var(--primary-color)',
-              padding: '0.5rem',
-              marginRight: '1rem',
-              fontFamily: 'monospace'
-            }}
-          >
-            <option value={GameMode.MONOPOLY}>MONOPOLY</option>
-            <option value={GameMode.SPADES}>SPADES (Coming Soon)</option>
-            <option value={GameMode.CHESS}>CHESS (Coming Soon)</option>
-            <option value={GameMode.DBA}>⚡ DBA ⚡</option>
-          </select>
+          <div className="game-mode-buttons">
+            <button
+              className={`game-btn ${currentGameMode === GameMode.MONOPOLY ? 'active' : ''}`}
+              onClick={() => switchGameMode(GameMode.MONOPOLY)}
+            >
+              MONOPOLY
+            </button>
+            <button
+              className={`game-btn ${currentGameMode === GameMode.SPADES ? 'active' : ''}`}
+              disabled
+            >
+              SPADES (SOON)
+            </button>
+            <button
+              className={`game-btn ${currentGameMode === GameMode.CHESS ? 'active' : ''}`}
+              disabled
+            >
+              CHESS (SOON)
+            </button>
+          </div>
 
           <button
-            className="action-btn info"
+            className={`action-btn info ${showLogs ? '' : 'standardize'}`}
             onClick={() => setShowWorldNews(true)}
           >
             NEWS
@@ -189,6 +191,12 @@ function App() {
             onClick={() => setShowLogs(!showLogs)}
           >
             {showLogs ? 'LOGS' : 'NO_LOG'}
+          </button>
+          <button
+            className={`dba-button ${currentGameMode === GameMode.DBA ? 'active' : ''}`}
+            onClick={() => switchGameMode(GameMode.DBA)}
+          >
+            ⚡ DBA ⚡
           </button>
         </div>
       </header>
