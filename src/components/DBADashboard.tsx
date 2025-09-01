@@ -76,6 +76,7 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
         <div className="league-info">
           <span>SEASON {gameState.league.season}</span>
           <span>WEEK {gameState.league.currentWeek}</span>
+          <span>{gameState.currentView?.toUpperCase()}</span>
         </div>
       </div>
 
@@ -104,103 +105,232 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
 
       {/* Main Dashboard Content */}
       <div className="dashboard-content">
-        {/* Starting Lineup */}
-        <div className="dashboard-section">
-          <h3>STARTING_LINEUP</h3>
-          <div className="starting-lineup">
-            {Object.entries(currentTeam.startingLineup).map(([position, player]) => (
-              <div key={position} className="lineup-spot">
-                <div className="position-label">{position}</div>
-                {player ? (
-                  <div className="player-card">
+        {gameState.currentView === 'dashboard' && (
+          <>
+            {/* Starting Lineup */}
+            <div className="dashboard-section">
+              <h3>STARTING_LINEUP</h3>
+              <div className="starting-lineup">
+                {Object.entries(currentTeam.startingLineup).map(([position, player]) => (
+                  <div key={position} className="lineup-spot">
+                    <div className="position-label">{position}</div>
+                    {player ? (
+                      <div className="player-card">
+                        <div
+                          className="rarity-border"
+                          style={{ borderColor: getRarityColor(player.rarity) }}
+                        />
+                        <div className="player-name">{player.name}</div>
+                        <div className="player-stats">
+                          {player.stats.points.toFixed(1)} PTS • {player.stats.assists.toFixed(1)} AST • {player.stats.rebounds.toFixed(1)} REB
+                        </div>
+                        <div className="player-value">{formatValue(player.value)}</div>
+                      </div>
+                    ) : (
+                      <div className="empty-spot">VACANT</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Games */}
+            <div className="dashboard-section">
+              <h3>RECENT_GAMES</h3>
+              <div className="recent-games">
+                {currentWeekGames.slice(0, 5).map(game => {
+                  if (!game.result) return null;
+                  const isHome = game.homeTeam.id === currentTeam.id;
+                  const ourScore = isHome ? game.result.homeScore : game.result.awayScore;
+                  const oppScore = isHome ? game.result.awayScore : game.result.homeScore;
+                  const opponent = isHome ? game.awayTeam : game.homeTeam;
+                  const won = (isHome && game.result.winner === game.homeTeam) ||
+                             (!isHome && game.result.winner === game.awayTeam);
+
+                  return (
+                    <div key={game.id} className={`game-result ${won ? 'win' : 'loss'}`}>
+                      <div className="game-score">
+                        <span className={won ? 'winner' : ''}>
+                          {ourScore}-{oppScore}
+                        </span>
+                        <span className="opponent">vs {opponent.name}</span>
+                      </div>
+                      <div className="game-details">
+                        MVP: {game.result!.mvp.player.name} ({
+                          game.result!.mvp.points} PTS, {game.result!.mvp.assists} AST, {game.result!.mvp.rebounds} REB)
+                      </div>
+                    </div>
+                  );
+                })}
+                {currentWeekGames.length === 0 && (
+                  <div className="no-games">No games completed yet</div>
+                )}
+              </div>
+            </div>
+
+            {/* League Standings Preview */}
+            <div className="dashboard-section">
+              <h3>LEAGUE_STANDINGS</h3>
+              <div className="standings-preview">
+                {gameState.league.standings.slice(0, 8).map((team, index) => (
+                  <div
+                    key={team.id}
+                    className={`standings-row ${team.id === currentTeam.id ? 'current' : ''}`}
+                  >
+                    <span>#{index + 1}</span>
+                    <span>{team.name}</span>
+                    <span>{team.record.wins}-{team.record.losses}</span>
+                    <span>{formatValue(team.totalValue)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* News/Events */}
+            <div className="dashboard-section">
+              <h3>LEAGUE_NEWS</h3>
+              <div className="news-feed">
+                <div className="news-item">
+                  <span className="news-time">2H AGO</span>
+                  <span>Free Agent Market Update: 15 new players available</span>
+                </div>
+                <div className="news-item">
+                  <span className="news-time">4H AGO</span>
+                  <span>Trade Deadline: {Math.ceil((gameState.leagueRules.settings.tradeDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days remaining</span>
+                </div>
+                <div className="news-item">
+                  <span className="news-time">6H AGO</span>
+                  <span>Weekly Draft: Pick #1 goes to {gameState.league.draftOrder[0]}</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {gameState.currentView === 'roster' && (
+          <div className="dashboard-section">
+            <h3>TEAM_ROSTER</h3>
+            <div className="roster-grid">
+              <h4>STARTING_LINEUP</h4>
+              <div className="starting-lineup">
+                {Object.entries(currentTeam.startingLineup).map(([position, player]) => (
+                  <div key={position} className="lineup-spot roster-spot">
+                    <div className="position-label">{position}</div>
+                    {player ? (
+                      <div className="player-card roster-card">
+                        <div
+                          className="rarity-border"
+                          style={{ borderColor: getRarityColor(player.rarity) }}
+                        />
+                        <div className="player-name">{player.name}</div>
+                        <div className="player-stats">
+                          PPG: {player.stats.points.toFixed(1)} RPG: {player.stats.rebounds.toFixed(1)} APG: {player.stats.assists.toFixed(1)}
+                        </div>
+                        <div className="player-value">{formatValue(player.value)}</div>
+                      </div>
+                    ) : (
+                      <div className="empty-spot">VACANT</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <h4>BENCH ({currentTeam.bench.length})</h4>
+              <div className="bench-grid">
+                {currentTeam.bench.map(player => (
+                  <div key={player.id} className="player-card roster-card bench-card">
                     <div
                       className="rarity-border"
                       style={{ borderColor: getRarityColor(player.rarity) }}
                     />
                     <div className="player-name">{player.name}</div>
                     <div className="player-stats">
-                      {player.stats.points.toFixed(1)} PTS • {player.stats.assists.toFixed(1)} AST • {player.stats.rebounds.toFixed(1)} REB
+                      PPG: {player.stats.points.toFixed(1)} RPG: {player.stats.rebounds.toFixed(1)} APG: {player.stats.assists.toFixed(1)}
                     </div>
                     <div className="player-value">{formatValue(player.value)}</div>
                   </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {gameState.currentView === 'trade' && (
+          <div className="dashboard-section">
+            <h3>TRADE_MARKET</h3>
+            <div className="trade-interface">
+              <div className="trade-section">
+                <h4>ACTIVE_TRADES</h4>
+                {gameState.league.activeTrades.length === 0 ? (
+                  <div className="no-trades">No active trades available</div>
                 ) : (
-                  <div className="empty-spot">VACANT</div>
+                  <div className="trade-list">
+                    {gameState.league.activeTrades.map(trade => (
+                      <div key={trade.id} className="trade-offer">
+                        <div className="trade-details">
+                          <div>{trade.fromTeam} → {trade.toTeam}</div>
+                          <div>Players: {trade.offeredPlayers.map(p => p.name).join(', ')}</div>
+                          <div>Money: {formatValue(trade.offeredMoney)} ↔ {formatValue(trade.requestedMoney)}</div>
+                        </div>
+                        <div className="trade-actions">
+                          <button className="accept-btn">ACCEPT</button>
+                          <button className="counter-btn">COUNTER</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Recent Games */}
-        <div className="dashboard-section">
-          <h3>RECENT_GAMES</h3>
-          <div className="recent-games">
-            {currentWeekGames.slice(0, 5).map(game => {
-              if (!game.result) return null;
-              const isHome = game.homeTeam.id === currentTeam.id;
-              const ourScore = isHome ? game.result.homeScore : game.result.awayScore;
-              const oppScore = isHome ? game.result.awayScore : game.result.homeScore;
-              const opponent = isHome ? game.awayTeam : game.homeTeam;
-              const won = (isHome && game.result.winner === game.homeTeam) ||
-                         (!isHome && game.result.winner === game.awayTeam);
-
-              return (
-                <div key={game.id} className={`game-result ${won ? 'win' : 'loss'}`}>
-                  <div className="game-score">
-                    <span className={won ? 'winner' : ''}>
-                      {ourScore}-{oppScore}
-                    </span>
-                    <span className="opponent">vs {opponent.name}</span>
-                  </div>
-                  <div className="game-details">
-                    MVP: {game.result!.mvp.player.name} ({
-                      game.result!.mvp.points} PTS, {game.result!.mvp.assists} AST, {game.result!.mvp.rebounds} REB)
-                  </div>
+        {gameState.currentView === 'leaderboard' && (
+          <div className="dashboard-section">
+            <h3>COMPLETE_LEAGUE_STANDINGS</h3>
+            <div className="full-standings">
+              {gameState.league.standings.map((team, index) => (
+                <div
+                  key={team.id}
+                  className={`standings-row ${team.id === currentTeam.id ? 'current' : ''}`}
+                >
+                  <span>#{index + 1}</span>
+                  <span>{team.name}</span>
+                  <span>{team.record.wins}-{team.record.losses}</span>
+                  <span>{((team.record.wins / (team.record.wins + team.record.losses || 1)) * 100).toFixed(1)}%</span>
+                  <span>{formatValue(team.totalValue)}</span>
+                  <span>{formatValue(team.budget)}</span>
                 </div>
-              );
-            })}
-            {currentWeekGames.length === 0 && (
-              <div className="no-games">No games completed yet</div>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* League Standings Preview */}
-        <div className="dashboard-section">
-          <h3>LEAGUE_STANDINGS</h3>
-          <div className="standings-preview">
-            {gameState.league.standings.slice(0, 8).map((team, index) => (
-              <div
-                key={team.id}
-                className={`standings-row ${team.id === currentTeam.id ? 'current' : ''}`}
-              >
-                <span>#{index + 1}</span>
-                <span>{team.name}</span>
-                <span>{team.record.wins}-{team.record.losses}</span>
-                <span>{formatValue(team.totalValue)}</span>
+        {gameState.currentView === 'live-game' && (
+          <div className="dashboard-section">
+            <h3>LIVE_GAMES</h3>
+            <div className="live-games-view">
+              <div className="current-week-games">
+                <h4>THIS_WEEK</h4>
+                {gameState.league.schedule
+                  .filter(g => g.status !== 'completed')
+                  .slice(0, 5)
+                  .map(game => (
+                    <div key={game.id} className="live-game-item">
+                      <div className="live-game-teams">
+                        <span className={game.homeTeam.id === currentTeam.id ? 'current-team' : ''}>{game.homeTeam.name}</span>
+                        <span>vs</span>
+                        <span className={game.awayTeam.id === currentTeam.id ? 'current-team' : ''}>{game.awayTeam.name}</span>
+                      </div>
+                      <div className="live-game-status">
+                        {game.status === 'scheduled' ? `Projected: ${Math.floor(Math.random() * 50) + 80}-${Math.floor(Math.random() * 50) + 80}` : game.status}
+                      </div>
+                    </div>
+                  ))}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* News/Events */}
-        <div className="dashboard-section">
-          <h3>LEAGUE_NEWS</h3>
-          <div className="news-feed">
-            <div className="news-item">
-              <span className="news-time">2H AGO</span>
-              <span>Free Agent Market Update: 15 new players available</span>
-            </div>
-            <div className="news-item">
-              <span className="news-time">4H AGO</span>
-              <span>Trade Deadline: {Math.ceil((gameState.leagueRules.settings.tradeDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days remaining</span>
-            </div>
-            <div className="news-item">
-              <span className="news-time">6H AGO</span>
-              <span>Weekly Draft: Pick #1 goes to {gameState.league.draftOrder[0]}</span>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
