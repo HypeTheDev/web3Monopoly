@@ -206,14 +206,18 @@ export class MonopolyGameEngine extends BaseGameEngine {
   }
 
   private executeAIAction(action: AIActions, player: Player) {
+    if (this.gameState.gameMode !== GameMode.MONOPOLY) return;
+
+    const monopolyState = this.gameState as MonopolyGameState;
+
     switch (action.type) {
       case 'ROLL_DICE':
         const dice1 = Math.floor(Math.random() * 6) + 1;
         const dice2 = Math.floor(Math.random() * 6) + 1;
-        this.gameState.diceRolls = [dice1, dice2];
+        monopolyState.diceRolls = [dice1, dice2];
 
         player.position = (player.position + dice1 + dice2) % 40;
-        const landed = this.gameState.properties[player.position];
+        const landed = monopolyState.properties[player.position];
 
         if (landed.owner && landed.owner.id !== player.id) {
           const rent = landed.type === 'property' ? landed.rent[landed.houses] : landed.rent[0];
@@ -223,7 +227,7 @@ export class MonopolyGameEngine extends BaseGameEngine {
         break;
 
       case 'BUY_PROPERTY':
-        const propertyToBuy = this.gameState.properties[player.position];
+        const propertyToBuy = monopolyState.properties[player.position];
         if (propertyToBuy.price > 0 && !propertyToBuy.owner && player.money >= propertyToBuy.price) {
           player.money -= propertyToBuy.price;
           propertyToBuy.owner = player;
@@ -276,7 +280,7 @@ export class MonopolyGameEngine extends BaseGameEngine {
     localStorage.setItem('monopoly-summaries', JSON.stringify(existingSummaries));
   }
 
-  private logEntry(actionType: string, details: string) {
+  protected logEntry(actionType: string, details: string) {
     const entry = new GameEntry(this.turnCount, 'SYSTEM', actionType, details);
     this.gameLog.push(entry);
   }

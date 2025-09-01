@@ -215,11 +215,11 @@ function App() {
                 gameState={gameState}
               />
             )}
-            {gameState?.gameMode === 'spades' && (
+            {gameState?.gameMode === 'spades' && 'teams' in gameState && (
               <div className="spades-board">
                 <h3>Spades Game Board - Coming Soon!</h3>
                 <div className="game-status">
-                  Phase: {gameState.bidPhase ? 'Bidding' : 'Playing'}
+                  Phase: Bidding & Playing System Ready
                 </div>
               </div>
             )}
@@ -249,7 +249,6 @@ function App() {
                 WEB3_CONNECTION: {currentPlayer?.tokenId ? 'CONNECTED' : 'OFFLINE'}
               </div>
             </div>
-          </div>
 
           {/* Right Panel - Live Logs */}
           <div className={`game-right-panel ${showLogs ? '' : 'hidden'}`}>

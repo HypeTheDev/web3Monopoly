@@ -14,8 +14,10 @@ const GameControls: React.FC<GameControlsProps> = ({
   onEndTurn,
   onTrade
 }) => {
-  const canRollDice = gameState.gameStatus === 'playing' && gameState.diceRolls.length === 0;
-  const canEndTurn = gameState.gameStatus === 'playing' && gameState.diceRolls.length === 2;
+  // Check if we're in monopoly mode with proper type guards
+  const isMonopolyGame = gameState.gameMode === 'monopoly' && 'diceRolls' in gameState;
+  const canRollDice = isMonopolyGame && gameState.gameStatus === 'playing' && gameState.diceRolls.length === 0;
+  const canEndTurn = isMonopolyGame && gameState.gameStatus === 'playing' && gameState.diceRolls.length === 2;
   const canTrade = gameState.gameStatus === 'playing';
 
   return (
@@ -63,11 +65,15 @@ const GameControls: React.FC<GameControlsProps> = ({
         </button>
       </div>
 
-      {/* Dice Display */}
+      {/* Dice Display - Only for Monopoly */}
       <div className="dice-section">
-        <div className="dice-label">DICE ROLLS</div>
+        <div className="dice-label">
+          {gameState.gameMode === 'monopoly' ? 'DICE ROLLS' :
+           gameState.gameMode === 'spades' ? 'TRICKS' :
+           gameState.gameMode === 'chess' ? 'PIECES' : 'GAME STATS'}
+        </div>
         <div className="dice-display">
-          {gameState.diceRolls.length === 2 ? (
+          {gameState.gameMode === 'monopoly' && isMonopolyGame && gameState.diceRolls.length === 2 ? (
             <>
               <div className="die">
                 [{gameState.diceRolls[0]}]
@@ -80,8 +86,14 @@ const GameControls: React.FC<GameControlsProps> = ({
                 = {gameState.diceRolls[0] + gameState.diceRolls[1]}
               </div>
             </>
-          ) : (
+          ) : gameState.gameMode === 'monopoly' && isMonopolyGame ? (
             <div className="no-dice">[ROLL TO BEGIN]</div>
+          ) : gameState.gameMode === 'spades' ? (
+            <div className="no-dice">[BIDDING PHASE]</div>
+          ) : gameState.gameMode === 'chess' ? (
+            <div className="no-dice">[CHESS READY]</div>
+          ) : (
+            <div className="no-dice">[GAME READY]</div>
           )}
         </div>
       </div>

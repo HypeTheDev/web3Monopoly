@@ -153,9 +153,11 @@ const GameBoard: React.FC<GameBoardProps> = ({
               {currentPlayer ? `${currentPlayer.name}'s TURN` : 'WAITING'}
             </div>
             <div className="current-action">
-              {gameState?.diceRolls.length === 2 ?
+              {gameState?.gameMode === 'monopoly' && 'diceRolls' in gameState && gameState.diceRolls.length === 2 ?
                 `MOVED ${gameState.diceRolls[0] + gameState.diceRolls[1]} SPACES` :
-                'ROLL TO MOVE'
+                gameState?.gameMode === 'monopoly' ? 'ROLL TO MOVE' :
+                gameState?.gameMode === 'spades' ? 'WAITING FOR BID' :
+                'PREPARE TURN'
               }
             </div>
             <div className="round-info">
