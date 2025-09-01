@@ -4,16 +4,16 @@ import './App.css';
 // Game components
 import GameBoard from './components/GameBoard';
 import PlayerInfo from './components/PlayerInfo';
-import GameControls from './components/GameControls';
 import MusicPlayer from './components/MusicPlayer';
 import PropertyModal from './components/PropertyModal';
 import ColorPicker from './components/ColorPicker';
+import MatrixRain from './components/MatrixRain';
 
 // Game Engine
 import { MonopolyGameEngine, GameEntry } from './lib/GameEngine';
 
 // Types
-import { Player, Property, GameState, TerminalTheme } from './types/GameTypes';
+import { Property, GameState, TerminalTheme } from './types/GameTypes';
 
 function App() {
   const [gameEngine, setGameEngine] = useState<MonopolyGameEngine | null>(null);
@@ -274,7 +274,7 @@ function App() {
       )}
 
       {/* Matrix background effect */}
-      <div className="matrix-bg" id="matrix-bg"></div>
+      <MatrixRain />
 
       {/* Footer with network status */}
       <footer className="terminal-footer">
@@ -282,7 +282,7 @@ function App() {
           [TERMINAL_STATUS: ONLINE] | [WEB3_API: CONNECTED] | [MUSIC_STREAM: ACTIVE] | [AI_ENGINES: RUNNING]
         </div>
         <div className="version-info">
-          v2025.AI_TERMINAL | Copyright © Blockchain Management INC.
+          v2025.CYPHER_GAME | © Neo's Property Matrix
         </div>
       </footer>
     </div>

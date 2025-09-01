@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TerminalTheme } from '../types/GameTypes';
+import './ColorPicker.css';
 
 interface ColorPickerProps {
   theme: {
@@ -15,6 +16,14 @@ interface ColorPickerProps {
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ theme, onColorChange, onClose }) => {
   const [activeProperty, setActiveProperty] = useState<keyof typeof theme | null>(null);
+
+  // Rainbow color palette
+  const rainbowColors = [
+    '#ff0000', '#ff4400', '#ff8800', '#ffaa00', '#ffff00',
+    '#aaff00', '#55ff00', '#00ff00', '#00ff55', '#00ffaa',
+    '#00ffff', '#00aaff', '#0055ff', '#0000ff', '#4400ff',
+    '#8800ff', '#aa00ff', '#ff00ff', '#ff00aa', '#ff0055'
+  ];
 
   // Terminal-appropriate color palettes
   const colorPalettes = {
@@ -82,20 +91,21 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ theme, onColorChange, onClose
                         <span>{theme[propKey]}</span>
                       </div>
                       <div className="palette-list">
-                        <h4>Select Color:</h4>
-                        {colorPalettes.terminal.map((color, index) => (
-                          <button
-                            key={`${property}-${color}-${index}`}
-                            className="palette-color"
-                            style={{ backgroundColor: color }}
-                            onClick={() => {
-                              onColorChange(propKey, color);
-                              setActiveProperty(null);
-                            }}
-                          >
-                            {index + 1}
-                          </button>
-                        ))}
+                        <h4>RAINBOW_COLORS:</h4>
+                        <div className="rainbow-grid">
+                          {rainbowColors.map((color, index) => (
+                            <button
+                              key={`${property}-${color}-${index}`}
+                              className="rainbow-color"
+                              style={{ backgroundColor: color }}
+                              onClick={() => {
+                                onColorChange(propKey, color);
+                                setActiveProperty(null);
+                              }}
+                              title={`Color ${index + 1}: ${color}`}
+                            />
+                          ))}
+                        </div>
                       </div>
                       <button
                         className="back-btn"

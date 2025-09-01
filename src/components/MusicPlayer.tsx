@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './MusicPlayer.css';
 
 // Music Player Component with multiple sources
@@ -11,7 +11,7 @@ const MusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Available tracks from different sources (URLs would be replaced with real ones)
-  const tracksBySource = {
+  const tracksBySource = useMemo(() => ({
     soundcloud: [
       { id: 'sc-1', title: 'Ambient Terminal 1', artist: 'Code Ambient', url: 'https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/123456789' },
       { id: 'sc-2', title: 'Matrix Algorithms', artist: 'Cyber Beats', url: 'https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/987654321' },
@@ -30,7 +30,7 @@ const MusicPlayer: React.FC = () => {
       { id: 'rd-2', title: 'Coding Beats FM', artist: 'Dev Radio', url: 'https://streaming.radionomy.com/coding-beats' },
       { id: 'rd-3', title: 'Synthwave Zone', artist: 'Retro FM', url: 'https://streaming.radionomy.com/synthwave-zone' }
     ]
-  };
+  }), []);
 
   interface Track {
     id: string;
@@ -42,7 +42,7 @@ const MusicPlayer: React.FC = () => {
   useEffect(() => {
     setPlaylist(tracksBySource[currentSource]);
     setCurrentTrack(0);
-  }, [currentSource]);
+  }, [currentSource, tracksBySource]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -96,6 +96,7 @@ const MusicPlayer: React.FC = () => {
               scrolling="no"
               frameBorder="no"
               allow="autoplay"
+              title={`${track.title} by ${track.artist} on SoundCloud`}
               src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&color=%23000000&auto_play=${isPlaying}&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`}
             />
           </div>
@@ -107,6 +108,7 @@ const MusicPlayer: React.FC = () => {
             <iframe
               width="100%"
               height="166"
+              title={`${track.title} by ${track.artist} on YouTube`}
               src={`${track.url}?autoplay=${isPlaying ? '1' : '0'}&mute=1&loop=1&playlist=---actual-video-id---`}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -122,6 +124,7 @@ const MusicPlayer: React.FC = () => {
               src={track.url}
               width="100%"
               height="152"
+              title={`${track.title} by ${track.artist} on Spotify`}
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
