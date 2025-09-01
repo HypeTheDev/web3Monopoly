@@ -109,8 +109,7 @@ function App() {
       {/* Game Header */}
       <header className="game-header">
         <div className="game-title">
-          <h1>MONOPOLY WEB3 TERMINAL</h1>
-          <div className="terminal-indicator">[AI DEMO MODE]</div>
+          <h1>BkM</h1>
         </div>
         <div className="header-controls">
           <button
@@ -123,7 +122,7 @@ function App() {
             className="settings-button"
             onClick={() => setShowLogs(!showLogs)}
           >
-            {showLogs ? 'HIDE_LOGS' : 'SHOW_LOGS'}
+            {showLogs ? 'LOGS' : 'NO_LOG'}
           </button>
         </div>
       </header>
@@ -131,27 +130,27 @@ function App() {
       {/* AI Status Panel */}
       <div className="ai-status-panel">
         <div className="status-indicators">
-          <span>GAME_ENGINE: {isGameRunning ? 'ACTIVE' : 'STANDBY'}</span>
-          <span>PLAYERS: 4 AI_BOTS</span>
-          <span>SPEED: {gameSpeed / 1000}s/turn</span>
+          <span>ENGINE: {isGameRunning ? 'ON' : 'OFF'}</span>
+          <span>BOTS: 4</span>
+          <span>SPEED: {gameSpeed / 1000}s</span>
           <span>ROUND: {gameState?.roundNumber || 0}</span>
         </div>
         <div className="ai-controls">
           {!isGameRunning ? (
-            <button className="action-btn" onClick={startGame}>START_AI_RACE</button>
+            <button className="action-btn" onClick={startGame}>START</button>
           ) : (
-            <button className="action-btn danger" onClick={stopGame}>STOP_RACE</button>
+            <button className="action-btn danger" onClick={stopGame}>STOP</button>
           )}
-          <button className="action-btn" onClick={resetGame}>RESET_GAME</button>
+          <button className="action-btn" onClick={resetGame}>RESET</button>
           <select
             value={gameSpeed}
             onChange={(e) => changeSpeed(parseInt(e.target.value))}
             className="speed-selector"
           >
-            <option value="2000">ULTRA_SLOW</option>
-            <option value="1000">NORMAL</option>
+            <option value="2000">SLOW</option>
+            <option value="1000">NORM</option>
             <option value="500">FAST</option>
-            <option value="250">ULTRA_FAST</option>
+            <option value="250">MAX</option>
           </select>
         </div>
       </div>
@@ -177,10 +176,9 @@ function App() {
             <div className="game-state-panel">
               <h4>GAME_STATE</h4>
               <div className="state-info">
-                <div>BANK_BALANCE: ${gameState?.bankMoney || 0}</div>
-                <div>FREE_PARKING: ${gameState?.freeParkingPot || 0}</div>
-                <div>ACTIVE_TRANSACTIONS: {gameState ? gameState.properties.filter(p => p.owner).length : 0}</div>
-                <div>TERMINALS_RUNNING: 1</div>
+                <div>BANK: ${gameState?.bankMoney || 0}</div>
+                <div>FREE: ${gameState?.freeParkingPot || 0}</div>
+                <div>OWNED: {gameState ? gameState.properties.filter(p => p.owner).length : 0}</div>
               </div>
             </div>
           </div>
@@ -240,14 +238,13 @@ function App() {
               )}
             </div>
 
-            {/* Game Summary Data */}
+            {/* Only show simplified stats */}
             <div className="data-summary">
-              <h5>SESSION_STATS</h5>
+              <h5>STATS</h5>
               <div className="summary-data">
-                <div>COMPUTED_TURNS: {recentLogs.length}</div>
-                <div>AI_DECISIONS: {recentLogs.filter(l => l.actionType === 'BUY_PROPERTY' || l.actionType === 'TRADE').length}</div>
-                <div>PROPERTIES_OWNED: {gameState ? gameState.properties.filter(p => p.owner).length : 0}</div>
-                <div>DATA_GENERATED: {JSON.stringify(recentLogs).length} bytes</div>
+                <div>TURNS: {recentLogs.length}</div>
+                <div>AI: {recentLogs.filter(l => l.actionType === 'BUY_PROPERTY' || l.actionType === 'TRADE').length}</div>
+                <div>OWNED: {gameState ? gameState.properties.filter(p => p.owner).length : 0}</div>
               </div>
             </div>
           </div>
@@ -276,14 +273,9 @@ function App() {
       {/* Matrix background effect */}
       <MatrixRain />
 
-      {/* Footer with network status */}
+      {/* Footer - simplified */}
       <footer className="terminal-footer">
-        <div className="network-status">
-          [TERMINAL_STATUS: ONLINE] | [WEB3_API: CONNECTED] | [MUSIC_STREAM: ACTIVE] | [AI_ENGINES: RUNNING]
-        </div>
-        <div className="version-info">
-          v2025.CYPHER_GAME | © Neo's Property Matrix
-        </div>
+        <div className="network-status">BkM Terminal v1.0 | © Neo's Property Matrix</div>
       </footer>
     </div>
   );
