@@ -84,9 +84,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ properties, onPropertyClick }) =>
           {property?.owner && (
             <div
               className="owner-indicator"
-              style={{ backgroundColor: property.owner.color || '#ffff00' }}
+              style={{ backgroundColor: (property.owner as Player).color || '#ffff00' }}
             >
-              {(property.owner as Player).name.charAt(0)}
+              {property.owner.name.charAt(0)}
             </div>
           )}
 
