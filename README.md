@@ -1,170 +1,129 @@
-# 🎮 Monopoly Web3 Terminal Demo
+# 🎮 Monopoly Web3 Terminal
 
-**Experience Monopoly like never before!** This is a **Web3 decentralized** version of the classic Monopoly game with a **futuristic terminal interface**. 4 AI players compete continuously, making strategic decisions while you watch the action unfold.
+A modern, Web3-ready Monopoly game with a sleek terminal interface featuring 4 AI players competing in real-time.
 
-## ✨ What Makes This Special?
+## ✨ Features
 
-- 🤖 **4 AI Players** - Watch intelligent bots play Monopoly 24/7
-- 🔥 **Terminal Style** - Cool black & green computer interface
-- 🎵 **Background Music** - SoundCloud, YouTube, Spotify, & Radio integration
-- ⚡ **Customizable Themes** - Choose your favorite color scheme
-- 📊 **Live Data Collection** - See real-time game stats & player performance
-- 🌐 **Web3 Ready** - Built for blockchain property ownership
-- 📱 **Mobile Friendly** - Works great on phones and tablets
+- 🤖 **4 AI Players** compete continuously with different strategies
+- 🔥 **Terminal Interface** with customizable color themes
+- 🎲 **Real-time Gameplay** with automatic dice rolling and property management
+- 🎵 **Music Integration** supporting SoundCloud, YouTube, Spotify, and web radio
+- 📱 **Responsive Design** optimized for all devices
+- 🎨 **Multiple Themes** including Cyber Space, Matrix Mode, and Retro Fun
+- 📊 **Live Statistics** tracking player performance and game trends
+- 🏠 **Complete Property Trading** with houses, hotels, and mortgaging
 
-## 🎯 How It Works
+## 🚀 Quick Start
 
-1. **Click "START_AI_RACE"** - Begin watching the AI players compete
-2. **Adjust speed controls** - Fast, Normal, Ultra-Fast gameplay
-3. **Change themes** - Customize colors to match your style
-4. **Play music** - Add background tunes from your favorite platforms
-5. **Watch the data** - See who's winning, property stats, and game trends
-
-### Game Features:
-- 🏠 **Property Trading** - Buy, sell, mortgage properties
-- 🎲 **Dice Rolling** - Automatic dice mechanics
-- 💰 **Bank Management** - Money tracking & transactions
-- 🚀 **Special Cards** - Chance & Community Chest cards
-- 🏨 **Building System** - Houses and hotels
-- 👥 **Multiple Players** - 4 AI opponents with different strategies
-
-## 🚀 Quick Start Guide
-
-### For Beginners (Super Easy!)
-1. Click the green **"Clone or download"** button above
-2. Download the ZIP file
-3. Unzip the folder on your computer
-4. **double-click `index.html`** in the `public` folder 🚀
-
-### For Developers (Advanced)
+### Install Dependencies
 ```bash
-# Step 1: Get the code
-git clone https://github.com/yourusername/web3Monopoly.git
-cd web3Monopoly
-
-# Step 2: Install programs
 npm install
-
-# Step 3: Run the game!
-npm start
 ```
 
-Then open http://localhost:3000 in your web browser!
+### Development Mode
+```bash
+npm start
+```
+Opens http://localhost:3000 in your browser.
 
-## 🛠️ Tech Stack (Cool Technology Used)
+### Production Build
+```bash
+npm run build
+npm run serve  # or serve -s build
+```
 
-### Frontend (User Interface)
-- ⚛️ **React** - Modern web app framework
-- 🎨 **TypeScript** - Smart programming language
-- 🎭 **CSS Variables** - Dynamic theme system
+### Start Watching AI Players
+1. Click **"START_AI_RACE"** button
+2. Adjust speed controls (Normal/Realtime/Ultra-Fast)
+3. Watch AI players compete automatically
+4. Customize themes and add background music
 
-### Game Engine
-- 🎯 **AI Simulation** - Smart computer players
-- 📈 **Data Analytics** - Game performance tracking
-- 🔄 **Real-time Updates** - Live gameplay broadcasting
+## 🛠️ Tech Stack
 
-### Integration
-- 🎵 **Multi-platform Music** - SoundCloud, YouTube, Spotify, Radio
-- 🌐 **Web3 Ready** - Blockchain property ownership prep
-- ☁️ **Cloud Hosting** - Ready for worldwide deployment
-
-## 🎨 Customization Options
-
-### 🎨 **Theme System**
-Choose from these awesome themes:
-- 🌙 **Terminal Classic** - Original green & black
-- 🌈 **Cyber Space** - Bright cyan & magenta
-- 🎬 **Matrix Mode** - Red pill enhanced colors
-- 🌼 **Retro Fun** - 80s style palette
-- 🎪 **Neon Nights** - Electric color explosion
-
-### 🎵 **Music Integration**
-Enjoy background music from:
-- 🎤 **SoundCloud** - By widget
-- 📹 **YouTube** - Direct video streaming
-- 🎧 **Spotify** - Web player integration
-- 📻 **Radio** - Worldwide radio stations
-
-## 📊 Game Stats Dashboard
-
-### What You Can Track:
-- 🏆 **Winner Statistics** - Who wins most games
-- 📈 **Property Values** - Real estate market trends
-- 💸 **Transaction Logs** - Buy/sell activity monitor
-- ⏰ **Game Duration** - How long games typically last
-- 🤖 **AI Performance** - Bot strategy effectiveness
-
-## 🚀 Deploy To The Web (Free!)
-
-### Vercel Deployment (Recommended)
-1. Go to [Vercel.com](https://vercel.com)
-2. Sign up for free account
-3. Click **"Import Project"**
-4. Connect your GitHub repo
-5. Click **Deploy** - done! 🎉
-
-## 🎮 Game Strategy Guide
-
-### AI Player Types:
-- **Conservative** 🛡️ - Plays safe, builds carefully
-- **Aggressive** ⚔️ - Takes big risks, trades aggressively
-- **Strategic** 🧠 - Uses complex tactics
-- **Lucky** 🍀 - Relies on chance cards
-
-### Advanced Tips:
-- 🏠 **Build sets** - Get all properties of one color
-- 💰 **Mortgage wisely** - Smart borrowing strategy
-- 🎲 **Know probability** - Understand dice odds
-- 🤝 **Trade strategically** - Negotiate smart deals
+- **Frontend**: React 18, TypeScript, CSS3
+- **Build**: Create React App, React Scripts
+- **Styling**: CSS Variables, Responsive Design
+- **Game Engine**: Custom AI simulation with real-time state management
+- **Music Integration**: Embedded players for popular streaming platforms
 
 ## 📁 Project Structure
 
 ```
-src/
-├── components/          # Game interface pieces
-│   ├── GameBoard.tsx    # Main Monopoly board
-│   ├── PlayerInfo.tsx   # Player stats display
-│   ├── PropertyModal.tsx # Property trading window
-│   └── ColorPicker.tsx   # Theme customization
-├── lib/
-│   └── GameEngine.ts     # AI game simulation
-├── types/
-│   └── GameTypes.ts      # Game data definitions
-└── App.tsx              # Main application controller
+monopoly-web3/
+├── public/              # Static assets
+├── src/
+│   ├── components/      # React components
+│   │   ├── GameBoard.tsx    # Main monopoly board
+│   │   ├── PlayerInfo.tsx   # Player statistics
+│   │   ├── GameControls.tsx # Start/stop controls
+│   │   ├── PropertyModal.tsx # Property trading
+│   │   ├── MusicPlayer.tsx   # Background music
+│   │   ├── MatrixRain.tsx    # Visual effects
+│   │   └── ColorPicker.tsx   # Theme selector
+│   ├── lib/
+│   │   └── GameEngine.ts     # AI game logic
+│   ├── types/
+│   │   └── GameTypes.ts      # TypeScript interfaces
+│   ├── App.tsx           # Main application
+│   ├── index.tsx         # Application entry point
+│   └── *.css             # Styling files
+├── build/                # Production build output
+├── package.json          # Dependencies & scripts
+└── README.md            # This file
 ```
 
-## 🤝 Contributing
+## 🎮 How to Play
 
-Want to help make this better? Here's how:
+1. **Start a Game**: Click "START_AI_RACE" to begin AI competition
+2. **Watch Gameplay**: 4 AI players make strategic decisions automatically
+3. **Customize Experience**:
+   - Change speed (Realtime/Ultra-Fast)
+   - Select color themes
+   - Add background music
+4. **Monitor Stats**: Track who's winning, property ownership, and game metrics
 
-1. 🎯 **Fork** the project
-2. 🛠️ **Add your improvements**
-3. 📝 **Submit a pull request**
-4. 🎉 **Get your contributions merged!**
+## 🎨 Customization
 
-### Ideas for Improvements:
-- 👥 Add human vs AI multiplayer mode
-- 🌐 Implement real Web3 blockchain integration
-- 🧠 Add different AI difficulty levels
-- 🎨 Create more theme variations
-- 📱 Add mobile-specific features
+### Themes
+- **Terminal Classic** - Green & black hacker aesthetic
+- **Cyber Space** - Cyan & magenta neon colors
+- **Matrix Mode** - Red pill style visual effects
+- **Retro Fun** - 80s inspired palette
+- **Neon Nights** - Electric color explosion
 
-## 📞 Support & Questions
+### Music Sources
+- SoundCloud widget integration
+- YouTube direct streaming
+- Spotify web player
+- Internet radio stations
 
-- Found a bug? **Open an issue** on GitHub
-- Have questions? **Check our Discussions** tab
-- Want new features? **Share your ideas!**
+## 🔧 Recent Updates
 
-## 🎓 Educational Value
+- Fixed game board tile sizing for consistent square boxes
+- Improved CSS grid layout for proper board alignment
+- Enhanced responsive design for mobile devices
+- Optimized development build process
+- Updated documentation for clarity
 
-This project demonstrates:
-- 🌐 **Modern Web Development** - React & TypeScript
-- 🤖 **Artificial Intelligence** - Game-playing algorithms
-- 🎨 **UI/UX Design** - Terminal aesthetic & usability
-- 📊 **Data Analysis** - Game statistics & trends
-- ☁️ **Cloud Deployment** - Hosting modern web apps
-- 🔗 **Web3 Integration** - Future of internet technology
+## 👥 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature-name`)
+3. Commit changes (`git commit -am 'Add feature'`)
+4. Push to branch (`git push origin feature-name`)
+5. Create a Pull Request
+
+### Future Enhancements
+- Human vs AI multiplayer mode
+- Web3 blockchain property ownership
+- AI difficulty levels and strategies
+- Advanced property trading mechanics
+- Tournament mode with multiple games
+
+## 📄 License
+
+Built with ❤️ for game enthusiasts and developers. See package.json for dependencies.
 
 ---
 
-**Made with ❤️ for game lovers, tech enthusiasts, and curious minds everywhere!** 🚀🎲✨
+**Enjoy the game!** 🎲🚀

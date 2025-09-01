@@ -192,6 +192,7 @@ function App() {
                   setSelectedProperty(property);
                   setShowPropertyModal(true);
                 }}
+                gameState={gameState}
               />
             )}
 

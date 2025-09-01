@@ -600,12 +600,11 @@ html, body {
   }
 }
 
-/* Tablet portrait */
+/* Tablet portrait - Enhanced */
 @media (max-width: 768px) {
   .App {
     max-width: 100vw;
     width: 100vw;
-    /* Better tablet support */
     touch-action: pan-x pan-y;
   }
 
@@ -641,14 +640,24 @@ html, body {
 
   .demo-container {
     flex-direction: column;
+    gap: 10px;
   }
 
-  .game-left-panel,
+  .game-left-panel {
+    width: 100%;
+    border-left: none;
+    border-right: none;
+    max-height: 30vh;
+    border-top: 1px solid var(--primary-color);
+    border-bottom: 1px solid var(--primary-color);
+    padding: 12px;
+  }
+
   .game-right-panel {
     width: 100%;
     border-left: none;
     border-right: none;
-    max-height: 35vh;
+    max-height: 25vh;
     border-top: 1px solid var(--primary-color);
     border-bottom: 1px solid var(--primary-color);
     padding: 12px;
@@ -656,7 +665,8 @@ html, body {
 
   .game-center-panel {
     flex: 1;
-    min-height: 250px;
+    min-height: 300px;
+    align-self: stretch;
   }
 
   .terminal-footer {
@@ -667,15 +677,6 @@ html, body {
 
   .version-info {
     text-align: center;
-  }
-
-  .board-grid {
-    grid-template-columns: repeat(11, 40px);
-    grid-template-rows: repeat(11, 40px);
-  }
-
-  .game-board {
-    min-height: 450px;
   }
 }
 

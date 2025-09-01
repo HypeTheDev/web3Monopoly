@@ -1,5 +1,5 @@
 import React from 'react';
-import { Property, Player } from '../types/GameTypes';
+import { Property, Player, GameState } from '../types/GameTypes';
 import './GameBoard.css';
 
 interface GameBoardProps {
@@ -8,6 +8,7 @@ interface GameBoardProps {
   currentPlayerPosition?: number;
   playerNames?: string[];
   playerColors?: string[];
+  gameState?: GameState | null;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
@@ -15,49 +16,51 @@ const GameBoard: React.FC<GameBoardProps> = ({
   onPropertyClick,
   currentPlayerPosition = 0,
   playerNames = ['P1', 'P2', 'P3', 'P4'],
-  playerColors = ['#ff00ff', '#00ffff', '#ffff00', '#ff8800']
+  playerColors = ['#ff00ff', '#00ffff', '#ffff00', '#ff8800'],
+  gameState
 }) => {
-  // Standard Monopoly board layout (simplified for rendering)
+  const currentPlayer = gameState?.players[gameState?.currentPlayerIndex];
+  // Enhanced Monopoly board layout with modern color coordination
   const boardLayout = [
-    { position: 0, name: 'GO', type: 'corner', color: 'transparent' },
+    { position: 0, name: 'GO', type: 'corner', color: 'var(--background-color)' },
     { position: 1, name: 'Mediterranean Ave', type: 'property', color: '#8B4513' },
-    { position: 2, name: 'Community Chest', type: 'card', color: '#87CEEB' },
+    { position: 2, name: 'Community Chest', type: 'card', color: 'var(--panel-color)' },
     { position: 3, name: 'Baltic Ave', type: 'property', color: '#8B4513' },
-    { position: 4, name: 'Income Tax', type: 'tax', color: '#708090' },
-    { position: 5, name: 'Reading Railroad', type: 'railroad', color: '#000000' },
-    { position: 6, name: 'Oriental Ave', type: 'property', color: '#FF6B6B' },
-    { position: 7, name: 'Chance', type: 'card', color: '#FFD93D' },
-    { position: 8, name: 'Vermont Ave', type: 'property', color: '#FF6B6B' },
-    { position: 9, name: 'Connecticut Ave', type: 'property', color: '#FF6B6B' },
-    { position: 10, name: 'Just Visiting', type: 'corner', color: 'transparent' },
-    { position: 11, name: 'St. Charles Place', type: 'property', color: '#87CEEB' },
-    { position: 12, name: 'Electric Company', type: 'utility', color: '#98FB98' },
-    { position: 13, name: 'States Ave', type: 'property', color: '#87CEEB' },
-    { position: 14, name: 'Virginia Ave', type: 'property', color: '#87CEEB' },
-    { position: 15, name: 'Pennsylvania Railroad', type: 'railroad', color: '#000000' },
-    { position: 16, name: 'St. James Place', type: 'property', color: '#FFB347' },
-    { position: 17, name: 'Community Chest', type: 'card', color: '#87CEEB' },
-    { position: 18, name: 'Tennessee Ave', type: 'property', color: '#FFB347' },
-    { position: 19, name: 'New York Ave', type: 'property', color: '#FFB347' },
-    { position: 20, name: 'Free Parking', type: 'corner', color: 'transparent' },
+    { position: 4, name: 'Income Tax', type: 'tax', color: 'var(--panel-color)' },
+    { position: 5, name: 'Reading Railroad', type: 'railroad', color: 'var(--secondary-color)' },
+    { position: 6, name: 'Oriental Ave', type: 'property', color: 'var(--accent-color)' },
+    { position: 7, name: 'Chance', type: 'card', color: 'var(--warning-color)' },
+    { position: 8, name: 'Vermont Ave', type: 'property', color: 'var(--accent-color)' },
+    { position: 9, name: 'Connecticut Ave', type: 'property', color: 'var(--accent-color)' },
+    { position: 10, name: 'Just Visiting', type: 'corner', color: 'var(--background-color)' },
+    { position: 11, name: 'St. Charles Place', type: 'property', color: 'var(--success-color)' },
+    { position: 12, name: 'Electric Company', type: 'utility', color: 'var(--panel-color)' },
+    { position: 13, name: 'States Ave', type: 'property', color: 'var(--success-color)' },
+    { position: 14, name: 'Virginia Ave', type: 'property', color: 'var(--success-color)' },
+    { position: 15, name: 'Pennsylvania Railroad', type: 'railroad', color: 'var(--secondary-color)' },
+    { position: 16, name: 'St. James Place', type: 'property', color: 'var(--warning-color)' },
+    { position: 17, name: 'Community Chest', type: 'card', color: 'var(--panel-color)' },
+    { position: 18, name: 'Tennessee Ave', type: 'property', color: 'var(--warning-color)' },
+    { position: 19, name: 'New York Ave', type: 'property', color: 'var(--warning-color)' },
+    { position: 20, name: 'Free Parking', type: 'corner', color: 'var(--background-color)' },
     { position: 21, name: 'Kentucky Ave', type: 'property', color: '#FF69B4' },
-    { position: 22, name: 'Chance', type: 'card', color: '#FFD93D' },
+    { position: 22, name: 'Chance', type: 'card', color: 'var(--warning-color)' },
     { position: 23, name: 'Indiana Ave', type: 'property', color: '#FF69B4' },
     { position: 24, name: 'Illinois Ave', type: 'property', color: '#FF69B4' },
-    { position: 25, name: 'B&O Railroad', type: 'railroad', color: '#000000' },
+    { position: 25, name: 'B&O Railroad', type: 'railroad', color: 'var(--secondary-color)' },
     { position: 26, name: 'Atlantic Ave', type: 'property', color: '#FFFF99' },
     { position: 27, name: 'Ventnor Ave', type: 'property', color: '#FFFF99' },
-    { position: 28, name: 'Water Works', type: 'utility', color: '#98FB98' },
+    { position: 28, name: 'Water Works', type: 'utility', color: 'var(--panel-color)' },
     { position: 29, name: 'Marvin Gardens', type: 'property', color: '#FFFF99' },
-    { position: 30, name: 'Go To Jail', type: 'corner', color: 'transparent' },
-    { position: 31, name: 'Pacific Ave', type: 'property', color: '#32CD32' },
-    { position: 32, name: 'North Carolina Ave', type: 'property', color: '#32CD32' },
-    { position: 33, name: 'Community Chest', type: 'card', color: '#87CEEB' },
-    { position: 34, name: 'Pennsylvania Ave', type: 'property', color: '#32CD32' },
-    { position: 35, name: 'Short Line', type: 'railroad', color: '#000000' },
-    { position: 36, name: 'Chance', type: 'card', color: '#FFD93D' },
+    { position: 30, name: 'Go To Jail', type: 'corner', color: 'var(--background-color)' },
+    { position: 31, name: 'Pacific Ave', type: 'property', color: 'var(--success-color)' },
+    { position: 32, name: 'North Carolina Ave', type: 'property', color: 'var(--success-color)' },
+    { position: 33, name: 'Community Chest', type: 'card', color: 'var(--panel-color)' },
+    { position: 34, name: 'Pennsylvania Ave', type: 'property', color: 'var(--success-color)' },
+    { position: 35, name: 'Short Line', type: 'railroad', color: 'var(--secondary-color)' },
+    { position: 36, name: 'Chance', type: 'card', color: 'var(--warning-color)' },
     { position: 37, name: 'Park Place', type: 'property', color: '#8A2BE2' },
-    { position: 38, name: 'Luxury Tax', type: 'tax', color: '#708090' },
+    { position: 38, name: 'Luxury Tax', type: 'tax', color: 'var(--panel-color)' },
     { position: 39, name: 'Boardwalk', type: 'property', color: '#8A2BE2' }
   ];
 
@@ -143,11 +146,21 @@ const GameBoard: React.FC<GameBoardProps> = ({
           )}
         </div>
 
-        {/* Center area - could show game info or cards */}
+        {/* Center area - game status display */}
         <div className="board-center">
           <div className="center-display">
-            <div className="web3-indicator">[WEB3 MODE]</div>
-            <div className=" decentral-indicator">[DECENTRALIZED]</div>
+            <div className="game-phase-indicator">
+              {currentPlayer ? `${currentPlayer.name}'s TURN` : 'WAITING'}
+            </div>
+            <div className="current-action">
+              {gameState?.diceRolls.length === 2 ?
+                `MOVED ${gameState.diceRolls[0] + gameState.diceRolls[1]} SPACES` :
+                'ROLL TO MOVE'
+              }
+            </div>
+            <div className="round-info">
+              ROUND {gameState?.roundNumber || 0}
+            </div>
           </div>
         </div>
 

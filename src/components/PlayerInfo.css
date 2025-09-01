@@ -1,8 +1,9 @@
-/* Player Info Panel - Terminal Style */
+/* Player Info Panel - Modernized Terminal Style */
 
 .player-info-panel {
   font-size: 0.8rem;
   overflow-y: auto;
+  max-height: 100%;
 }
 
 .player-info-panel h3 {
@@ -12,34 +13,42 @@
   font-size: 1rem;
   border-bottom: 1px solid var(--primary-color, #00ff00);
   padding-bottom: 8px;
-  text-shadow: 0 0 5px var(--primary-color, #00ff00);
-  animation: blink 4s infinite;
+  letter-spacing: 0.5px;
+  font-weight: bold;
 }
 
 .player-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .player-card {
-  margin-bottom: 10px;
-  padding: 10px;
+  padding: 12px;
   background: var(--background-color, #000000);
   border: 1px solid var(--secondary-color, #ffff00);
-  border-radius: 0;
-  transition: all 0.3s ease;
+  border-radius: 1px;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .player-card:hover {
   border-color: var(--primary-color, #00ff00);
-  box-shadow: 0 0 5px var(--primary-color, #00ff00);
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.3);
 }
 
 .player-card.current {
-  border-color: var(--primary-color, #00ff00);
-  box-shadow: 0 0 15px var(--primary-color, #00ff00);
-  background: var(--panel-color, #111111);
+  border-color: var(--accent-color, #ff00ff);
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
+  background: rgba(0, 255, 0, 0.02);
+}
+
+.player-card.current::before {
+  content: '▶';
+  position: absolute;
+  left: 5px;
+  color: var(--accent-color, #ff00ff);
+  font-size: 0.8rem;
 }
 
 .player-name {
@@ -47,31 +56,33 @@
   font-weight: bold;
   margin-bottom: 8px;
   font-size: 0.9rem;
-  text-shadow: 0 0 5px var(--primary-color, #00ff00);
   border-bottom: 1px dashed var(--border-color, #333333);
   padding-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .player-stats {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 .stat-label {
   color: var(--secondary-color, #ffff00);
   text-transform: uppercase;
   font-size: 0.7rem;
-  letter-spacing: 1px;
-  font-family: inherit;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
 }
 
 .stat-value {
-  color: var(--primary-color, #00ff00);
+  color: var(--success-color, #00ffff);
   font-weight: bold;
-  text-shadow: 0 0 5px var(--primary-color, #00ff00);
   font-size: 0.8rem;
 }
 
