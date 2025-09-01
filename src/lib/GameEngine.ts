@@ -907,11 +907,93 @@ export class MonopolyGameEngine extends BaseGameEngine {
   }
 
   startGameLoop(speed: number): void {
-    this.logEntry('MONOPOLY_START', 'Monopoly game loop started');
+    this.logEntry('MONOPOLY_START', 'Starting Monopoly simulation with auto-dice rolls');
+    this.isRunning = true;
+
+    // Immediately process the first turn
+    setTimeout(() => this.processNextTurn(), 100);
+
+    // Set up auto-turn simulation based on speed
+    this.gameInterval = setInterval(() => {
+      if (this.isRunning) {
+        this.processNextTurn();
+      }
+    }, speed);
+
+    // Update initial state
+    this.gameState.gameStatus = 'playing';
+    this.onGameUpdate(this.gameState, new GameEntry(0, 'SYSTEM', 'GAME_START', '🎲 Monopoly game has begun!'));
   }
 
   stopGameLoop(): void {
-    this.logEntry('MONOPOLY_STOP', 'Monopoly game loop stopped');
+    this.isRunning = false;
+    if (this.gameInterval) {
+      clearInterval(this.gameInterval);
+      this.gameInterval = null;
+    }
+    this.logEntry('MONOPOLY_STOP', 'Monopoly simulation stopped');
+  }
+
+  private processNextTurn(): void {
+    const monopolyState = this.gameState as MonopolyGameState;
+    const currentPlayer = monopolyState.players[monopolyState.currentPlayerIndex];
+
+    if (!currentPlayer) return;
+
+    // Roll dice and move player
+    const dice1 = Math.floor(Math.random() * 6) + 1;
+    const dice2 = Math.floor(Math.random() * 6) + 1;
+    const totalMove = dice1 + dice2;
+
+    monopolyState.diceRolls = [dice1, dice2];
+
+    // Update player position
+    currentPlayer.position = (currentPlayer.position + totalMove) % 40;
+
+    this.logEntry('DICE_ROLL', `🎲 ${currentPlayer.name} rolled ${dice1}+${dice2}=${totalMove}`);
+
+    // Simple property landing (for demo - no complex AI decisions yet)
+    const propertyIndex = currentPlayer.position;
+    if (propertyIndex >= 0 && propertyIndex < 40 && [1,3,6,8,10,12,14,16,17,19,21,23,25,27,29,32,34,37,39].includes(propertyIndex)) {
+      // Landed on a property (simplified)
+      const propertyNames = [
+        'Mediterranean Avenue', 'Baltic Avenue', 'Oriental Avenue', 'Vermont Avenue',
+        'Connecticut Avenue', 'St. Charles Place', 'States Avenue', 'Virginia Avenue',
+        'St. James Place', 'Tennessee Avenue', 'New York Avenue', 'Kentucky Avenue',
+        'Indiana Avenue', 'Illinois Avenue', 'Atlantic Avenue', 'Ventnor Avenue',
+        'Marvin Gardens', 'Pennsylvania Avenue', 'Short Line', 'Park Place',
+        'Boardwalk', 'Reading Railroad', 'Pennsylvania Railroad', 'B&O Railroad',
+        'Short Line', 'Water Works', 'Electric Company'
+      ];
+      const propertyName = propertyNames[Math.floor(Math.random() * propertyNames.length)];
+      this.logEntry('PROPERTY_LAND', `🏠 ${currentPlayer.name} landed on ${propertyName}`);
+    }
+
+    // Handle doubles and special squares
+    if (dice1 === dice2) {
+      this.logEntry('DOUBLES', `🎲 DOUBLES! ${currentPlayer.name} rolls again`);
+    }
+
+    // Pass go
+    if (currentPlayer.position < totalMove) {
+      currentPlayer.money += 200;
+      this.logEntry('PASS_GO', `🎉 ${currentPlayer.name} passed GO! +$200`);
+    }
+
+    // Choose random action (simple AI for demo)
+    const actions = [
+      'pays $50 rent', 'pays $100 rent', 'buys property', 'collects $200', 'pays $75 taxes',
+      'finds $100 on ground', 'wins auction', 'pays hotel rent', 'draws card'
+    ];
+    const action = actions[Math.floor(Math.random() * actions.length)];
+    this.logEntry('PLAYER_ACTION', `🔧 ${currentPlayer.name} ${action}`);
+
+    // Move to next player
+    monopolyState.currentPlayerIndex = (monopolyState.currentPlayerIndex + 1) % monopolyState.players.length;
+    monopolyState.roundNumber++;
+
+    // Update state and notify UI
+    this.onGameUpdate(monopolyState, new GameEntry(monopolyState.roundNumber, currentPlayer.name, 'TURN_COMPLETE', `Next player's turn: ${monopolyState.players[monopolyState.currentPlayerIndex].name}`));
   }
 
   getGameState(): GameState {
@@ -919,12 +1001,16 @@ export class MonopolyGameEngine extends BaseGameEngine {
   }
 
   resetGame(): void {
+    this.stopGameLoop();
     this.gameState = this.initializeGameState();
     this.logEntry('MONOPOLY_RESET', 'Monopoly game has been reset');
   }
 
   adjustSpeed(speed: number): void {
-    // Implement speed adjustment logic
+    if (this.gameInterval) {
+      this.stopGameLoop();
+      this.startGameLoop(speed);
+    }
   }
 }
 
