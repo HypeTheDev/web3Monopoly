@@ -1,0 +1,366 @@
+.monopoly-page {
+  min-height: 100vh;
+  background: var(--background-color, #000000);
+  color: var(--text-color, #00ff00);
+  font-family: 'Courier New', monospace;
+}
+
+/* Game Header */
+.game-header {
+  background: var(--panel-color, #111111);
+  border-bottom: 2px solid var(--border-color, #333333);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-title h1 {
+  color: var(--primary-color, #00ff00);
+  font-size: 2rem;
+  margin: 0;
+  text-shadow: 0 0 10px var(--primary-color, #00ff00);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid var(--primary-color, #00ff00);
+  color: var(--primary-color, #00ff00);
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: var(--primary-color, #00ff00);
+  color: #000;
+}
+
+.game-mode-indicator {
+  color: var(--secondary-color, #ffff00);
+  font-weight: bold;
+}
+
+.action-btn {
+  background: var(--primary-color, #00ff00);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background: #00cc00;
+  transform: translateY(-2px);
+}
+
+.action-btn.danger {
+  background: #ff4444;
+  color: #fff;
+}
+
+.action-btn.danger:hover {
+  background: #cc3333;
+}
+
+.settings-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color, #333);
+  color: var(--text-color, #00ff00);
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s ease;
+}
+
+.settings-button:hover {
+  border-color: var(--primary-color, #00ff00);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* AI Status Panel */
+.ai-status-panel {
+  background: var(--panel-color, #111111);
+  border-bottom: 2px solid var(--border-color, #333333);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-indicators span {
+  color: var(--secondary-color, #ffff00);
+  margin-right: 20px;
+  font-size: 0.9rem;
+}
+
+.ai-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.speed-selector {
+  background: var(--background-color, #000);
+  color: var(--text-color, #00ff00);
+  border: 1px solid var(--border-color, #333);
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+/* Game Main */
+.game-main {
+  flex: 1;
+  padding: 20px;
+}
+
+.demo-container {
+  display: flex;
+  gap: 20px;
+  height: calc(100vh - 200px);
+}
+
+/* Left Panel */
+.game-left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.music-panel,
+.game-state-panel {
+  background: var(--panel-color, #111111);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.game-state-panel h4 {
+  color: var(--primary-color, #00ff00);
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.state-info div {
+  color: var(--text-color, #00ff00);
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+/* Center Panel - Game Board */
+.game-center-panel {
+  flex: 3;
+  background: var(--panel-color, #111111);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 5px;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-board h3 {
+  color: var(--secondary-color, #ffff00);
+  text-align: center;
+}
+
+/* Right Panel - Game Status Display */
+.game-status-display {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--panel-color, #111111);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 5px;
+  padding: 15px;
+  min-width: 200px;
+}
+
+.status-line {
+  color: var(--text-color, #00ff00);
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+/* Right Panel - Live Logs */
+.game-right-panel {
+  flex: 2;
+  background: var(--panel-color, #111111);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 5px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-right-panel.hidden {
+  display: none;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--border-color, #333);
+  padding-bottom: 10px;
+}
+
+.logs-header h4 {
+  color: var(--primary-color, #00ff00);
+  margin: 0;
+}
+
+.clear-logs-btn {
+  background: transparent;
+  border: 1px solid var(--secondary-color, #ffff00);
+  color: var(--secondary-color, #ffff00);
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+}
+
+.clear-logs-btn:hover {
+  background: var(--secondary-color, #ffff00);
+  color: #000;
+}
+
+.logs-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.log-entry {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+}
+
+.log-turn {
+  color: var(--secondary-color, #ffff00);
+  font-size: 0.8rem;
+}
+
+.log-player {
+  color: var(--primary-color, #00ff00);
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.log-action {
+  color: var(--text-color, #cccccc);
+  font-size: 0.8rem;
+}
+
+.no-logs {
+  color: var(--text-color, #666);
+  text-align: center;
+  padding: 20px;
+}
+
+.data-summary h5 {
+  color: var(--secondary-color, #ffff00);
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.summary-data div {
+  color: var(--text-color, #cccccc);
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+}
+
+/* Footer */
+.terminal-footer {
+  background: var(--panel-color, #111111);
+  border-top: 2px solid var(--border-color, #333333);
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.network-status {
+  color: var(--text-color, #666);
+  font-size: 0.85rem;
+}
+
+/* Matrix Rain */
+.matrix-rain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .demo-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .game-center-panel {
+    order: -1;
+    min-height: 400px;
+  }
+
+  .game-right-panel {
+    flex: none;
+    height: 300px;
+  }
+
+  .game-status-display {
+    position: static;
+    transform: none;
+    order: 1;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-main {
+    padding: 10px;
+  }
+
+  .game-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .header-controls {
+    flex-wrap: wrap;
+  }
+
+  .ai-status-panel {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .ai-controls {
+    justify-content: center;
+  }
+}
