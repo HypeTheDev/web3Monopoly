@@ -838,10 +838,7 @@ export class SpadesGameEngine extends BaseGameEngine {
       currentPlayerIndex: 0,
       gameStatus: 'waiting',
       roundNumber: 1,
-      teams: {
-        team1: [spadesPlayers[0], spadesPlayers[2]],
-        team2: [spadesPlayers[1], spadesPlayers[3]]
-      },
+      teams: { team1: ['blade-master', 'trick-runner'], team2: ['shadow-dealer', 'void-nil'] },
       currentDealer: 0,
       currentTrick: [],
       bidPhase: false,
@@ -877,7 +874,6 @@ export class SpadesGameEngine extends BaseGameEngine {
     // Implement speed adjustment logic
   }
 }
-
 
 // Game Engine for AI Demo
 export class MonopolyGameEngine extends BaseGameEngine {
@@ -925,56 +921,6 @@ export class MonopolyGameEngine extends BaseGameEngine {
   resetGame(): void {
     this.gameState = this.initializeGameState();
     this.logEntry('MONOPOLY_RESET', 'Monopoly game has been reset');
-  }
-
-  adjustSpeed(speed: number): void {
-    // Implement speed adjustment logic
-  }
-}
-
-// Spades Game Engine - 2v2 variant inspired by Balatro
-export class SpadesGameEngine extends BaseGameEngine {
-  constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
-    super(onGameUpdate);
-  }
-
-  initializeGameState(): GameState {
-    return {
-      gameMode: GameMode.SPADES,
-      players: [],
-      currentPlayerIndex: 0,
-      gameStatus: 'waiting',
-      roundNumber: 1,
-      teams: { team1: [], team2: [] },
-      currentDealer: 0,
-      currentTrick: [],
-      bidPhase: false,
-      playPhase: false,
-      bids: {},
-      tricks: {},
-      spadesBroken: false,
-      deck: [],
-      hands: {},
-      trickHistory: [],
-      score: { team1: 0, team2: 0 }
-    };
-  }
-
-  startGameLoop(speed: number): void {
-    this.logEntry('SPADES_START', 'Spades game loop started');
-  }
-
-  stopGameLoop(): void {
-    this.logEntry('SPADES_STOP', 'Spades game loop stopped');
-  }
-
-  getGameState(): GameState {
-    return this.gameState;
-  }
-
-  resetGame(): void {
-    this.gameState = this.initializeGameState();
-    this.logEntry('SPADES_RESET', 'Spades game has been reset');
   }
 
   adjustSpeed(speed: number): void {
