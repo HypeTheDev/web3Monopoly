@@ -27,7 +27,7 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
   const [showWorldNews, setShowWorldNews] = useState(false);
 
   const [terminalTheme, setTerminalTheme] = useState<TerminalTheme>({
-    primaryColor: '#9900ff',
+    primaryColor: '#00ff00',
     secondaryColor: '#ffff00',
     backgroundColor: '#000000',
     panelColor: '#111111',
@@ -188,22 +188,82 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
       {/* Main Game Area */}
       <main className="game-main">
         <div className="dba-container">
-          {gameState?.gameMode === 'dba' && 'league' in gameState && gameState.league ? (
-            <DBADashboard
-              gameState={gameState as DBAGameState}
-              onViewChange={handleViewChange}
-              onAdvanceWeek={handleWeekAdvance}
-            />
-          ) : (
-            <div className="loading-dba">
-              <h3>DBA League Loading...</h3>
-              <div className="loading-status">
-                {gameState?.gameMode === 'dba' ? 'Initializing League...' : 'Game Mode Switch Required'}
+          {/* Left Panel - Player Stats */}
+          <div className="dba-stats-panel">
+            <div className="stats-section">
+              <h4>CURRENT_TEAM</h4>
+              {gameState && 'league' in gameState && gameState.league ? (
+                <>
+                  <div className="stat-item">
+                    <span>TEAM:</span>
+                    <span className="stat-value">{gameState.league.standings.find(t => t.id === gameState.currentTeam)?.name || 'NONE'}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span>RANK:</span>
+                    <span className="stat-value">#{gameState.league.standings.findIndex(t => t.id === gameState.currentTeam) + 1}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span>RECORD:</span>
+                    <span className="stat-value">{gameState.league.standings.find(t => t.id === gameState.currentTeam)?.record.wins}-{gameState.league.standings.find(t => t.id === gameState.currentTeam)?.record.losses}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="stat-item">INITIALIZING...</div>
+              )}
+            </div>
+
+            <div className="stats-section">
+              <h4>GAME_STATUS</h4>
+              <div className="stat-item">
+                <span>ENGINE:</span>
+                <span className="stat-value">{isGameRunning ? 'RUNNING' : 'STOPPED'}</span>
+              </div>
+              <div className="stat-item">
+                <span>WEEK:</span>
+                <span className="stat-value">{gameState && 'league' in gameState && gameState.league ? gameState.league.currentWeek || 0 : 0}</span>
+              </div>
+              <div className="stat-item">
+                <span>TEAMS:</span>
+                <span className="stat-value">{gameState && 'league' in gameState && gameState.league ? gameState.league.standings.length : 0}</span>
               </div>
             </div>
-          )}
 
-          {/* Live Logs */}
+            <div className="stats-section">
+              <h4>GAME_SETTINGS</h4>
+              <div className="stat-item">
+                <span>SPEED:</span>
+                <span className="stat-value">{gameSpeed/1000}s</span>
+              </div>
+              <div className="stat-item">
+                <span>LOGS:</span>
+                <span className="stat-value">{showLogs ? 'ON' : 'OFF'}</span>
+              </div>
+              <div className="stat-item">
+                <span>EVENTS:</span>
+                <span className="stat-value">{recentLogs.length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Center Panel - DBA Dashboard */}
+          <div className="dba-dashboard-center">
+            {gameState?.gameMode === 'dba' && 'league' in gameState && gameState.league ? (
+              <DBADashboard
+                gameState={gameState as DBAGameState}
+                onViewChange={handleViewChange}
+                onAdvanceWeek={handleWeekAdvance}
+              />
+            ) : (
+              <div className="loading-dba">
+                <h3>DBA League Loading...</h3>
+                <div className="loading-status">
+                  {gameState?.gameMode === 'dba' ? 'Initializing League...' : 'Game Mode Switch Required'}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel - Live Logs */}
           <div className={`dba-logs-panel ${showLogs ? '' : 'hidden'}`}>
             <div className="logs-header">
               <h4>DBA_GAME_LOGS</h4>
@@ -231,7 +291,7 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
 
             {/* DBA Stats */}
             <div className="data-summary">
-              <h5>STATS</h5>
+              <h5>LIVE_STATS</h5>
               <div className="summary-data">
                 <div>EVENTS: {recentLogs.length}</div>
                 <div>GAMES: {recentLogs.filter(l => l.actionType === 'SCORE_UPDATE').length}</div>
@@ -246,7 +306,7 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
             </div>
           </div>
 
-          {/* DBA Game Status Display */}
+          {/* DBA Game Status Display - Repositioned */}
           <div className="dba-status-display">
             <div className="status-line">
               CURRENT_SEASON: {gameState && 'league' in gameState && gameState.league ? gameState.league.season || 'UNKNOWN' : 'NONE'}

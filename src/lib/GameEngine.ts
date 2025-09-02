@@ -1,4 +1,4 @@
-import { Player, Property, GameState, ChanceCard, GameStats, GameMode, MonopolyGameState, SpadesCard, SpadesGameState, DBAGameState, NBAPlayer, DBATeam, DBALeague, LeagueRules, DBAGame, NBAStatLine, DBAGameResult, PlayerRankings, GameEntry } from '../types/GameTypes';
+import { GameState, GameMode, MonopolyGameState, SpadesCard, SpadesGameState, DBAGameState, NBAPlayer, DBATeam, DBALeague, LeagueRules, DBAGame, NBAStatLine, DBAGameResult, PlayerRankings, GameEntry } from '../types/GameTypes';
 
 // Base Game Engine Interface
 export abstract class BaseGameEngine {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DBAGameState, DBATeam, NBAPlayer, DBAGame, DBAGameResult } from '../types/GameTypes';
+import WorldNews from './WorldNews';
 import './DBADashboard.css';
 
 interface DBADashboardProps {
@@ -13,6 +14,7 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
   onViewChange,
   onAdvanceWeek
 }) => {
+  const [showWorldNews, setShowWorldNews] = useState(false);
   const currentTeam = gameState.league.standings.find(t => t.id === gameState.currentTeam)!;
   const currentWeekGames = gameState.league.schedule.filter(g =>
     g.status === 'completed' &&
@@ -186,23 +188,64 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
               </div>
             </div>
 
-            {/* News/Events */}
+            {/* Network Broadcast - News/Events */}
             <div className="dashboard-section">
-              <h3>LEAGUE_NEWS</h3>
-              <div className="news-feed">
-                <div className="news-item">
-                  <span className="news-time">2H AGO</span>
-                  <span>Free Agent Market Update: 15 new players available</span>
-                </div>
-                <div className="news-item">
-                  <span className="news-time">4H AGO</span>
-                  <span>Trade Deadline: {Math.ceil((gameState.leagueRules.settings.tradeDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days remaining</span>
-                </div>
-                <div className="news-item">
-                  <span className="news-time">6H AGO</span>
-                  <span>Weekly Draft: Pick #1 goes to {gameState.league.draftOrder[0]}</span>
+              <div className="broadcast-header">
+                <h3>NETWORK_BROADCAST</h3>
+                <div className="broadcast-status">
+                  <span className="broadcast-indicator">
+                    {showWorldNews ? '📰 WORLD_NEWS' : '🏀 LEAGUE_NEWS'}
+                  </span>
+                  <button
+                    className="broadcast-toggle"
+                    onClick={() => setShowWorldNews(!showWorldNews)}
+                  >
+                    {showWorldNews ? 'SWITCH_TO_LEAGUE' : 'SWITCH_TO_WORLD'}
+                  </button>
                 </div>
               </div>
+
+              {showWorldNews ? (
+                <div className="world-news-broadcast">
+                  <div className="broadcast-notice">
+                    <span className="live-indicator">🔴 LIVE</span>
+                    <span>World News Feed - Auto Updates Every 5 Minutes</span>
+                  </div>
+                  <WorldNews
+                    isVisible={true}
+                    onClose={() => setShowWorldNews(false)}
+                  />
+                </div>
+              ) : (
+                <div className="league-news-feed">
+                  <div className="broadcast-notice">
+                    <span className="live-indicator">🔴 LIVE</span>
+                    <span>League Updates - Stay informed with important league information</span>
+                  </div>
+                  <div className="news-feed">
+                    <div className="news-item">
+                      <span className="news-time">2H AGO</span>
+                      <span>Free Agent Market Update: 15 new players available</span>
+                    </div>
+                    <div className="news-item">
+                      <span className="news-time">4H AGO</span>
+                      <span>Trade Deadline: {Math.ceil((gameState.leagueRules.settings.tradeDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days remaining</span>
+                    </div>
+                    <div className="news-item">
+                      <span className="news-time">6H AGO</span>
+                      <span>Weekly Draft: Pick #1 goes to {gameState.league.draftOrder[0]}</span>
+                    </div>
+                    <div className="news-item">
+                      <span className="news-time">8H AGO</span>
+                      <span>Season Progress: Week {gameState.league.currentWeek} of 17 completed</span>
+                    </div>
+                    <div className="news-item">
+                      <span className="news-time">12H AGO</span>
+                      <span>League Standings: {currentTeam.name} ranks #{gameState.league.standings.findIndex(t => t.id === currentTeam.id) + 1}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}

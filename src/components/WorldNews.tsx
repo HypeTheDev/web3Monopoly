@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './WorldNews.css';
 
 interface NewsArticle {
@@ -26,13 +26,7 @@ const WorldNews: React.FC<WorldNewsProps> = ({ isVisible, onClose }) => {
   const NEWS_API_URL = 'https://newsapi.org/v2/top-headlines';
   const API_KEY = 'YOUR_NEWSAPI_KEY_HERE'; // Replace with actual API key
 
-  useEffect(() => {
-    if (isVisible && news.length === 0) {
-      fetchNews();
-    }
-  }, [isVisible, news.length]);
-
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     if (!API_KEY || API_KEY === 'YOUR_NEWSAPI_KEY_HERE') {
       // Fallback demo news if no API key
       loadDemoNews();
@@ -53,7 +47,7 @@ const WorldNews: React.FC<WorldNewsProps> = ({ isVisible, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_KEY]);
 
   const loadDemoNews = () => {
     const demoNews: NewsArticle[] = [
@@ -95,6 +89,22 @@ const WorldNews: React.FC<WorldNewsProps> = ({ isVisible, onClose }) => {
     ];
     setNews(demoNews);
   };
+
+  // Auto-update news every 5 minutes
+  useEffect(() => {
+    if (isVisible && news.length === 0) {
+      fetchNews();
+    }
+
+    // Set up auto-refresh interval (5 minutes)
+    const autoRefreshInterval = setInterval(() => {
+      if (isVisible) {
+        fetchNews();
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(autoRefreshInterval);
+  }, [isVisible, news.length, fetchNews]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -148,7 +158,7 @@ const WorldNews: React.FC<WorldNewsProps> = ({ isVisible, onClose }) => {
             {loading ? 'REFRESHING...' : 'REFRESH_NEWS'}
           </button>
           <div className="news-info">
-            STORIES: {news.length} | AUTO_UPDATE: 5_MIN
+            STORIES: {news.length} | AUTO_UPDATE: ON | NEXT: <span className="next-update">⏰</span>
           </div>
         </div>
       </div>
