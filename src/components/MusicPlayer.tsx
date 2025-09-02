@@ -29,16 +29,8 @@ const MusicPlayer: React.FC = () => {
     setCurrentTrack(0);
   }, [currentSource, tracksBySource]);
 
-  // Auto-play on component load
-  useEffect(() => {
-    if (playlist.length > 0) {
-      // Small delay to ensure component is fully mounted
-      const timer = setTimeout(() => {
-        setIsPlaying(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [playlist]);
+  // Removed auto-play to comply with browser policies
+  // User must interact with play button to start music
 
   useEffect(() => {
     if (audioRef.current) {
