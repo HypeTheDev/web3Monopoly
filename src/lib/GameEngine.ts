@@ -38,16 +38,26 @@ export abstract class BaseGameEngine {
 
 // DBA Game Engine - Digital Basketball Association
 export class DBAEngine extends BaseGameEngine {
-  private aiTeams: DBATeam[];
-  private nbaPlayersData: NBAPlayer[];
-  private currentWeek: number = 1;
-  private leagueRules: LeagueRules;
+  private aiTeams: DBATeam[] = [];
+  private nbaPlayersData: NBAPlayer[] = [];
+  private leagueRules!: LeagueRules;
 
   constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
     super(onGameUpdate);
-    this.nbaPlayersData = this.generateNBAPlayers();
-    this.leagueRules = this.getDefaultLeagueRules();
-    this.aiTeams = [];
+    this.initializeEngineData();
+  }
+
+  private initializeEngineData(): void {
+    try {
+      this.nbaPlayersData = this.generateNBAPlayers();
+      this.leagueRules = this.getDefaultLeagueRules();
+      this.aiTeams = [];
+    } catch (error) {
+      console.error('DBA Engine initialization error:', error);
+      // Provide fallback data
+      this.nbaPlayersData = [];
+      this.aiTeams = [];
+    }
   }
 
   initializeGameState(): GameState {
