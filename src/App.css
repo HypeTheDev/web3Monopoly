@@ -621,9 +621,83 @@ html, body {
 
 /* Ultra-wide screens */
 @media (min-width: 1440px) {
-  .App {
-    max-width: 1400px;
+.App {
+  text-align: center;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Persistent Music Player - slim horizontal bar at bottom */
+.persistent-music-player {
+  position: fixed;
+  bottom: 40px; /* Very slim above copyright */
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.persistent-music-player .music-player-container {
+  background: rgba(0, 15, 0, 0.9);
+  border: 1px solid #00ff00;
+  border-radius: 15px 15px 0 0;
+  padding: 6px 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+/* Ensure music player doesn't interfere with game interactions */
+.game-main,
+.homepage {
+  padding-bottom: 100px; /* Space for bottom music player */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .persistent-music-player {
+    padding: 0 15px;
+    bottom: 80px;
   }
+
+  .persistent-music-player .music-player-container {
+    padding: 10px 15px;
+    max-width: none;
+    width: calc(100vw - 30px);
+    gap: 10px;
+  }
+
+  .game-main,
+  .homepage {
+    padding-bottom: 110px;
+  }
+}
+
+@media (max-width: 480px) {
+  .persistent-music-player {
+    bottom: 85px;
+    padding: 0 10px;
+  }
+
+  .persistent-music-player .music-player-container {
+    padding: 8px 12px;
+    width: calc(100vw - 20px);
+    gap: 8px;
+  }
+
+  .game-main,
+  .homepage {
+    padding-bottom: 120px;
+  }
+}
 
   .game-left-panel,
   .game-right-panel {

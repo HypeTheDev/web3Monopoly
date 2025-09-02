@@ -379,3 +379,215 @@
   outline: 2px solid var(--primary-color, #00ff00);
   outline-offset: 2px;
 }
+
+/* Compact Music Player Styles for Bottom Bar */
+.music-player-container {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  max-width: none;
+}
+
+.player-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+}
+
+.radio-player {
+  height: auto;
+  min-height: 40px;
+  background: none;
+}
+
+.radio-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.radio-wave {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.radio-wave.active::before {
+  width: 44px;
+  height: 44px;
+}
+
+.radio-wave.active::after {
+  width: 56px;
+  height: 56px;
+}
+
+.radio-freq {
+  font-size: 0.9rem;
+  color: var(--primary-color, #00ff00);
+}
+
+.compact-player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 15px;
+  gap: 10px;
+  background: rgba(0, 15, 0, 0.9);
+  border-top: 1px solid #00ff00;
+}
+
+.track-info-compact {
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.track-title-compact {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--primary-color, #00ff00);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.control-buttons-compact {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.control-btn-compact {
+  background: rgba(0, 20, 0, 0.8);
+  border: 1px solid var(--primary-color, #00ff00);
+  color: var(--primary-color, #00ff00);
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.control-btn-compact:hover:not(:disabled) {
+  background: var(--primary-color, #00ff00);
+  color: #000000;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+}
+
+.control-btn-compact:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.volume-control-compact {
+  flex: 1;
+  max-width: 120px;
+}
+
+.volume-slider-compact {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: 1px solid var(--primary-color, #00ff00);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.volume-slider-compact::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--primary-color, #00ff00);
+  cursor: pointer;
+  border: 1px solid #000000;
+}
+
+.music-status-compact {
+  min-width: 24px;
+  text-align: center;
+  font-size: 1rem;
+  margin-left: 5px;
+}
+
+.loading {
+  height: auto;
+  padding: 10px;
+  color: var(--secondary-color, #ffff00);
+  font-size: 0.8rem;
+}
+
+.error {
+  height: auto;
+  padding: 10px;
+  color: #ff4444;
+  font-size: 0.8rem;
+}
+
+/* Responsive for compact player */
+@media (max-width: 768px) {
+  .compact-player-controls {
+    padding: 4px 10px;
+    gap: 6px;
+  }
+
+  .track-info-compact {
+    min-width: 80px;
+  }
+
+  .track-title-compact {
+    font-size: 0.8rem;
+    max-width: 80px;
+  }
+
+  .volume-control-compact {
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .compact-player-controls {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .track-info-compact {
+    order: 1;
+    width: 100%;
+    min-width: auto;
+    text-align: center;
+  }
+
+  .track-title-compact {
+    font-size: 0.7rem;
+    max-width: none;
+  }
+
+  .control-buttons-compact {
+    order: 2;
+    gap: 3px;
+  }
+
+  .volume-control-compact {
+    order: 3;
+    flex: 1;
+    min-width: 60px;
+  }
+
+  .music-status-compact {
+    order: 4;
+  }
+}

@@ -97,57 +97,42 @@ const MusicPlayer: React.FC = () => {
 
   return (
     <div className="music-player-container">
-      <div className="music-header">
-        <h3>TERMINAL MUSIC</h3>
-        <div className="source-selector">
-          {Object.keys(tracksBySource).map(source => (
-            <button
-              key={source}
-              className={`source-btn ${currentSource === source ? 'active' : ''}`}
-              onClick={() => changeSource('radio')}
-            >
-              {source.toUpperCase()}
-            </button>
-          ))}
+      <div className="player-display">
+        {renderPlayer()}
+      </div>
+
+      <div className="compact-player-controls">
+        <div className="track-info-compact">
+          {playlist[currentTrack] && (
+            <div className="track-title-compact">{playlist[currentTrack].title}</div>
+          )}
         </div>
-      </div>
 
-      <div className="track-info">
-        {playlist[currentTrack] && (
-          <>
-            <div className="track-title">{playlist[currentTrack].title}</div>
-            <div className="track-artist">by {playlist[currentTrack].artist}</div>
-          </>
-        )}
-      </div>
-
-      <div className="player-controls">
-        <div className="control-buttons">
+        <div className="control-buttons-compact">
           <button
-            className="control-btn"
+            className="control-btn-compact"
             onClick={togglePlay}
             disabled={playlist.length === 0}
           >
-            {!isPlaying ? '[PLAY]' : '[PAUSE]'}
+            {!isPlaying ? '▶' : '⏸'}
           </button>
           <button
-            className="control-btn"
+            className="control-btn-compact"
             onClick={prevTrack}
             disabled={playlist.length <= 1}
           >
-            {'<<'}
+            {'◀'}
           </button>
           <button
-            className="control-btn"
+            className="control-btn-compact"
             onClick={nextTrack}
             disabled={playlist.length <= 1}
           >
-            {'>>'}
+            {'▶'}
           </button>
         </div>
 
-        <div className="volume-control">
-          <span>VOL:</span>
+        <div className="volume-control-compact">
           <input
             type="range"
             min="0"
@@ -160,23 +145,12 @@ const MusicPlayer: React.FC = () => {
                 audioRef.current.volume = newVolume / 100;
               }
             }}
-            className="volume-slider"
+            className="volume-slider-compact"
           />
-          <span>{volume}%</span>
         </div>
-      </div>
 
-      <div className="player-display">
-        {renderPlayer()}
-      </div>
-
-      <div className="music-footer">
-        <div className="playlist-info">
-          <span>TRACK {currentTrack + 1} / {playlist.length}</span>
-          <span className="source-indicator">[{currentSource.toUpperCase()} MODE]</span>
-        </div>
-        <div className="music-status">
-          {isPlaying ? '🔊 PLAYING' : '🔇 PAUSED'}
+        <div className="music-status-compact">
+          {isPlaying ? '🔊' : '🔇'}
         </div>
       </div>
     </div>

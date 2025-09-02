@@ -4,9 +4,7 @@ import './DBAPage.css';
 
 // Game components
 import DBADashboard from '../../components/DBADashboard';
-import MusicPlayer from '../../components/MusicPlayer';
 import WorldNews from '../../components/WorldNews';
-import AdBox from '../../components/AdBox';
 
 // Game Engine
 import { DBAEngine } from '../../lib/GameEngine';
@@ -40,12 +38,20 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
   // Initialize DBA game engine
   useEffect(() => {
     if (!gameEngine) {
-      const engine = new DBAEngine((gameState: GameState, logEntry: GameEntry) => {
-        setGameState(gameState);
-        setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
-      });
-      setGameEngine(engine);
-      setGameState(engine.getGameState());
+      console.log('DBA: Initializing engine...');
+      try {
+        const engine = new DBAEngine((gameState: GameState, logEntry: GameEntry) => {
+          setGameState(gameState);
+          setRecentLogs(prev => [logEntry, ...prev.slice(0, 19)]);
+        });
+        setGameEngine(engine);
+        const initialState = engine.getGameState();
+        console.log('DBA: Got initial state:', initialState);
+        setGameState(initialState);
+        console.log('DBA: Engine initialized successfully');
+      } catch (error) {
+        console.error('DBA: Failed to initialize engine:', error);
+      }
     }
   }, [gameEngine]);
 
@@ -267,9 +273,6 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
 
       {/* Matrix background effect */}
       <MatrixRain />
-
-      {/* Ad Box - slideshow in bottom right */}
-      <AdBox />
 
       {/* Footer - simplified */}
       <footer className="terminal-footer">

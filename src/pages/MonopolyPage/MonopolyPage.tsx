@@ -5,10 +5,8 @@ import './MonopolyPage.css';
 // Game components
 import GameBoard from '../../components/GameBoard';
 import PlayerInfo from '../../components/PlayerInfo';
-import MusicPlayer from '../../components/MusicPlayer';
 import PropertyModal from '../../components/PropertyModal';
 import WorldNews from '../../components/WorldNews';
-import AdBox from '../../components/AdBox';
 
 // Game Engine
 import { MonopolyGameEngine } from '../../lib/GameEngine';
@@ -179,10 +177,7 @@ const MonopolyPage: React.FC<MonopolyPageProps> = ({ onPageChange }) => {
               />
             )}
 
-            {/* Music Player */}
-            <div className="music-panel">
-              <MusicPlayer />
-            </div>
+            {/* Music Player moved to HomePage for space efficiency */}
 
             {/* Current Game State */}
             <div className="game-state-panel">
@@ -296,11 +291,8 @@ const MonopolyPage: React.FC<MonopolyPageProps> = ({ onPageChange }) => {
         />
       )}
 
-      {/* Matrix background effect */}
+            {/* Matrix background effect */}
       <MatrixRain />
-
-      {/* Ad Box - slideshow in bottom right */}
-      <AdBox />
 
       {/* Footer - simplified */}
       <footer className="terminal-footer">
