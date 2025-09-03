@@ -5,6 +5,8 @@ import './HomePage.css';
 // Import shared components
 import AdBox from '../../components/AdBox';
 import ColorPicker from '../../components/ColorPicker';
+import LiveNewsFeed from '../../components/LiveNewsFeed';
+import { NewsCategory } from '../../components/LiveNewsFeed';
 
 interface HomePageProps {
   onPageChange: (page: PageType) => void;
@@ -13,6 +15,7 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showAdBox, setShowAdBox] = useState(true);
+  const [activeNewsCategory, setActiveNewsCategory] = useState<NewsCategory>(NewsCategory.BREAKING);
 
   const [terminalTheme, setTerminalTheme] = useState({
     primaryColor: '#00ff00',
@@ -72,9 +75,6 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
               </div>
             </div>
             <div className="panel-content">
-              <h2 className="hero-title">BKM</h2>
-              <p className="hero-subtitle">Choose Your Game</p>
-
               <div className="game-grid">
                 <div className="game-card" onClick={() => onPageChange(PageType.MONOPOLY)}>
                   <div className="game-icon">🏠</div>
@@ -92,7 +92,7 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
 
                 <div className="game-card featured" onClick={() => onPageChange(PageType.MESSENGER)}>
                   <div className="game-icon">🔐</div>
-                  <h3>ALBERTCRYPTO</h3>
+                  <h3>AbC</h3>
                   <p>Encrypted P2P messaging terminal</p>
                   <button className="game-btn">LAUNCH</button>
                 </div>
@@ -114,20 +114,38 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
             </div>
           </div>
 
-          {/* Right Panel - Ad Box */}
-          <div className="terminal-panel ad-panel">
-            <div className="panel-header">
-              <h3>📡 NETWORK BROADCAST</h3>
-              <button
-                className="hide-ad-btn"
-                onClick={() => setShowAdBox(!showAdBox)}
-                title={showAdBox ? "Hide Ad Box" : "Show Ad Box"}
-              >
-                {showAdBox ? "HIDE ▲" : "SHOW ▼"}
-              </button>
+          {/* Right Panel Container */}
+          <div className="right-panel-container">
+            {/* Live News Feed */}
+            <div className="terminal-panel news-panel">
+              <div className="panel-header">
+                <h3>📡 NETWORK BROADCAST</h3>
+              </div>
+              <div className="panel-content">
+                <LiveNewsFeed 
+                  activeCategory={activeNewsCategory}
+                  onCategoryChange={setActiveNewsCategory}
+                />
+              </div>
             </div>
-            <div className={`panel-content ${showAdBox ? '' : 'hidden'}`}>
-              <AdBox />
+
+
+
+            {/* Ad Box */}
+            <div className="terminal-panel ad-panel">
+              <div className="panel-header">
+                <h3>🎯 SPONSORED CONTENT</h3>
+                <button
+                  className="ad-close-btn"
+                  onClick={() => setShowAdBox(!showAdBox)}
+                  title={showAdBox ? "Close Ads" : "Show Ads"}
+                >
+                  {showAdBox ? "Ad ✕" : "Show"}
+                </button>
+              </div>
+              <div className={`panel-content ${showAdBox ? '' : 'hidden'}`}>
+                <AdBox />
+              </div>
             </div>
           </div>
 

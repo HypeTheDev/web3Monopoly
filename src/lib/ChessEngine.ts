@@ -1,4 +1,4 @@
-import { GameState, GameMode, ChessGameState, ChessPiece, ChessMove, GameEntry } from '../types/GameTypes';
+import { GameState, GameMode, ChessGameState, ChessPiece, GameEntry } from '../types/GameTypes';
 
 export class ChessGameEngine {
   private gameState: ChessGameState;

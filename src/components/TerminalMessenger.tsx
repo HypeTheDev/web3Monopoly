@@ -34,6 +34,28 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
   // Matrix rain effect
   const [matrixChars, setMatrixChars] = useState<Array<{id: number, char: string, x: number, delay: number}>>([]);
 
+  // Handle new messages
+  const handleNewMessage = useCallback((message: P2PMessage) => {
+    setMessages(prev => [...prev, message]);
+  }, []);
+
+  // Handle connection status changes
+  const handleConnectionChange = useCallback((status: ConnectionStatus) => {
+    setConnectionStatus(status);
+  }, []);
+
+  // Handle peer updates
+  const handlePeerUpdate = useCallback((peer: PeerInfo) => {
+    setPeers(prev => {
+      const existing = prev.find(p => p.id === peer.id);
+      if (existing) {
+        return prev.map(p => p.id === peer.id ? peer : p);
+      } else {
+        return [...prev, peer];
+      }
+    });
+  }, []);
+
   // Initialize messaging service
   useEffect(() => {
     const initializeService = async () => {
@@ -63,28 +85,6 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
       messagingService.cleanup();
     };
   }, [messagingService, handleNewMessage, handleConnectionChange, handlePeerUpdate]);
-
-  // Handle new messages
-  const handleNewMessage = useCallback((message: P2PMessage) => {
-    setMessages(prev => [...prev, message]);
-  }, []);
-
-  // Handle connection status changes
-  const handleConnectionChange = useCallback((status: ConnectionStatus) => {
-    setConnectionStatus(status);
-  }, []);
-
-  // Handle peer updates
-  const handlePeerUpdate = useCallback((peer: PeerInfo) => {
-    setPeers(prev => {
-      const existing = prev.find(p => p.id === peer.id);
-      if (existing) {
-        return prev.map(p => p.id === peer.id ? peer : p);
-      } else {
-        return [...prev, peer];
-      }
-    });
-  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -216,7 +216,7 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
         <div className="terminal-header">
           <div className="terminal-title">
             <span className="status-indicator status-connecting"></span>
-            AlbertCrypto Terminal - Initializing...
+            AbC Terminal - Initializing...
           </div>
         </div>
         <div className="terminal-body">
@@ -252,7 +252,7 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
       <div className="terminal-header">
         <div className="terminal-title">
           <span className={`status-indicator ${getStatusClass()}`}></span>
-          AlbertCrypto Terminal v1.0
+          AbC Terminal v1.0
         </div>
         <div className="connection-info">
           {connectionStatus.peerId && (
