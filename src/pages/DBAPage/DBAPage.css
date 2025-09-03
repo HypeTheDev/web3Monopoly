@@ -131,22 +131,58 @@
 
 .dba-container {
   display: flex;
+  flex-direction: column;
   gap: 15px;
-  height: calc(100vh - 180px);
+  min-height: calc(100vh - 180px);
   position: relative;
+}
+
+/* Tablet layout */
+@media (min-width: 768px) {
+  .dba-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas:
+      "center center"
+      "stats logs";
+  }
+}
+
+/* Desktop layout */
+@media (min-width: 1200px) {
+  .dba-container {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 180px);
+    grid-template-areas: none;
+  }
 }
 
 /* Left Panel - Player Stats and Game Info */
 .dba-stats-panel {
-  flex: 1.5;
   background: var(--panel-color, #111111);
   border: 1px solid var(--border-color, #333);
   border-radius: 5px;
   padding: 15px;
   display: flex;
   flex-direction: column;
-  max-height: 100%;
+  min-height: 300px;
   overflow-y: auto;
+  order: 2;
+}
+
+@media (min-width: 768px) {
+  .dba-stats-panel {
+    grid-area: stats;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dba-stats-panel {
+    flex: 1.5;
+    max-height: 100%;
+    order: 0;
+  }
 }
 
 .stats-section {
@@ -180,7 +216,6 @@
 
 /* Center Panel - DBA Dashboard */
 .dba-dashboard-center {
-  flex: 3.5;
   background: var(--panel-color, #111111);
   border: 1px solid var(--border-color, #333);
   border-radius: 5px;
@@ -188,8 +223,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  max-height: 100%;
+  min-height: 400px;
   overflow-y: auto;
+  order: 1;
+}
+
+@media (min-width: 768px) {
+  .dba-dashboard-center {
+    grid-area: center;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dba-dashboard-center {
+    flex: 3.5;
+    max-height: 100%;
+    order: 0;
+  }
 }
 
 .loading-dba h3 {
@@ -206,15 +256,29 @@
 
 /* Right Panel - Live Logs */
 .dba-logs-panel {
-  flex: 1.5;
   background: var(--panel-color, #111111);
   border: 1px solid var(--border-color, #333);
   border-radius: 5px;
   padding: 15px;
   display: flex;
   flex-direction: column;
-  max-height: 100%;
+  min-height: 300px;
   overflow-y: auto;
+  order: 3;
+}
+
+@media (min-width: 768px) {
+  .dba-logs-panel {
+    grid-area: logs;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dba-logs-panel {
+    flex: 1.5;
+    max-height: 100%;
+    order: 0;
+  }
 }
 
 .dba-logs-panel.hidden {
@@ -342,28 +406,12 @@
   z-index: -1;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .dba-container {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .dba-container > div:first-child {
-    order: -1;
-    min-height: 400px;
-  }
-
-  .dba-logs-panel {
-    flex: none;
-    height: 300px;
-  }
-
+/* Mobile specific adjustments */
+@media (max-width: 767px) {
   .dba-status-display {
     position: static;
     transform: none;
-    order: 1;
-    margin-top: 20px;
+    margin: 20px 0;
   }
 }
 

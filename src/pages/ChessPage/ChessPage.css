@@ -124,9 +124,16 @@
 
 .preview-content {
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 30px;
+  grid-template-columns: 1fr;
+  gap: 20px;
   align-items: start;
+}
+
+@media (min-width: 768px) {
+  .preview-content {
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+  }
 }
 
 .board-preview h4 {
@@ -223,10 +230,7 @@
     font-size: 2rem;
   }
 
-  .preview-content {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
+
 
   .chess-board-preview {
     grid-template-columns: repeat(2, 50px);

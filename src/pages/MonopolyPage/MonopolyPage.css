@@ -130,16 +130,32 @@
 
 .demo-container {
   display: flex;
+  flex-direction: column;
   gap: 20px;
-  height: calc(100vh - 200px);
+  min-height: calc(100vh - 200px);
+}
+
+/* Desktop layout */
+@media (min-width: 1024px) {
+  .demo-container {
+    flex-direction: row;
+    height: calc(100vh - 200px);
+  }
 }
 
 /* Left Panel */
 .game-left-panel {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  order: 2;
+}
+
+@media (min-width: 1024px) {
+  .game-left-panel {
+    flex: 1;
+    order: 0;
+  }
 }
 
 .music-panel,
@@ -164,7 +180,6 @@
 
 /* Center Panel - Game Board */
 .game-center-panel {
-  flex: 3;
   background: var(--panel-color, #111111);
   border: 1px solid var(--border-color, #333);
   border-radius: 5px;
@@ -172,6 +187,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 400px;
+  order: 1;
+}
+
+@media (min-width: 1024px) {
+  .game-center-panel {
+    flex: 3;
+    order: 0;
+  }
 }
 
 .loading-board h3 {
@@ -200,13 +224,21 @@
 
 /* Right Panel - Live Logs */
 .game-right-panel {
-  flex: 2;
   background: var(--panel-color, #111111);
   border: 1px solid var(--border-color, #333);
   border-radius: 5px;
   padding: 15px;
   display: flex;
   flex-direction: column;
+  min-height: 300px;
+  order: 3;
+}
+
+@media (min-width: 1024px) {
+  .game-right-panel {
+    flex: 2;
+    order: 0;
+  }
 }
 
 .game-right-panel.hidden {
@@ -315,28 +347,13 @@
   z-index: -1;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .demo-container {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .game-center-panel {
-    order: -1;
-    min-height: 400px;
-  }
-
-  .game-right-panel {
-    flex: none;
-    height: 300px;
-  }
-
+/* Mobile specific adjustments */
+@media (max-width: 1023px) {
   .game-status-display {
     position: static;
     transform: none;
     order: 1;
-    margin-top: 20px;
+    margin: 20px 0;
   }
 }
 
