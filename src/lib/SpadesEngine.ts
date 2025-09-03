@@ -272,11 +272,19 @@ export class SpadesGameEngine {
     const winner = this.gameState.players[winningCardIndex];
     this.gameState.tricks[winner.id]++;
     
+    // Calculate trick points (spades = 1 point each, hearts = 1 point each, others = 0)
+    const trickPoints = trick.reduce((points, card) => {
+      if (card.suit === 'spades' || card.suit === 'hearts') {
+        return points + 1;
+      }
+      return points;
+    }, 0);
+    
     // Save trick to history
     const trickResult: SpadesTrick = {
       cards: [...trick],
       winner: winner.id,
-      leadPlayer: this.gameState.players[0].id // Simplified
+      points: trickPoints
     };
     this.gameState.trickHistory.push(trickResult);
     

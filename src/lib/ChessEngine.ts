@@ -19,10 +19,10 @@ export class ChessGameEngine {
     
     // Create 4 kings for 4-player variant
     const kings = {
-      'red': { id: 'red-king', type: 'king' as const, color: 'red', position: { row: 0, col: 3 }, captured: false },
-      'blue': { id: 'blue-king', type: 'king' as const, color: 'blue', position: { row: 7, col: 4 }, captured: false },
-      'green': { id: 'green-king', type: 'king' as const, color: 'green', position: { row: 0, col: 4 }, captured: false },
-      'yellow': { id: 'yellow-king', type: 'king' as const, color: 'yellow', position: { row: 7, col: 3 }, captured: false }
+      'red': { id: 'red-king', type: 'king' as const, color: 'red' as const, position: { row: 0, col: 3 }, captured: false, hasMoved: false },
+      'blue': { id: 'blue-king', type: 'king' as const, color: 'blue' as const, position: { row: 7, col: 4 }, captured: false, hasMoved: false },
+      'green': { id: 'green-king', type: 'king' as const, color: 'green' as const, position: { row: 0, col: 4 }, captured: false, hasMoved: false },
+      'yellow': { id: 'yellow-king', type: 'king' as const, color: 'yellow' as const, position: { row: 7, col: 3 }, captured: false, hasMoved: false }
     };
 
     // Place kings on board
