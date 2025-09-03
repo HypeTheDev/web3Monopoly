@@ -30,7 +30,7 @@ const MonopolyPage: React.FC<MonopolyPageProps> = ({ onPageChange }) => {
   const [showLogs, setShowLogs] = useState(true);
   const [showWorldNews, setShowWorldNews] = useState(false);
 
-  const [terminalTheme, setTerminalTheme] = useState<TerminalTheme>({
+  const [terminalTheme] = useState<TerminalTheme>({
     primaryColor: '#00ff00',
     secondaryColor: '#ffff00',
     backgroundColor: '#000000',

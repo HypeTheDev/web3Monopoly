@@ -23,7 +23,7 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
     textColor: '#00ff00'
   });
 
-  const handleColorChange = (key: keyof typeof terminalTheme, color: string) => {
+  const handleColorChange = (key: string, color: string) => {
     setTerminalTheme(prev => ({
       ...prev,
       [key]: color
@@ -60,20 +60,7 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
       <main className="terminal-main">
         <div className="terminal-grid">
 
-          {/* Left Panel - FM Radio */}
-          <div className="terminal-panel radio-panel">
-            <div className="panel-header">
-              <h3>📻 FM RADIO STATION</h3>
-            </div>
-            <div className="panel-content">
-              <div className="radio-status">
-                <div className="radio-wave"></div>
-                <span>SCOPE RADIO</span>
-                <br />
-                <small>Music Playing Globally</small>
-              </div>
-            </div>
-          </div>
+
 
           {/* Center Panel - Game Selection */}
           <div className="terminal-panel center-panel">

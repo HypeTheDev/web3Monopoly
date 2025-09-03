@@ -7,7 +7,7 @@ import DBADashboard from '../../components/DBADashboard';
 import WorldNews from '../../components/WorldNews';
 
 // Game Engine
-import { DBAEngine } from '../../lib/GameEngine';
+import DBAEngine from '../../lib/DBAEngine';
 import { GameEntry } from '../../types/GameTypes';
 
 // Types
@@ -26,7 +26,7 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
   const [showLogs, setShowLogs] = useState(true);
   const [showWorldNews, setShowWorldNews] = useState(false);
 
-  const [terminalTheme, setTerminalTheme] = useState<TerminalTheme>({
+  const [terminalTheme] = useState<TerminalTheme>({
     primaryColor: '#00ff00',
     secondaryColor: '#ffff00',
     backgroundColor: '#000000',
@@ -101,7 +101,7 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
   };
 
   const handleWeekAdvance = () => {
-    if (gameEngine && gameEngine instanceof DBAEngine) {
+    if (gameEngine) {
       gameEngine.advanceWeek();
     }
   };
