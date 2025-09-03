@@ -90,6 +90,13 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
                   <button className="game-btn">LAUNCH</button>
                 </div>
 
+                <div className="game-card featured" onClick={() => onPageChange(PageType.MESSENGER)}>
+                  <div className="game-icon">🔐</div>
+                  <h3>ALBERTCRYPTO</h3>
+                  <p>Encrypted P2P messaging terminal</p>
+                  <button className="game-btn">LAUNCH</button>
+                </div>
+
                 <div className="game-card soon">
                   <div className="game-icon">♠️</div>
                   <h3>SPADES</h3>
