@@ -1,5 +1,14 @@
 import { GameState, GameMode, MonopolyGameState, DBAGameState, NBAPlayer, DBATeam, DBALeague, LeagueRules, DBAGame, NBAStatLine, DBAGameResult, GameEntry } from '../types/GameTypes';
 
+// Import new functional game engines
+import MonopolyGameEngine from './MonopolyEngine';
+import DBAEngine from './DBAEngine';
+import ChessGameEngine from './ChessEngine';
+import SpadesGameEngine from './SpadesEngine';
+
+// Export the new engines
+export { MonopolyGameEngine, DBAEngine, ChessGameEngine, SpadesGameEngine };
+
 // Base Game Engine Interface
 export abstract class BaseGameEngine {
   protected gameState: GameState;

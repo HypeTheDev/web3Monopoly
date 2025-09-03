@@ -7,7 +7,7 @@ import DBADashboard from '../../components/DBADashboard';
 import WorldNews from '../../components/WorldNews';
 
 // Game Engine
-import { DBAEngine } from '../../lib/GameEngine';
+import DBAEngine from '../../lib/DBAEngine';
 import { GameEntry } from '../../types/GameTypes';
 
 // Types
@@ -101,7 +101,7 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
   };
 
   const handleWeekAdvance = () => {
-    if (gameEngine && gameEngine instanceof DBAEngine) {
+    if (gameEngine) {
       gameEngine.advanceWeek();
     }
   };
