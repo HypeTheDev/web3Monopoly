@@ -4,13 +4,15 @@ import MonopolyPage from './MonopolyPage/MonopolyPage';
 import DBAPage from './DBAPage/DBAPage';
 import SpadesPage from './SpadesPage/SpadesPage';
 import ChessPage from './ChessPage/ChessPage';
+import MessengerPage from './MessengerPage/MessengerPage';
 
 export enum PageType {
   HOME = 'home',
   MONOPOLY = 'monopoly',
   DBA = 'dba',
   SPADES = 'spades',
-  CHESS = 'chess'
+  CHESS = 'chess',
+  MESSENGER = 'messenger'
 }
 
 interface PageRouterProps {
@@ -34,6 +36,9 @@ const PageRouter: React.FC<PageRouterProps> = ({ activePage, onPageChange }) => 
 
     case PageType.CHESS:
       return <ChessPage onPageChange={onPageChange} />;
+
+    case PageType.MESSENGER:
+      return <MessengerPage onPageChange={onPageChange} />;
 
     default:
       return <HomePage onPageChange={onPageChange} />;
