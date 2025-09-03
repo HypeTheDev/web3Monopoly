@@ -5,8 +5,17 @@ import './App.css';
 // Page Router and Pages
 import PageRouter, { PageType } from './pages/PageRouter';
 
-// Persistent Music Player Component
-import MusicPlayer from './components/MusicPlayer';
+// Draggable Music Player Component
+import DraggableMusicPlayer from './components/DraggableMusicPlayer';
+
+// Light Beam Animation Component
+import LightBeamAnimation from './components/LightBeamAnimation';
+
+// Terminal Effects Component
+import TerminalEffects from './components/TerminalEffects';
+
+// Terminal Decorations Component
+import TerminalDecorations from './components/TerminalDecorations';
 
 function App() {
   const [activePage, setActivePage] = useState<PageType>(PageType.HOME); // Start with Home by default
@@ -17,10 +26,17 @@ function App() {
 
   return (
     <div className="App">
-      {/* Persistent Music Player - plays across all pages */}
-      <div className="persistent-music-player">
-        <MusicPlayer />
-      </div>
+      {/* Terminal Effects Layer */}
+      <TerminalEffects currentPage={activePage} />
+      
+      {/* Terminal Decorations Layer */}
+      <TerminalDecorations currentPage={activePage} />
+      
+      {/* Light Beam Animation Layer */}
+      <LightBeamAnimation currentPage={activePage} />
+      
+      {/* Draggable Music Player */}
+      <DraggableMusicPlayer />
 
       <PageRouter activePage={activePage} onPageChange={handlePageChange} />
     </div>

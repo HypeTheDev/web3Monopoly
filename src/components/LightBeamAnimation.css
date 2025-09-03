@@ -1,0 +1,383 @@
+/* Light Beam Animation Styles */
+
+.light-beam-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Individual Light Beam */
+.light-beam {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: beamTravel var(--animation-duration, 3s) ease-in-out var(--animation-delay, 0s) forwards;
+}
+
+/* Beam Animation Keyframes */
+@keyframes beamTravel {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Main Beam Line */
+.beam-line {
+  position: absolute;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--beam-color, #00ff00) 10%,
+    var(--beam-color, #00ff00) 90%,
+    transparent 100%
+  );
+  height: var(--beam-thickness, 2px);
+  width: 0;
+  border-radius: var(--beam-thickness, 2px);
+  box-shadow: 
+    0 0 4px var(--beam-color, #00ff00),
+    0 0 8px var(--beam-color, #00ff00);
+  
+  /* Position beam line between start and end points */
+  left: var(--start-x, 0%);
+  top: var(--start-y, 50%);
+  transform-origin: left center;
+  
+  /* Calculate angle and length */
+  --dx: calc(var(--end-x, 100%) - var(--start-x, 0%));
+  --dy: calc(var(--end-y, 50%) - var(--start-y, 50%));
+  --length: calc(sqrt(var(--dx) * var(--dx) + var(--dy) * var(--dy)) * 1vw);
+  --angle: calc(atan2(var(--dy), var(--dx)));
+  
+  transform: rotate(var(--angle, 0deg));
+  animation: beamExtend var(--animation-duration, 3s) ease-out var(--animation-delay, 0s) forwards;
+}
+
+@keyframes beamExtend {
+  0% {
+    width: 0;
+    box-shadow: none;
+  }
+  20% {
+    width: calc(sqrt((var(--end-x, 100%) - var(--start-x, 0%)) * (var(--end-x, 100%) - var(--start-x, 0%)) + (var(--end-y, 50%) - var(--start-y, 50%)) * (var(--end-y, 50%) - var(--start-y, 50%))) * 1vw);
+    box-shadow: 
+      0 0 4px var(--beam-color, #00ff00),
+      0 0 8px var(--beam-color, #00ff00);
+  }
+  80% {
+    width: calc(sqrt((var(--end-x, 100%) - var(--start-x, 0%)) * (var(--end-x, 100%) - var(--start-x, 0%)) + (var(--end-y, 50%) - var(--start-y, 50%)) * (var(--end-y, 50%) - var(--start-y, 50%))) * 1vw);
+    box-shadow: 
+      0 0 4px var(--beam-color, #00ff00),
+      0 0 8px var(--beam-color, #00ff00);
+  }
+  100% {
+    width: 0;
+    box-shadow: none;
+  }
+}
+
+/* Glow Effect */
+.beam-glow {
+  position: absolute;
+  left: var(--start-x, 0%);
+  top: var(--start-y, 50%);
+  width: 0;
+  height: calc(var(--beam-thickness, 2px) * 3);
+  background: radial-gradient(
+    ellipse,
+    var(--beam-color, #00ff00) 0%,
+    rgba(0, 255, 0, 0.5) 30%,
+    transparent 70%
+  );
+  transform-origin: left center;
+  transform: rotate(var(--angle, 0deg));
+  animation: glowExtend var(--animation-duration, 3s) ease-out var(--animation-delay, 0s) forwards;
+  filter: blur(1px);
+}
+
+@keyframes glowExtend {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  20% {
+    width: calc(sqrt((var(--end-x, 100%) - var(--start-x, 0%)) * (var(--end-x, 100%) - var(--start-x, 0%)) + (var(--end-y, 50%) - var(--start-y, 50%)) * (var(--end-y, 50%) - var(--start-y, 50%))) * 1vw);
+    opacity: 0.8;
+  }
+  80% {
+    width: calc(sqrt((var(--end-x, 100%) - var(--start-x, 0%)) * (var(--end-x, 100%) - var(--start-x, 0%)) + (var(--end-y, 50%) - var(--start-y, 50%)) * (var(--end-y, 50%) - var(--start-y, 50%))) * 1vw);
+    opacity: 0.8;
+  }
+  100% {
+    width: 0;
+    opacity: 0;
+  }
+}
+
+/* Beam Particles */
+.beam-particles {
+  position: absolute;
+  left: var(--start-x, 0%);
+  top: var(--start-y, 50%);
+  width: calc(sqrt((var(--end-x, 100%) - var(--start-x, 0%)) * (var(--end-x, 100%) - var(--start-x, 0%)) + (var(--end-y, 50%) - var(--start-y, 50%)) * (var(--end-y, 50%) - var(--start-y, 50%))) * 1vw);
+  height: 1px;
+  transform-origin: left center;
+  transform: rotate(var(--angle, 0deg));
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--beam-color, #00ff00);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--beam-color, #00ff00);
+  animation: particleTravel var(--animation-duration, 3s) linear var(--animation-delay, 0s) forwards;
+}
+
+.particle-1 {
+  animation-delay: calc(var(--animation-delay, 0s) + 0.1s);
+}
+
+.particle-2 {
+  animation-delay: calc(var(--animation-delay, 0s) + 0.3s);
+}
+
+.particle-3 {
+  animation-delay: calc(var(--animation-delay, 0s) + 0.6s);
+}
+
+@keyframes particleTravel {
+  0% {
+    left: 0;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* Beam Points */
+.beam-point {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--beam-color, #00ff00);
+  box-shadow: 
+    0 0 8px var(--beam-color, #00ff00),
+    0 0 16px var(--beam-color, #00ff00);
+  animation: pointPulse var(--animation-duration, 3s) ease-in-out var(--animation-delay, 0s) forwards;
+}
+
+.beam-start {
+  left: calc(var(--start-x, 0%) - 3px);
+  top: calc(var(--start-y, 50%) - 3px);
+  animation-delay: var(--animation-delay, 0s);
+}
+
+.beam-end {
+  left: calc(var(--end-x, 100%) - 3px);
+  top: calc(var(--end-y, 50%) - 3px);
+  animation-delay: calc(var(--animation-delay, 0s) + var(--animation-duration, 3s) * 0.8);
+}
+
+@keyframes pointPulse {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* Corner Nodes */
+.corner-nodes {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.corner-node {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--primary-color, #00ff00);
+  background: rgba(0, 255, 0, 0.1);
+  animation: nodePulse 4s ease-in-out infinite;
+}
+
+.corner-node.top-left {
+  top: 20px;
+  left: 20px;
+  animation-delay: 0s;
+}
+
+.corner-node.top-right {
+  top: 20px;
+  right: 20px;
+  animation-delay: 1s;
+}
+
+.corner-node.bottom-right {
+  bottom: 20px;
+  right: 20px;
+  animation-delay: 2s;
+}
+
+.corner-node.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  animation-delay: 3s;
+}
+
+@keyframes nodePulse {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--primary-color, #00ff00);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 
+      0 0 15px var(--primary-color, #00ff00),
+      0 0 30px var(--primary-color, #00ff00);
+    transform: scale(1.2);
+  }
+}
+
+/* Circuit Grid */
+.circuit-grid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+}
+
+.grid-lines.horizontal .grid-line,
+.grid-lines.vertical .grid-line {
+  position: absolute;
+  background: var(--primary-color, #00ff00);
+  opacity: 0.3;
+}
+
+.grid-lines.horizontal .grid-line {
+  width: 100%;
+  height: 1px;
+  animation: gridFlicker 6s ease-in-out infinite;
+}
+
+.grid-lines.vertical .grid-line {
+  height: 100%;
+  width: 1px;
+  animation: gridFlicker 8s ease-in-out infinite;
+}
+
+@keyframes gridFlicker {
+  0%, 90%, 100% {
+    opacity: 0.1;
+  }
+  5%, 15% {
+    opacity: 0.3;
+  }
+}
+
+/* Beam Type Variants */
+.light-beam-horizontal .beam-line,
+.light-beam-horizontal .beam-glow {
+  animation-timing-function: ease-in-out;
+}
+
+.light-beam-vertical .beam-line,
+.light-beam-vertical .beam-glow {
+  animation-timing-function: ease-out;
+}
+
+.light-beam-diagonal .beam-line,
+.light-beam-diagonal .beam-glow {
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.light-beam-circuit .beam-line,
+.light-beam-circuit .beam-glow {
+  animation-timing-function: steps(3, end);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .corner-node {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .corner-node.top-left,
+  .corner-node.top-right {
+    top: 10px;
+  }
+  
+  .corner-node.top-left,
+  .corner-node.bottom-left {
+    left: 10px;
+  }
+  
+  .corner-node.top-right,
+  .corner-node.bottom-right {
+    right: 10px;
+  }
+  
+  .corner-node.bottom-left,
+  .corner-node.bottom-right {
+    bottom: 10px;
+  }
+  
+  .beam-line {
+    height: calc(var(--beam-thickness, 2px) * 0.8);
+  }
+  
+  .particle {
+    width: 2px;
+    height: 2px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .light-beam,
+  .beam-line,
+  .beam-glow,
+  .particle,
+  .beam-point,
+  .corner-node {
+    animation: none;
+  }
+  
+  .circuit-grid {
+    opacity: 0.05;
+  }
+}

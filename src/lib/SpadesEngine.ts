@@ -252,7 +252,6 @@ export class SpadesGameEngine {
 
   private processTrickWin(): void {
     const trick = this.gameState.currentTrick;
-    const leadSuit = trick[0].suit;
     
     // Find highest card (spades win, then highest of lead suit)
     let winningCardIndex = 0;

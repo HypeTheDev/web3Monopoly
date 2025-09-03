@@ -79,7 +79,41 @@
 /* Desktop layout */
 @media (min-width: 1024px) {
   .terminal-grid {
-    grid-template-columns: minmax(600px, 3fr) minmax(300px, 1fr);
+    grid-template-columns: minmax(600px, 2fr) minmax(400px, 1fr);
+  }
+}
+
+/* Right Panel Container */
+.right-panel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  height: fit-content;
+}
+
+@media (min-width: 1024px) {
+  .right-panel-container {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 10px; /* Space for scrollbar */
+  }
+  
+  /* Custom scrollbar styling for better aesthetics */
+  .right-panel-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .right-panel-container::-webkit-scrollbar-track {
+    background: var(--background-color);
+  }
+  
+  .right-panel-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+  
+  .right-panel-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
   }
 }
 
@@ -162,27 +196,40 @@
   display: none;
 }
 
-/* Hide Ad Box Button */
-.hide-ad-btn {
-  background: transparent;
-  border: 1px solid var(--secondary-color, #ffff00);
-  color: var(--secondary-color, #ffff00);
-  padding: 4px 8px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: 'Courier New', monospace;
-  align-self: flex-end;
-  margin-top: -5px;
+/* Terminal Grid Layout - Widened Broadcast Box */
+.terminal-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  grid-template-rows: 1fr auto;
+  gap: 20px;
+  height: 100%;
+  align-items: start;
 }
 
-.hide-ad-btn:hover {
-  background: var(--secondary-color, #ffff00);
-  color: #000000;
-  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+@media (max-width: 1400px) {
+  .terminal-grid {
+    grid-template-columns: 1fr 350px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .terminal-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .right-panel-container {
+    order: 2;
+  }
+  
+  .center-panel {
+    order: 1;
+  }
+
+  .right-panel-container {
+    max-height: none;
+    overflow-y: visible;
+  }
 }
 
 /* Update panel header to support button */
@@ -337,9 +384,58 @@
   box-shadow: none;
 }
 
-/* Right Panel - Ad Box */
+/* News Panel - Priority layout */
+.news-panel {
+  min-height: 600px;
+  order: 1;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+.news-panel .panel-content {
+  padding: 0;
+  height: 550px;
+}
+
+
+
+/* Ad Panel - Secondary priority */
+.ad-panel {
+  margin-top: 0;
+  order: 2;
+  border-color: var(--info-color);
+  box-shadow: 0 0 8px rgba(136, 136, 255, 0.1);
+}
+
 .ad-panel .panel-content {
   padding: 0;
+}
+
+/* Ad Close Button - New Style */
+.ad-close-btn {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  padding: 4px 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+}
+
+.ad-close-btn:hover {
+  background: rgba(255, 68, 68, 0.2);
+  border-color: #ff6666;
+  color: #ff6666;
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.3);
+}
+
+.ad-close-btn:active {
+  transform: scale(0.95);
 }
 
 /* Terminal Footer */
@@ -390,6 +486,21 @@
   .terminal-grid {
     gap: 15px;
   }
+
+  /* Mobile right panel adjustments */
+  .right-panel-container {
+    gap: 15px;
+  }
+
+  .news-panel {
+    min-height: 400px;
+  }
+
+  .news-panel .panel-content {
+    height: 350px;
+  }
+
+
 }
 
 @media (max-width: 767px) {

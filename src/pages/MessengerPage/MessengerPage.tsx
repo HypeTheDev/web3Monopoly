@@ -31,7 +31,7 @@ const MessengerPage: React.FC<MessengerPageProps> = ({ onPageChange }) => {
       <nav className="messenger-navbar">
         <div className="messenger-brand">
           <span className="messenger-brand-icon">🔐</span>
-          AlbertCrypto Messenger
+          AbC Messenger
         </div>
         <div className="messenger-nav-links">
           <button
@@ -62,7 +62,7 @@ const MessengerPage: React.FC<MessengerPageProps> = ({ onPageChange }) => {
             // Welcome Screen
             <div className="welcome-screen">
               <div className="welcome-icon">🚀</div>
-              <h1 className="welcome-title">Welcome to AlbertCrypto</h1>
+              <h1 className="welcome-title">Welcome to AbC</h1>
               <p className="welcome-subtitle">
                 Experience the future of secure communication with our decentralized,<br />
                 end-to-end encrypted peer-to-peer messaging platform.

@@ -173,27 +173,7 @@
   box-shadow: 0 0 5px var(--danger-color);
 }
 
-/* Persistent Music Player */
-.persistent-music-player {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  background: rgba(17, 17, 17, 0.95);
-  border: 1px solid var(--primary-color);
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-}
-
-@media (max-width: 768px) {
-  .persistent-music-player {
-    bottom: 10px;
-    right: 10px;
-    left: 10px;
-    right: 10px;
-  }
-}
+/* Persistent Music Player styles removed - now using DraggableMusicPlayer */
 
 /* DBA Button - Prominent outside container */
 .dba-button {

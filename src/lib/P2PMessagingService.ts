@@ -75,14 +75,14 @@ export class P2PMessagingService {
           }
         });
 
-        this.peer.on('open', (id) => {
+        this.peer.on('open', (id: string) => {
           console.log('P2P Service initialized with peer ID:', id);
           this.setupPeerEventHandlers();
           this.notifyConnectionHandlers();
           resolve(id);
         });
 
-        this.peer.on('error', (error) => {
+        this.peer.on('error', (error: any) => {
           console.error('PeerJS error:', error);
           reject(error);
         });
@@ -100,7 +100,7 @@ export class P2PMessagingService {
     if (!this.peer) return;
 
     // Handle incoming connections
-    this.peer.on('connection', (conn) => {
+    this.peer.on('connection', (conn: DataConnection) => {
       this.handleIncomingConnection(conn);
     });
 
@@ -142,7 +142,7 @@ export class P2PMessagingService {
         resolve(true);
       });
 
-      conn.on('error', (error) => {
+      conn.on('error', (error: any) => {
         console.error('Connection error:', error);
         resolve(false);
       });
@@ -176,7 +176,7 @@ export class P2PMessagingService {
     });
 
     // Setup connection event handlers
-    conn.on('data', (data) => {
+    conn.on('data', (data: any) => {
       this.handleIncomingData(conn.peer, data);
     });
 
@@ -185,7 +185,7 @@ export class P2PMessagingService {
       this.handlePeerDisconnection(conn.peer);
     });
 
-    conn.on('error', (error) => {
+    conn.on('error', (error: any) => {
       console.error('Connection error with peer:', conn.peer, error);
       this.handlePeerDisconnection(conn.peer);
     });
