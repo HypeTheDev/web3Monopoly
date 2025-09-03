@@ -79,25 +79,21 @@
 /* Desktop layout */
 @media (min-width: 1024px) {
   .terminal-grid {
-    grid-template-columns: minmax(300px, 1fr) minmax(600px, 2fr) minmax(300px, 1fr);
+    grid-template-columns: minmax(600px, 3fr) minmax(300px, 1fr);
   }
 }
 
 /* Tablet layout */
 @media (min-width: 768px) and (max-width: 1023px) {
   .terminal-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     grid-template-areas: 
-      "center center"
-      "radio ad";
+      "center"
+      "ad";
   }
   
   .center-panel {
     grid-area: center;
-  }
-  
-  .radio-panel {
-    grid-area: radio;
   }
   
   .ad-panel {
@@ -207,10 +203,7 @@
   text-shadow: 0 0 10px var(--primary-color, #00ff00);
 }
 
-/* Left Panel - FM Radio */
-.radio-panel .panel-content {
-  padding: 0;
-}
+
 
 /* Center Panel - Game Selection */
 .center-panel {
