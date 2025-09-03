@@ -7,7 +7,7 @@ const MusicPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(30);
   const [playlist, setPlaylist] = useState<Track[]>([]);
-  const [currentSource, setCurrentSource] = useState<'radio'>('radio');
+  const [currentSource] = useState<'radio'>('radio');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Available tracks - Synthwave Radio Only
@@ -61,11 +61,7 @@ const MusicPlayer: React.FC = () => {
     setCurrentTrack(prevIndex);
   };
 
-  const changeSource = (source: 'radio') => {
-    setCurrentSource(source);
-    setIsPlaying(false);
-    setCurrentTrack(0);
-  };
+
 
   const renderPlayer = () => {
     const track = playlist[currentTrack];
