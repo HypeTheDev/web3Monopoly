@@ -152,44 +152,88 @@ const MusicPlayer: React.FC = () => {
   }, [nextTrack]);
 
   const togglePlay = () => {
-    if (audioRef.current && playlist.length > 0) {
+    if (playlist.length > 0) {
       if (isPlaying) {
-        audioRef.current.pause();
+        // Stop playing
+        setIsPlaying(false);
       } else {
-        // Create a simple tone generator for demo purposes
-        generateTone();
+        // Start playing - generate ambient music
+        generateAmbientMusic();
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
-  // Generate a simple tone for demo purposes
-  const generateTone = () => {
+  // Generate continuous ambient music for each channel
+  const generateAmbientMusic = () => {
     if (typeof window !== 'undefined' && 'AudioContext' in window) {
       try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        // Create multiple oscillators for richer sound
+        const createChannel = (frequency: number, detune: number = 0) => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
 
-        // Different frequencies for different channels
-        const frequencies = {
-          beats: 220,
-          terminal: 440,
-          elevator: 330,
-          easylistening: 261.63
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+          oscillator.detune.setValueAtTime(detune, audioContext.currentTime);
+          oscillator.type = 'triangle'; // More musical than sine
+
+          gainNode.gain.setValueAtTime((volume / 1000) * 0.5, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+
+          return { oscillator, gainNode };
         };
 
-        oscillator.frequency.setValueAtTime(frequencies[currentChannel], audioContext.currentTime);
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(volume / 1000, audioContext.currentTime); // Very low volume
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+        // Different ambient patterns for each channel
+        const channelPatterns = {
+          beats: [
+            { freq: 220, detune: 0 },   // A3
+            { freq: 277, detune: 2 },   // C#4
+            { freq: 330, detune: -1 }   // E4
+          ],
+          terminal: [
+            { freq: 440, detune: 0 },   // A4
+            { freq: 523, detune: 3 },   // C5
+            { freq: 659, detune: -2 }   // E5
+          ],
+          elevator: [
+            { freq: 330, detune: 0 },   // E4
+            { freq: 392, detune: 1 },   // G4
+            { freq: 494, detune: -1 }   // B4
+          ],
+          easylistening: [
+            { freq: 262, detune: 0 },   // C4
+            { freq: 330, detune: 2 },   // E4
+            { freq: 392, detune: -1 }   // G4
+          ]
+        };
 
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 2);
+        const pattern = channelPatterns[currentChannel];
+
+        // Create and start oscillators
+        pattern.forEach((note, index) => {
+          const { oscillator } = createChannel(note.freq, note.detune);
+
+          // Stagger the start times slightly for richer texture
+          oscillator.start(audioContext.currentTime + (index * 0.1));
+
+          // Create a gentle fade pattern
+          setTimeout(() => {
+            oscillator.stop(audioContext.currentTime + 4);
+          }, 100);
+        });
+
+        // Schedule next iteration for continuous play
+        setTimeout(() => {
+          if (isPlaying) {
+            generateAmbientMusic();
+          }
+        }, 3500);
+
       } catch (error) {
         console.warn('Web Audio API not supported');
       }

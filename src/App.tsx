@@ -20,6 +20,9 @@ import TerminalDecorations from './components/TerminalDecorations';
 // Blockchain Test Component
 import BlockchainTest from './components/BlockchainTest';
 
+// Matrix Rain Component (commented out for now)
+// import MatrixRain from './components/MatrixRain';
+
 function App() {
   const [activePage, setActivePage] = useState<PageType>(PageType.HOME); // Start with Home by default
 
