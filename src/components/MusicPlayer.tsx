@@ -19,86 +19,86 @@ const MusicPlayer: React.FC = () => {
     url: string;
   }
 
-  // Available channels with instrumental music
+  // Available channels with 24/7 streaming radio stations
   const tracksByChannel = useMemo(() => ({
     beats: [
-      { 
-        id: 'b1', 
-        title: 'Lo-Fi Hip Hop Beats', 
-        artist: 'Chill Station', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'b1',
+        title: 'Lo-Fi Hip Hop Radio',
+        artist: 'Chillhop Radio',
+        url: 'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
       },
-      { 
-        id: 'b2', 
-        title: 'Study Beats', 
-        artist: 'Focus Flow', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'b2',
+        title: 'Jazz Cafe 24/7',
+        artist: 'Jazz Radio',
+        url: 'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc4'
       },
-      { 
-        id: 'b3', 
-        title: 'Ambient Groove', 
-        artist: 'Beat Lab', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'b3',
+        title: 'Instrumental Beats',
+        artist: 'Focus Music',
+        url: 'https://uk7.internet-radio.com:8226/stream'
       }
     ],
     terminal: [
-      { 
-        id: 't1', 
-        title: 'Cyberpunk Terminal', 
-        artist: 'Neon Codes', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 't1',
+        title: 'Ambient Room',
+        artist: 'Sleep Radio',
+        url: 'https://streaming.radionomy.com/Sleep-Radio'
       },
-      { 
-        id: 't2', 
-        title: 'Matrix Vibes', 
-        artist: 'Digital Rain', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 't2',
+        title: 'Digital Lounge',
+        artist: 'Nightlight FM',
+        url: 'https://nightlight.fm/stream'
       },
-      { 
-        id: 't3', 
-        title: 'Synthwave Code', 
-        artist: 'Retro Terminal', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 't3',
+        title: 'Code Beats Ambient',
+        artist: 'WFMU Experimental',
+        url: 'https://stream0.wfmu.org/experimental-128k'
       }
     ],
     elevator: [
-      { 
-        id: 'e1', 
-        title: 'Smooth Jazz Elevator', 
-        artist: 'Lobby Lounge', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'e1',
+        title: 'Classical Piano',
+        artist: 'Piano Radio',
+        url: 'https://streaming.radionomy.com/Abacusfm-PianoRadio'
       },
-      { 
-        id: 'e2', 
-        title: 'Gentle Piano', 
-        artist: 'Elevator Express', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'e2',
+        title: 'Smooth Jazz',
+        artist: 'KJazz 88.1 FM',
+        url: 'https://kjzz.streamguys1.com/kjzzmp3'
       },
-      { 
-        id: 'e3', 
-        title: 'Bossa Nova Lite', 
-        artist: 'Lift Music Co.', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'e3',
+        title: 'Elevator Classics',
+        artist: 'Classical KDFC',
+        url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/KDFCFM.mp3'
       }
     ],
     easylistening: [
-      { 
-        id: 'el1', 
-        title: 'Acoustic Chill', 
-        artist: 'Peaceful Sounds', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'el1',
+        title: 'Coffee Shop Jazz',
+        artist: 'Jazz Radio',
+        url: 'https://live.wostreaming.net/direct/ppm-coffeeshopmp3-ibc4'
       },
-      { 
-        id: 'el2', 
-        title: 'Soft Instrumental', 
-        artist: 'Relax Station', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'el2',
+        title: 'Lounge Music',
+        artist: 'Simply Lounge',
+        url: 'https://streaming.radionomy.com/Simply-Lounge'
       },
-      { 
-        id: 'el3', 
-        title: 'Ambient Waves', 
-        artist: 'Calm Collective', 
-        url: 'https://www.soundjay.com/misc/sounds-relax.mp3' // placeholder
+      {
+        id: 'el3',
+        title: 'Piano Radio',
+        artist: 'Abacus FM Piano',
+        url: 'https://streaming.radionomy.com/Abacusfm-PianoRadio'
       }
     ]
   }), []);
@@ -115,6 +115,15 @@ const MusicPlayer: React.FC = () => {
     setPlaylist(tracksByChannel[currentChannel]);
     setCurrentTrack(0);
     setIsPlaying(false); // Stop playing when switching channels
+
+    // Update audio source when channel changes
+    if (audioRef.current) {
+      const currentTrackData = tracksByChannel[currentChannel][0];
+      if (currentTrackData) {
+        audioRef.current.src = currentTrackData.url;
+        audioRef.current.load();
+      }
+    }
   }, [currentChannel, tracksByChannel]);
 
   useEffect(() => {
@@ -122,6 +131,56 @@ const MusicPlayer: React.FC = () => {
       audioRef.current.volume = volume / 100;
     }
   }, [volume]);
+
+  // Stream music from external API - fallback function
+  const streamMusicFromAPI = useCallback(async () => {
+    try {
+      // For demo purposes, we'll use a placeholder streaming approach
+      // In production, this would connect to actual streaming services
+
+      // Simulate streaming by creating a more sophisticated tone generator
+      await generateAdvancedAmbientMusic();
+
+    } catch (error) {
+      console.warn('Streaming API not available, falling back to local generation');
+      generateAdvancedAmbientMusic();
+    }
+  }, []);
+
+  // Update audio source when current track changes
+  useEffect(() => {
+    if (audioRef.current && playlist.length > 0) {
+      const currentTrackData = playlist[currentTrack];
+      if (currentTrackData) {
+        audioRef.current.src = currentTrackData.url;
+        audioRef.current.load();
+        // Auto-play if we were already playing
+        if (isPlaying) {
+          audioRef.current.play().catch(error => {
+            console.warn('Audio play failed, falling back to procedural generation');
+            streamMusicFromAPI();
+          });
+        }
+      }
+    }
+  }, [currentTrack, playlist, isPlaying]);
+
+  // Handle audio play/pause state changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+
+      return () => {
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
+      };
+    }
+  }, []);
 
   const nextTrack = useCallback(() => {
     const nextIndex = (currentTrack + 1) % playlist.length;
@@ -155,87 +214,149 @@ const MusicPlayer: React.FC = () => {
     if (playlist.length > 0) {
       if (isPlaying) {
         // Stop playing
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
         setIsPlaying(false);
       } else {
-        // Start playing - generate ambient music
-        generateAmbientMusic();
+        // Start playing from streaming URL
+        if (audioRef.current) {
+          audioRef.current.play().catch(error => {
+            console.warn('Audio play failed, falling back to procedural generation');
+            streamMusicFromAPI();
+          });
+        }
         setIsPlaying(true);
       }
     }
   };
 
-  // Generate continuous ambient music for each channel
-  const generateAmbientMusic = () => {
+  // Advanced ambient music generation with more sophisticated patterns
+  const generateAdvancedAmbientMusic = () => {
     if (typeof window !== 'undefined' && 'AudioContext' in window) {
       try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-        // Create multiple oscillators for richer sound
-        const createChannel = (frequency: number, detune: number = 0) => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
+        // Create a more sophisticated oscillator setup
+        const createAdvancedChannel = (baseFreq: number, harmonics: number[] = []) => {
+          const oscillators = [];
+          const gainNodes = [];
 
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
+          // Main oscillator
+          const mainOsc = audioContext.createOscillator();
+          const mainGain = audioContext.createGain();
 
-          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-          oscillator.detune.setValueAtTime(detune, audioContext.currentTime);
-          oscillator.type = 'triangle'; // More musical than sine
+          mainOsc.connect(mainGain);
+          mainGain.connect(audioContext.destination);
 
-          gainNode.gain.setValueAtTime((volume / 1000) * 0.5, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+          mainOsc.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+          mainOsc.type = 'sine';
 
-          return { oscillator, gainNode };
+          mainGain.gain.setValueAtTime((volume / 2000) * 0.8, audioContext.currentTime);
+          mainGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+
+          oscillators.push(mainOsc);
+          gainNodes.push(mainGain);
+
+          // Add harmonic overtones for richness
+          harmonics.forEach((harmonic, index) => {
+            const harmOsc = audioContext.createOscillator();
+            const harmGain = audioContext.createGain();
+
+            harmOsc.connect(harmGain);
+            harmGain.connect(audioContext.destination);
+
+            harmOsc.frequency.setValueAtTime(baseFreq * harmonic, audioContext.currentTime);
+            harmOsc.type = 'triangle';
+
+            harmGain.gain.setValueAtTime((volume / 3000) * (0.3 / (index + 1)), audioContext.currentTime);
+            harmGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+
+            oscillators.push(harmOsc);
+            gainNodes.push(harmGain);
+          });
+
+          return { oscillators, gainNodes };
         };
 
-        // Different ambient patterns for each channel
-        const channelPatterns = {
-          beats: [
-            { freq: 220, detune: 0 },   // A3
-            { freq: 277, detune: 2 },   // C#4
-            { freq: 330, detune: -1 }   // E4
-          ],
-          terminal: [
-            { freq: 440, detune: 0 },   // A4
-            { freq: 523, detune: 3 },   // C5
-            { freq: 659, detune: -2 }   // E5
-          ],
-          elevator: [
-            { freq: 330, detune: 0 },   // E4
-            { freq: 392, detune: 1 },   // G4
-            { freq: 494, detune: -1 }   // B4
-          ],
-          easylistening: [
-            { freq: 262, detune: 0 },   // C4
-            { freq: 330, detune: 2 },   // E4
-            { freq: 392, detune: -1 }   // G4
-          ]
+        // Channel-specific harmonic patterns
+        const channelHarmonics = {
+          beats: {
+            baseFreq: 220,
+            harmonics: [1.5, 2, 2.5] // Rich, warm lo-fi sound
+          },
+          terminal: {
+            baseFreq: 440,
+            harmonics: [1.25, 1.5, 1.75] // Bright, digital sound
+          },
+          elevator: {
+            baseFreq: 330,
+            harmonics: [1.33, 1.67, 2] // Smooth jazz character
+          },
+          easylistening: {
+            baseFreq: 262,
+            harmonics: [1.2, 1.4, 1.6] // Gentle, relaxing tones
+          }
         };
 
-        const pattern = channelPatterns[currentChannel];
+        const config = channelHarmonics[currentChannel];
 
-        // Create and start oscillators
-        pattern.forEach((note, index) => {
-          const { oscillator } = createChannel(note.freq, note.detune);
+        // Create the oscillator setup
+        const { oscillators } = createAdvancedChannel(config.baseFreq, config.harmonics);
 
-          // Stagger the start times slightly for richer texture
-          oscillator.start(audioContext.currentTime + (index * 0.1));
-
-          // Create a gentle fade pattern
+        // Start all oscillators with slight stagger
+        oscillators.forEach((oscillator, index) => {
+          oscillator.start(audioContext.currentTime + (index * 0.05));
           setTimeout(() => {
-            oscillator.stop(audioContext.currentTime + 4);
-          }, 100);
+            oscillator.stop(audioContext.currentTime + 3);
+          }, 50);
         });
 
-        // Schedule next iteration for continuous play
+        // Schedule next pattern for continuous play
         setTimeout(() => {
           if (isPlaying) {
-            generateAmbientMusic();
+            generateAdvancedAmbientMusic();
           }
-        }, 3500);
+        }, 2800);
 
       } catch (error) {
-        console.warn('Web Audio API not supported');
+        console.warn('Advanced audio generation failed, using fallback');
+        generateBasicAmbientMusic();
+      }
+    }
+  };
+
+  // Fallback basic ambient music
+  const generateBasicAmbientMusic = () => {
+    if (typeof window !== 'undefined' && 'AudioContext' in window) {
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Simple frequency for fallback
+        oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime((volume / 1000) * 0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 2);
+
+        // Schedule next fallback pattern
+        setTimeout(() => {
+          if (isPlaying) {
+            generateBasicAmbientMusic();
+          }
+        }, 2000);
+
+      } catch (error) {
+        console.warn('Basic audio generation also failed');
       }
     }
   };
@@ -342,6 +463,7 @@ const MusicPlayer: React.FC = () => {
         ref={audioRef}
         style={{ display: 'none' }}
         preload="none"
+        crossOrigin="anonymous"
       />
     </div>
   );
