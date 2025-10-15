@@ -17,6 +17,9 @@ import TerminalEffects from './components/TerminalEffects';
 // Terminal Decorations Component
 import TerminalDecorations from './components/TerminalDecorations';
 
+// Blockchain Test Component
+import BlockchainTest from './components/BlockchainTest';
+
 function App() {
   const [activePage, setActivePage] = useState<PageType>(PageType.HOME); // Start with Home by default
 
@@ -37,6 +40,9 @@ function App() {
       
       {/* Draggable Music Player */}
       <DraggableMusicPlayer />
+
+      {/* Blockchain Test Panel */}
+      <BlockchainTest />
 
       <PageRouter activePage={activePage} onPageChange={handlePageChange} />
     </div>
