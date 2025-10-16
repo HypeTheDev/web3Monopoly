@@ -1,4 +1,4 @@
-import { GameState, GameMode, Player, Web3Connection, SmartContractData, GameStats } from '../types/GameTypes';
+import { GameState, GameMode, Player, Web3Connection, GameStats } from '../types/GameTypes';
 import { MonopolyGameEngine } from '../lib/MonopolyEngine';
 import { DBAEngine } from '../lib/DBAEngine';
 import { ChessGameEngine } from '../lib/ChessEngine';

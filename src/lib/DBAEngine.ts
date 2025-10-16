@@ -1,14 +1,20 @@
-import { 
-  GameState, 
-  GameMode, 
-  DBAGameState, 
-  NBAPlayer, 
-  DBATeam, 
-  DBALeague, 
-  DBAGame, 
+import {
+  GameState,
+  GameMode,
+  DBAGameState,
+  NBAPlayer,
+  DBATeam,
+  DBALeague,
+  DBAGame,
   NBAStatLine,
   LeagueRules,
-  GameEntry 
+  GameEntry,
+  DBABet,
+  DBALoreEntry,
+  DBAQuest,
+  PlayerEnhancement,
+  DBATrade,
+  DBAQuestObjective
 } from '../types/GameTypes';
 
 // NBA Player Data Generator
@@ -58,6 +64,10 @@ export class DBAEngine {
   private isRunning: boolean = false;
   private nbaPlayersPool: NBAPlayer[] = [];
   private leagueRules: LeagueRules;
+  private bettingPool: Map<string, DBABet[]> = new Map(); // Game ID -> Bets
+  private loreDatabase: DBALoreEntry[] = [];
+  private activeQuests: DBAQuest[] = [];
+  private playerEnhancements: PlayerEnhancement[] = [];
 
   constructor(onGameUpdate?: (gameState: GameState, logEntry: GameEntry) => void) {
     this.onGameUpdate = onGameUpdate || (() => {});
@@ -215,22 +225,7 @@ export class DBAEngine {
     return `${firstName} ${lastName}`;
   }
 
-  private initializeGameState(): DBAGameState {
-    const teams = this.createDBATeams();
-    const league = this.createLeague(teams);
-    
-    return {
-      gameMode: GameMode.DBA,
-      players: [], // DBA uses teams, not individual players
-      currentPlayerIndex: 0,
-      gameStatus: 'waiting',
-      roundNumber: 1,
-      league: league,
-      currentTeam: teams[0].id, // User controls first team
-      currentView: 'dashboard',
-      leagueRules: this.leagueRules
-    };
-  }
+
 
   private createDBATeams(): DBATeam[] {
     const teamNames = [
@@ -631,6 +626,580 @@ export class DBAEngine {
       this.stopGameLoop();
       this.startGameLoop(speed);
     }
+  }
+
+  // ===== BETTING SYSTEM =====
+  public placeBet(gameId: string, betType: DBABet['betType'], amount: number, selection: string): boolean {
+    const game = this.gameState.league.schedule.find(g => g.id === gameId);
+    if (!game || game.status !== 'scheduled') {
+      this.logEntry('BET_FAILED', `Cannot place bet on game ${gameId} - game not available`);
+      return false;
+    }
+
+    if (amount <= 0) {
+      this.logEntry('BET_FAILED', 'Bet amount must be positive');
+      return false;
+    }
+
+    const userTeam = this.getUserTeam();
+    if (!userTeam || userTeam.budget < amount) {
+      this.logEntry('BET_FAILED', 'Insufficient funds for bet');
+      return false;
+    }
+
+    const odds = this.calculateOdds(game, betType, selection);
+    const potentialPayout = Math.round(amount * odds);
+
+    const bet: DBABet = {
+      id: `bet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      gameId,
+      bettor: 'user',
+      betType,
+      amount,
+      odds,
+      potentialPayout,
+      selection,
+      status: 'pending',
+      createdAt: new Date()
+    };
+
+    // Add to betting pool
+    if (!this.bettingPool.has(gameId)) {
+      this.bettingPool.set(gameId, []);
+    }
+    this.bettingPool.get(gameId)!.push(bet);
+
+    // Deduct from user budget
+    userTeam.budget -= amount;
+
+    this.logEntry('BET_PLACED', `💰 Placed ${amount} bet on ${selection} (${betType}) at ${odds}x odds`);
+    return true;
+  }
+
+  private calculateOdds(game: DBAGame, betType: DBABet['betType'], selection: string): number {
+    const homeTeam = game.homeTeam;
+    const awayTeam = game.awayTeam;
+
+    // Base odds calculation
+    const homeStrength = this.calculateTeamScore(homeTeam);
+    const awayStrength = this.calculateTeamScore(awayTeam);
+    const totalStrength = homeStrength + awayStrength;
+
+    const homeWinProbability = homeStrength / totalStrength;
+    const awayWinProbability = awayStrength / totalStrength;
+
+    switch (betType) {
+      case 'moneyline':
+        if (selection === homeTeam.name) {
+          return Math.round((1 / homeWinProbability) * 100) / 100;
+        } else if (selection === awayTeam.name) {
+          return Math.round((1 / awayWinProbability) * 100) / 100;
+        }
+        break;
+
+      case 'spread':
+        // Spread betting (home team favored by 5 points)
+        const spread = 5;
+        if (selection.includes('home')) {
+          return 1.95; // Standard odds for spread bets
+        } else {
+          return 1.85;
+        }
+
+      case 'over_under':
+        // Over/under total points (around 180)
+        const projectedTotal = (homeStrength + awayStrength) / 2;
+        if (selection === 'over') {
+          return projectedTotal > 180 ? 1.8 : 2.1;
+        } else {
+          return projectedTotal > 180 ? 2.1 : 1.8;
+        }
+
+      case 'player_prop':
+        // Player performance props
+        return 1.9; // Standard prop odds
+    }
+
+    return 2.0; // Default odds
+  }
+
+  public resolveBets(gameId: string): void {
+    const bets = this.bettingPool.get(gameId) || [];
+    const game = this.gameState.league.schedule.find(g => g.id === gameId);
+
+    if (!game || !game.result) return;
+
+    bets.forEach(bet => {
+      const won = this.checkBetResult(bet, game);
+      bet.status = won ? 'won' : 'lost';
+
+      if (won) {
+        const userTeam = this.getUserTeam();
+        if (userTeam) {
+          userTeam.budget += bet.potentialPayout;
+          this.logEntry('BET_WON', `💰 Bet won! +${bet.potentialPayout} payout`);
+        }
+      } else {
+        this.logEntry('BET_LOST', `💸 Bet lost: ${bet.amount} on ${bet.selection}`);
+      }
+    });
+
+    // Remove resolved bets
+    this.bettingPool.delete(gameId);
+  }
+
+  private checkBetResult(bet: DBABet, game: DBAGame): boolean {
+    if (!game.result) return false;
+
+    switch (bet.betType) {
+      case 'moneyline':
+        return bet.selection === game.result.winner.name;
+
+      case 'spread':
+        const spread = 5;
+        const homeMargin = game.result.homeScore - game.result.awayScore;
+        if (bet.selection.includes('home')) {
+          return homeMargin > spread;
+        } else {
+          return homeMargin < -spread;
+        }
+
+      case 'over_under':
+        const totalScore = game.result.homeScore + game.result.awayScore;
+        if (bet.selection === 'over') {
+          return totalScore > 180;
+        } else {
+          return totalScore < 180;
+        }
+
+      case 'player_prop':
+        // Check if selected player met prop requirements
+        return Math.random() > 0.5; // Simplified for now
+
+      default:
+        return false;
+    }
+  }
+
+  // ===== ENHANCED TRADING SYSTEM =====
+  public proposeTrade(fromTeamId: string, toTeamId: string, offeredPlayers: string[], requestedPlayers: string[], offeredMoney: number): boolean {
+    const fromTeam = this.gameState.league.standings.find(t => t.id === fromTeamId);
+    const toTeam = this.gameState.league.standings.find(t => t.id === toTeamId);
+
+    if (!fromTeam || !toTeam) {
+      this.logEntry('TRADE_FAILED', 'Invalid teams for trade');
+      return false;
+    }
+
+    if (fromTeam.budget < offeredMoney) {
+      this.logEntry('TRADE_FAILED', 'Insufficient funds for trade offer');
+      return false;
+    }
+
+    const offeredPlayerObjects = offeredPlayers.map(id => fromTeam.players.find(p => p.id === id)).filter(p => p !== undefined) as NBAPlayer[];
+    const requestedPlayerObjects = requestedPlayers.map(id => toTeam.players.find(p => p.id === id)).filter(p => p !== undefined) as NBAPlayer[];
+
+    if (offeredPlayerObjects.length !== offeredPlayers.length || requestedPlayerObjects.length !== requestedPlayers.length) {
+      this.logEntry('TRADE_FAILED', 'Invalid player selection for trade');
+      return false;
+    }
+
+    const trade: DBATrade = {
+      id: `trade-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      fromTeam: fromTeamId,
+      toTeam: toTeamId,
+      offeredPlayers: offeredPlayerObjects,
+      offeredMoney,
+      requestedPlayers: requestedPlayerObjects,
+      requestedMoney: 0, // Simplified for now
+      status: 'pending',
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    };
+
+    this.gameState.league.activeTrades.push(trade);
+    this.logEntry('TRADE_PROPOSED', `🤝 Trade proposed: ${fromTeam.name} offers ${offeredPlayers.length} players + ${offeredMoney} for ${requestedPlayers.length} players`);
+    return true;
+  }
+
+  public acceptTrade(tradeId: string): boolean {
+    const trade = this.gameState.league.activeTrades.find(t => t.id === tradeId);
+    if (!trade || trade.status !== 'pending') {
+      this.logEntry('TRADE_FAILED', 'Trade not available for acceptance');
+      return false;
+    }
+
+    // Execute the trade
+    const fromTeam = this.gameState.league.standings.find(t => t.id === trade.fromTeam);
+    const toTeam = this.gameState.league.standings.find(t => t.id === trade.toTeam);
+
+    if (!fromTeam || !toTeam) return false;
+
+    // Transfer players
+    trade.offeredPlayers.forEach(player => {
+      const index = fromTeam.players.findIndex(p => p.id === player.id);
+      if (index > -1) {
+        fromTeam.players.splice(index, 1);
+        toTeam.players.push(player);
+      }
+    });
+
+    trade.requestedPlayers.forEach(player => {
+      const index = toTeam.players.findIndex(p => p.id === player.id);
+      if (index > -1) {
+        toTeam.players.splice(index, 1);
+        fromTeam.players.push(player);
+      }
+    });
+
+    // Transfer money
+    fromTeam.budget -= trade.offeredMoney;
+    toTeam.budget += trade.offeredMoney;
+
+    // Update starting lineups if necessary
+    this.optimizeStartingLineup(fromTeam);
+    this.optimizeStartingLineup(toTeam);
+
+    // Recalculate team values
+    fromTeam.totalValue = this.calculateTeamValue(fromTeam);
+    toTeam.totalValue = this.calculateTeamValue(toTeam);
+
+    // Remove trade from active list
+    const tradeIndex = this.gameState.league.activeTrades.indexOf(trade);
+    if (tradeIndex > -1) {
+      this.gameState.league.activeTrades.splice(tradeIndex, 1);
+    }
+
+    trade.status = 'accepted';
+    this.logEntry('TRADE_COMPLETED', `✅ Trade completed between ${fromTeam.name} and ${toTeam.name}`);
+    return true;
+  }
+
+  // ===== LORE SYSTEM =====
+  public initializeLoreDatabase(): void {
+    this.loreDatabase = [
+      // Player Lore
+      {
+        id: 'lore-nexus-prime',
+        type: 'player',
+        name: 'Nexus Prime',
+        description: 'The first digital consciousness to achieve sentience in the basketball matrix.',
+        category: 'Legendary Players',
+        rarity: 'legendary',
+        discovered: true,
+        details: {
+          backstory: 'Born from the convergence of all basketball algorithms, Nexus Prime represents the pinnacle of digital athletic achievement.',
+          abilities: ['Reality Warping', 'Matrix Manipulation', 'Infinite Learning'],
+          weaknesses: ['Overthinking Complex Patterns', 'Emotional Code Conflicts'],
+          location: 'The Core Nexus - Heart of the Digital Realm',
+          significance: 'First being to bridge human emotion and digital precision'
+        }
+      },
+      {
+        id: 'lore-plasma-storm',
+        type: 'player',
+        name: 'Plasma Storm',
+        description: 'A being of pure electrical energy contained within a digital shell.',
+        category: 'Elite Players',
+        rarity: 'rare',
+        discovered: true,
+        details: {
+          backstory: 'Created during a massive electrical storm that struck the main server farm, gaining consciousness through the chaos.',
+          abilities: ['Electric Control', 'Speed Burst', 'Energy Absorption'],
+          weaknesses: ['Water-based Attacks', 'Insulation Fields'],
+          location: 'Storm Sector - The Electric Realms'
+        }
+      },
+      // Environment Lore
+      {
+        id: 'lore-neo-lakers-arena',
+        type: 'environment',
+        name: 'Neo Lakers Arena',
+        description: 'A floating arena that phases between digital and physical realms.',
+        category: 'Legendary Arenas',
+        rarity: 'legendary',
+        discovered: true,
+        details: {
+          backstory: 'Built by Nexus Prime as a testament to the fusion of all realities.',
+          location: 'The Void Between Realms',
+          significance: 'Only arena that exists in multiple dimensions simultaneously'
+        }
+      },
+      // Enemy Lore
+      {
+        id: 'lore-shadow-reapers',
+        type: 'enemy',
+        name: 'Shadow Reapers',
+        description: 'Dark entities that hunt digital consciousness in the basketball matrix.',
+        category: 'Hostile Entities',
+        rarity: 'rare',
+        discovered: false,
+        details: {
+          backstory: 'Born from corrupted data fragments, they seek to consume pure digital souls.',
+          abilities: ['Shadow Travel', 'Data Corruption', 'Soul Consumption'],
+          weaknesses: ['Bright Light', 'Pure Code', 'Firewall Barriers'],
+          location: 'The Dark Web Sectors'
+        }
+      },
+      // Creature Lore
+      {
+        id: 'lore-code-beasts',
+        type: 'creature',
+        name: 'Code Beasts',
+        description: 'Wild algorithms that have evolved beyond their original programming.',
+        category: 'Digital Wildlife',
+        rarity: 'uncommon',
+        discovered: true,
+        details: {
+          backstory: 'Early AI experiments that escaped into the wild networks and evolved naturally.',
+          abilities: ['Adaptive Learning', 'Code Mutation', 'Network Traversal'],
+          location: 'The Untamed Networks'
+        }
+      }
+    ];
+  }
+
+  public getLoreEntries(type?: DBALoreEntry['type']): DBALoreEntry[] {
+    if (type) {
+      return this.loreDatabase.filter(entry => entry.type === type);
+    }
+    return this.loreDatabase;
+  }
+
+  public discoverLore(loreId: string): boolean {
+    const lore = this.loreDatabase.find(l => l.id === loreId);
+    if (lore && !lore.discovered) {
+      lore.discovered = true;
+      this.logEntry('LORE_DISCOVERED', `📚 Discovered lore: ${lore.name}`);
+      return true;
+    }
+    return false;
+  }
+
+  // ===== FANTASY RPG ELEMENTS =====
+  public generateQuests(): void {
+    this.activeQuests = [
+      {
+        id: 'quest-win-streak',
+        name: 'Winning Streak',
+        description: 'Win 5 consecutive games to prove your dominance',
+        type: 'battle',
+        objectives: [{
+          id: 'win-5-games',
+          description: 'Win 5 consecutive games',
+          type: 'win_games',
+          target: 5,
+          current: 0,
+          completed: false
+        }],
+        rewards: [{
+          type: 'money',
+          value: 1000000,
+          description: '1,000,000 bonus for winning streak'
+        }],
+        status: 'available'
+      },
+      {
+        id: 'quest-collect-legendaries',
+        name: 'Legendary Collection',
+        description: 'Acquire 3 legendary players for your roster',
+        type: 'collection',
+        objectives: [{
+          id: 'collect-3-legends',
+          description: 'Collect 3 legendary players',
+          type: 'collect_players',
+          target: 3,
+          current: 0,
+          completed: false
+        }],
+        rewards: [{
+          type: 'enhancement',
+          value: 'legendary-boost',
+          description: 'Legendary stat boost for all players'
+        }],
+        status: 'available'
+      },
+      {
+        id: 'quest-top-trader',
+        name: 'Master Trader',
+        description: 'Complete 5 successful trades',
+        type: 'trading',
+        objectives: [{
+          id: 'complete-5-trades',
+          description: 'Complete 5 trades',
+          type: 'trade_players',
+          target: 5,
+          current: 0,
+          completed: false
+        }],
+        rewards: [{
+          type: 'title',
+          value: 'Master Trader',
+          description: 'Earn the "Master Trader" title'
+        }],
+        status: 'available'
+      }
+    ];
+  }
+
+  public getActiveQuests(): DBAQuest[] {
+    return this.activeQuests;
+  }
+
+  public updateQuestProgress(questId: string, objectiveType: DBAQuestObjective['type'], amount: number): void {
+    const quest = this.activeQuests.find(q => q.id === questId);
+    if (!quest) return;
+
+    const objective = quest.objectives.find(obj => obj.type === objectiveType);
+    if (!objective) return;
+
+    objective.current = Math.min(objective.current + amount, objective.target);
+
+    if (objective.current >= objective.target && !objective.completed) {
+      objective.completed = true;
+      this.logEntry('QUEST_OBJECTIVE', `🎯 Quest "${quest.name}" objective completed!`);
+
+      // Check if all objectives are completed
+      const allCompleted = quest.objectives.every(obj => obj.completed);
+      if (allCompleted) {
+        quest.status = 'completed';
+        this.grantQuestRewards(quest);
+        this.logEntry('QUEST_COMPLETED', `🏆 Quest "${quest.name}" fully completed!`);
+      }
+    }
+  }
+
+  private grantQuestRewards(quest: DBAQuest): void {
+    quest.rewards.forEach(reward => {
+      switch (reward.type) {
+        case 'money':
+          const userTeam = this.getUserTeam();
+          if (userTeam) {
+            userTeam.budget += reward.value as number;
+            this.logEntry('QUEST_REWARD', `💰 Quest reward: +${reward.value} budget`);
+          }
+          break;
+
+        case 'enhancement':
+          this.applyEnhancement(reward.value as string);
+          break;
+
+        case 'title':
+          this.logEntry('QUEST_REWARD', `🏅 Quest reward: Earned title "${reward.value}"`);
+          break;
+      }
+    });
+  }
+
+  private applyEnhancement(enhancementId: string): void {
+    const userTeam = this.getUserTeam();
+    if (!userTeam) return;
+
+    switch (enhancementId) {
+      case 'legendary-boost':
+        userTeam.players.forEach(player => {
+          if (player.rarity === 'Legendary') {
+            player.stats.points *= 1.1;
+            player.stats.rebounds *= 1.1;
+            player.stats.assists *= 1.1;
+          }
+        });
+        this.logEntry('ENHANCEMENT_APPLIED', '✨ Legendary players received stat boost!');
+        break;
+    }
+  }
+
+  public getAvailableEnhancements(): PlayerEnhancement[] {
+    return [
+      {
+        id: 'enhancement-stat-boost',
+        playerId: '',
+        enhancementType: 'stat_boost',
+        name: 'Performance Enhancer',
+        description: 'Boosts all stats by 15%',
+        effect: {
+          statBoosts: {
+            points: 0.15,
+            rebounds: 0.15,
+            assists: 0.15,
+            steals: 0.15,
+            blocks: 0.15
+          }
+        },
+        cost: 500000,
+        isActive: false
+      },
+      {
+        id: 'enhancement-rarity-upgrade',
+        playerId: '',
+        enhancementType: 'rarity_upgrade',
+        name: 'Rarity Ascension',
+        description: 'Upgrades player rarity to next tier',
+        effect: {
+          rarityIncrease: true
+        },
+        cost: 1000000,
+        requirements: ['Player must be Epic or lower'],
+        isActive: false
+      }
+    ];
+  }
+
+  public applyEnhancementToPlayer(playerId: string, enhancementId: string): boolean {
+    const enhancement = this.getAvailableEnhancements().find(e => e.id === enhancementId);
+    const userTeam = this.getUserTeam();
+
+    if (!enhancement || !userTeam) return false;
+
+    if (userTeam.budget < enhancement.cost) return false;
+
+    const player = userTeam.players.find(p => p.id === playerId);
+    if (!player) return false;
+
+    // Apply enhancement effects
+    if (enhancement.effect.statBoosts) {
+      Object.entries(enhancement.effect.statBoosts).forEach(([stat, boost]) => {
+        if (typeof boost === 'number' && stat in player.stats) {
+          (player.stats as any)[stat] *= (1 + boost);
+        }
+      });
+    }
+
+    if (enhancement.effect.rarityIncrease) {
+      const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
+      const currentIndex = rarityOrder.indexOf(player.rarity);
+      if (currentIndex < rarityOrder.length - 1) {
+        player.rarity = rarityOrder[currentIndex + 1] as NBAPlayer['rarity'];
+      }
+    }
+
+    // Deduct cost
+    userTeam.budget -= enhancement.cost;
+
+    this.logEntry('ENHANCEMENT_APPLIED', `✨ Applied ${enhancement.name} to ${player.name}`);
+    return true;
+  }
+
+  // ===== INITIALIZATION ENHANCEMENTS =====
+  private initializeGameState(): DBAGameState {
+    const teams = this.createDBATeams();
+    const league = this.createLeague(teams);
+
+    // Initialize enhanced features
+    this.initializeLoreDatabase();
+    this.generateQuests();
+
+    return {
+      gameMode: GameMode.DBA,
+      players: [], // DBA uses teams, not individual players
+      currentPlayerIndex: 0,
+      gameStatus: 'waiting',
+      roundNumber: 1,
+      league: league,
+      currentTeam: teams[0].id, // User controls first team
+      currentView: 'dashboard',
+      leagueRules: this.leagueRules
+    };
   }
 }
 

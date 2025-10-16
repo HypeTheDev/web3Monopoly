@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { gameBlockchainService } from '../services/GameBlockchainService';
 import { GameMode, Player } from '../types/GameTypes';
 
 interface BlockchainTestProps {}
+
+interface Position {
+  x: number;
+  y: number;
+}
 
 const BlockchainTest: React.FC<BlockchainTestProps> = () => {
   const [connectionStatus, setConnectionStatus] = useState(gameBlockchainService.getConnectionStatus());
@@ -10,6 +15,39 @@ const BlockchainTest: React.FC<BlockchainTestProps> = () => {
   const [testResults, setTestResults] = useState<string[]>([]);
   const [gasPrice, setGasPrice] = useState<string>('0');
   const [isMinimized, setIsMinimized] = useState(false);
+  const [position, setPosition] = useState<Position>({ x: 20, y: 20 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
+  const dragRef = useRef<HTMLDivElement>(null);
+
+  // Load saved position and minimized state from localStorage
+  useEffect(() => {
+    const savedPosition = localStorage.getItem('web3PanelPosition');
+    const savedMinimized = localStorage.getItem('web3PanelMinimized');
+
+    if (savedPosition) {
+      try {
+        const parsed = JSON.parse(savedPosition);
+        setPosition(parsed);
+      } catch (e) {
+        console.warn('Failed to parse saved web3 panel position');
+      }
+    }
+
+    if (savedMinimized) {
+      setIsMinimized(savedMinimized === 'true');
+    }
+  }, []);
+
+  // Save position to localStorage
+  useEffect(() => {
+    localStorage.setItem('web3PanelPosition', JSON.stringify(position));
+  }, [position]);
+
+  // Save minimized state to localStorage
+  useEffect(() => {
+    localStorage.setItem('web3PanelMinimized', isMinimized.toString());
+  }, [isMinimized]);
 
   useEffect(() => {
     // Listen for connection changes
@@ -136,22 +174,131 @@ const BlockchainTest: React.FC<BlockchainTestProps> = () => {
     return network ? `${network.chainName} (${network.networkId})` : 'Unknown';
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!dragRef.current) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const rect = dragRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+    setIsDragging(true);
+  };
+
+  // Snap to edges function
+  const snapToEdges = (x: number, y: number) => {
+    const snapThreshold = 50; // pixels from edge to trigger snap
+    const elementWidth = dragRef.current?.offsetWidth || 400;
+    const elementHeight = dragRef.current?.offsetHeight || 300;
+
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    let newX = x;
+    let newY = y;
+
+    // Snap to left edge
+    if (x < snapThreshold) {
+      newX = 10;
+    }
+    // Snap to right edge
+    else if (x + elementWidth > screenWidth - snapThreshold) {
+      newX = screenWidth - elementWidth - 10;
+    }
+
+    // Snap to top edge
+    if (y < snapThreshold) {
+      newY = 10;
+    }
+    // Snap to bottom edge
+    else if (y + elementHeight > screenHeight - snapThreshold) {
+      newY = screenHeight - elementHeight - 10;
+    }
+
+    return { x: newX, y: newY };
+  };
+
+  // Add global mouse event listeners
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      // Prevent default to avoid conflicts
+      e.preventDefault();
+      e.stopPropagation();
+
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+
+      // Keep within screen bounds
+      const maxX = window.innerWidth - (dragRef.current?.offsetWidth || 400);
+      const maxY = window.innerHeight - (dragRef.current?.offsetHeight || 300);
+
+      setPosition({
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY))
+      });
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      setIsDragging(false);
+
+      // Apply snap-to-edges after dragging ends
+      const currentElement = dragRef.current;
+      if (currentElement) {
+        const rect = currentElement.getBoundingClientRect();
+        const snapped = snapToEdges(rect.left, rect.top);
+        setPosition(snapped);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove, { passive: false });
+      document.addEventListener('mouseup', handleMouseUp, { passive: false });
+      document.body.style.userSelect = 'none'; // Prevent text selection while dragging
+      document.body.style.pointerEvents = 'none'; // Prevent interaction with other elements
+
+      // Re-enable pointer events for the drag handle
+      if (dragRef.current) {
+        dragRef.current.style.pointerEvents = 'auto';
+      }
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.pointerEvents = '';
+    };
+  }, [isDragging, dragOffset]);
+
   if (isMinimized) {
     return (
-      <div style={{
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        backgroundColor: '#1a1a1a',
-        color: '#00ff00',
-        padding: '8px 12px',
-        border: '2px solid #00ff00',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        zIndex: 1000,
-        cursor: 'pointer'
-      }}
-      onClick={() => setIsMinimized(false)}
+      <div
+        ref={dragRef}
+        style={{
+          position: 'fixed',
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          backgroundColor: '#1a1a1a',
+          color: '#00ff00',
+          padding: '8px 12px',
+          border: '2px solid #00ff00',
+          borderRadius: '8px',
+          fontFamily: 'monospace',
+          zIndex: 1000,
+          cursor: 'pointer'
+        }}
+        onClick={() => setIsMinimized(false)}
+        onMouseDown={handleMouseDown}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span>🔗</span>
@@ -163,36 +310,67 @@ const BlockchainTest: React.FC<BlockchainTestProps> = () => {
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: '20px',
-      right: '20px',
-      width: '400px',
-      backgroundColor: '#1a1a1a',
-      color: '#00ff00',
-      padding: '20px',
-      border: '2px solid #00ff00',
-      borderRadius: '8px',
-      fontFamily: 'monospace',
-      zIndex: 1000
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-        <h3 style={{ margin: 0, color: '#00ff00' }}>🔗 BLOCKCHAIN TEST PANEL</h3>
-        <button
-          onClick={() => setIsMinimized(true)}
-          style={{
-            backgroundColor: 'transparent',
-            color: '#00ff00',
-            border: '1px solid #00ff00',
-            borderRadius: '4px',
-            padding: '4px 8px',
-            fontSize: '12px',
-            cursor: 'pointer',
-            fontFamily: 'monospace'
-          }}
-        >
-          −
-        </button>
+    <div
+      ref={dragRef}
+      className={`draggable-web3-panel ${isDragging ? 'dragging' : ''}`}
+      style={{
+        position: 'fixed',
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        width: '400px',
+        backgroundColor: '#1a1a1a',
+        color: '#00ff00',
+        padding: '20px',
+        border: '2px solid #00ff00',
+        borderRadius: '8px',
+        fontFamily: 'monospace',
+        zIndex: 1000
+      }}
+    >
+      {/* Drag Handle */}
+      <div
+        className="drag-handle"
+        onMouseDown={handleMouseDown}
+        title="Drag to move web3 panel"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '15px',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="drag-dots">
+            <span>⋮⋮</span>
+          </div>
+          <div className="drag-title">
+            🔗 WEB3 PANEL
+          </div>
+        </div>
+        <div className="drag-controls">
+          <button
+            className="minimize-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMinimized(true);
+            }}
+            title="Minimize"
+            style={{
+              backgroundColor: 'transparent',
+              color: '#00ff00',
+              border: '1px solid #00ff00',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '12px',
+              cursor: 'pointer',
+              fontFamily: 'monospace'
+            }}
+          >
+            −
+          </button>
+        </div>
       </div>
 
       {/* Connection Status */}

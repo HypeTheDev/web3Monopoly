@@ -1,125 +1,198 @@
+/* Monopoly Page - Sleep-Friendly Design */
 .monopoly-page {
-  min-height: 100vh;
-  background: var(--background-color, #000000);
-  color: var(--text-color, #00ff00);
-  font-family: 'Courier New', monospace;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+  color: #a8d8a8; /* Softer green for better readability */
+  font-family: 'Courier New', 'SF Mono', 'Monaco', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
-/* Game Header */
+.monopoly-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(168, 216, 168, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 216, 168, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Game Header - Sleep-Friendly */
 .game-header {
-  background: var(--panel-color, #111111);
-  border-bottom: 2px solid var(--border-color, #333333);
-  padding: 15px 20px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #222222 50%, #1a1a1a 100%);
+  border-bottom: 2px solid #2a4a2a;
+  padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .game-title h1 {
-  color: var(--primary-color, #00ff00);
-  font-size: 2rem;
+  color: #7cb37c; /* Softer, more muted green */
+  font-size: 2.2rem;
   margin: 0;
-  text-shadow: 0 0 10px var(--primary-color, #00ff00);
+  text-shadow: 0 0 15px rgba(124, 179, 124, 0.4);
+  font-weight: 300;
+  letter-spacing: 2px;
 }
 
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
 }
 
 .back-btn {
-  background: transparent;
-  border: 1px solid var(--primary-color, #00ff00);
-  color: var(--primary-color, #00ff00);
-  padding: 8px 15px;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+  border: 1px solid #4a6a4a;
+  color: #9cc49c;
+  padding: 10px 18px;
+  border-radius: 8px;
   cursor: pointer;
-  font-family: 'Courier New', monospace;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .back-btn:hover {
-  background: var(--primary-color, #00ff00);
-  color: #000;
+  background: linear-gradient(135deg, #4a6a4a 0%, #3a5a3a 100%);
+  color: #ffffff;
+  border-color: #6a8a6a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 106, 74, 0.3);
 }
 
 .game-mode-indicator {
-  color: var(--secondary-color, #ffff00);
-  font-weight: bold;
+  color: #b8d4b8;
+  font-weight: 500;
+  font-size: 0.9rem;
+  background: rgba(124, 179, 124, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(124, 179, 124, 0.2);
 }
 
 .action-btn {
-  background: var(--primary-color, #00ff00);
-  color: #000;
+  background: linear-gradient(135deg, #4a6a4a 0%, #3a5a3a 100%);
+  color: #ffffff;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-weight: 600;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(74, 106, 74, 0.2);
 }
 
 .action-btn:hover {
-  background: #00cc00;
+  background: linear-gradient(135deg, #5a7a5a 0%, #4a6a4a 100%);
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(74, 106, 74, 0.4);
 }
 
 .action-btn.danger {
-  background: #ff4444;
-  color: #fff;
+  background: linear-gradient(135deg, #8a4a4a 0%, #7a3a3a 100%);
+  box-shadow: 0 2px 8px rgba(138, 74, 74, 0.2);
 }
 
 .action-btn.danger:hover {
-  background: #cc3333;
+  background: linear-gradient(135deg, #9a5a5a 0%, #8a4a4a 100%);
+  box-shadow: 0 6px 16px rgba(138, 74, 74, 0.4);
 }
 
 .settings-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--border-color, #333);
-  color: var(--text-color, #00ff00);
-  padding: 8px 15px;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+  border: 1px solid #4a6a4a;
+  color: #9cc49c;
+  padding: 10px 18px;
+  border-radius: 8px;
   cursor: pointer;
-  font-family: 'Courier New', monospace;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .settings-button:hover {
-  border-color: var(--primary-color, #00ff00);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: #6a8a6a;
+  background: linear-gradient(135deg, #3a3a3a 0%, #2f2f2f 100%);
+  color: #b8d4b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 106, 74, 0.2);
 }
 
-/* AI Status Panel */
+/* AI Status Panel - Sleep-Friendly */
 .ai-status-panel {
-  background: var(--panel-color, #111111);
-  border-bottom: 2px solid var(--border-color, #333333);
-  padding: 10px 20px;
+  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 50%, #1f1f1f 100%);
+  border-bottom: 2px solid #2a4a2a;
+  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
 }
 
 .status-indicators span {
-  color: var(--secondary-color, #ffff00);
-  margin-right: 20px;
-  font-size: 0.9rem;
+  color: #b8d4b8;
+  margin-right: 24px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(124, 179, 124, 0.08);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(124, 179, 124, 0.15);
 }
 
 .ai-controls {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
 }
 
 .speed-selector {
-  background: var(--background-color, #000);
-  color: var(--text-color, #00ff00);
-  border: 1px solid var(--border-color, #333);
-  padding: 5px 10px;
-  border-radius: 3px;
-  font-family: 'Courier New', monospace;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+  color: #9cc49c;
+  border: 1px solid #4a6a4a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.speed-selector:hover {
+  border-color: #6a8a6a;
+  background: linear-gradient(135deg, #3a3a3a 0%, #2f2f2f 100%);
+}
+
+.speed-selector:focus {
+  outline: none;
+  border-color: #7cb37c;
+  box-shadow: 0 0 8px rgba(124, 179, 124, 0.3);
 }
 
 /* Game Main */
@@ -158,37 +231,67 @@
   }
 }
 
+/* Panels - Sleep-Friendly */
 .music-panel,
 .game-state-panel {
-  background: var(--panel-color, #111111);
-  border: 1px solid var(--border-color, #333);
-  border-radius: 5px;
-  padding: 15px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+  border: 1px solid #2a4a2a;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
 }
 
 .game-state-panel h4 {
-  color: var(--primary-color, #00ff00);
-  margin: 0 0 10px 0;
+  color: #7cb37c;
+  margin: 0 0 16px 0;
   text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-shadow: 0 0 8px rgba(124, 179, 124, 0.3);
+  letter-spacing: 1px;
 }
 
 .state-info div {
-  color: var(--text-color, #00ff00);
-  margin-bottom: 5px;
+  color: #a8d8a8;
+  margin-bottom: 8px;
   font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(124, 179, 124, 0.05);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid #4a6a4a;
 }
 
-/* Center Panel - Game Board */
+/* Center Panel - Game Board - Sleep-Friendly */
 .game-center-panel {
-  background: var(--panel-color, #111111);
-  border: 1px solid var(--border-color, #333);
-  border-radius: 5px;
-  padding: 15px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+  border: 1px solid #2a4a2a;
+  border-radius: 16px;
+  padding: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
+  min-height: 450px;
   order: 1;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-center-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(124, 179, 124, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(124, 179, 124, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: 16px;
 }
 
 @media (min-width: 1024px) {
@@ -198,9 +301,18 @@
   }
 }
 
+.loading-board {
+  position: relative;
+  z-index: 1;
+}
+
 .loading-board h3 {
-  color: var(--secondary-color, #ffff00);
+  color: #7cb37c;
   text-align: center;
+  font-size: 1.3rem;
+  font-weight: 400;
+  text-shadow: 0 0 10px rgba(124, 179, 124, 0.3);
+  letter-spacing: 1px;
 }
 
 /* Right Panel - Game Status Display */

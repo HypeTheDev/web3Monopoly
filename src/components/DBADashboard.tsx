@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { DBAGameState, NBAPlayer } from '../types/GameTypes';
+import { DBAGameState, NBAPlayer, DBALoreEntry, DBABet } from '../types/GameTypes';
 import WorldNews from './WorldNews';
+import DBALore from './DBALore';
 import './DBADashboard.css';
 
 interface DBADashboardProps {
@@ -15,6 +16,10 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
   onAdvanceWeek
 }) => {
   const [showWorldNews, setShowWorldNews] = useState(false);
+  const [showLore, setShowLore] = useState(false);
+  const [betAmount, setBetAmount] = useState('');
+  const [betType, setBetType] = useState<DBABet['betType']>('moneyline');
+  const [betSelection, setBetSelection] = useState('');
   const currentTeam = gameState.league.standings.find(t => t.id === gameState.currentTeam)!;
   const currentWeekGames = gameState.league.schedule.filter(g =>
     g.status === 'completed' &&
@@ -185,6 +190,92 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
                     <span>{formatValue(team.totalValue)}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Betting Interface */}
+            <div className="dashboard-section">
+              <div className="betting-header">
+                <h3>💰 SPORTS_BOOK</h3>
+                <div className="betting-controls">
+                  <button
+                    className="lore-btn"
+                    onClick={() => setShowLore(true)}
+                  >
+                    📚 LORE
+                  </button>
+                </div>
+              </div>
+
+              <div className="betting-interface">
+                <div className="betting-form">
+                  <div className="bet-input-group">
+                    <label>Bet Type:</label>
+                    <select
+                      value={betType}
+                      onChange={(e) => setBetType(e.target.value as DBABet['betType'])}
+                      className="bet-select"
+                    >
+                      <option value="moneyline">Moneyline</option>
+                      <option value="spread">Point Spread</option>
+                      <option value="over_under">Over/Under</option>
+                      <option value="player_prop">Player Props</option>
+                    </select>
+                  </div>
+
+                  <div className="bet-input-group">
+                    <label>Amount:</label>
+                    <input
+                      type="number"
+                      value={betAmount}
+                      onChange={(e) => setBetAmount(e.target.value)}
+                      placeholder="Enter bet amount"
+                      className="bet-input"
+                    />
+                  </div>
+
+                  <div className="bet-input-group">
+                    <label>Selection:</label>
+                    <select
+                      value={betSelection}
+                      onChange={(e) => setBetSelection(e.target.value)}
+                      className="bet-select"
+                    >
+                      <option value="">Choose team/player</option>
+                      {gameState.league.standings.map(team => (
+                        <option key={team.id} value={team.name}>{team.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    className="place-bet-btn"
+                    disabled={!betAmount || !betSelection}
+                  >
+                    PLACE_BET
+                  </button>
+                </div>
+
+                <div className="betting-odds">
+                  <h4>CURRENT_ODDS</h4>
+                  <div className="odds-display">
+                    {gameState.league.schedule
+                      .filter(g => g.status === 'scheduled')
+                      .slice(0, 3)
+                      .map(game => (
+                        <div key={game.id} className="game-odds">
+                          <div className="game-matchup">
+                            {game.homeTeam.name} vs {game.awayTeam.name}
+                          </div>
+                          <div className="odds-values">
+                            <span>{game.homeTeam.name}: 1.85</span>
+                            <span>{game.awayTeam.name}: 2.05</span>
+                            <span>O/U: 180</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -375,6 +466,17 @@ const DBADashboard: React.FC<DBADashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* Lore Modal */}
+      <DBALore
+        isVisible={showLore}
+        onClose={() => setShowLore(false)}
+        loreEntries={[]} // This would come from the game engine
+        onDiscoverLore={(loreId) => {
+          // Handle lore discovery
+          console.log('Discovering lore:', loreId);
+        }}
+      />
     </div>
   );
 };

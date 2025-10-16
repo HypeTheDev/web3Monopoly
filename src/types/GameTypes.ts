@@ -594,6 +594,101 @@ export interface TCGAttack {
   battleResult: 'destroyed' | 'survived' | 'tie';
 }
 
+// Betting System Types
+export interface DBABet {
+  id: string;
+  gameId: string;
+  bettor: string; // Team ID or 'user'
+  betType: 'moneyline' | 'spread' | 'over_under' | 'player_prop';
+  amount: number;
+  odds: number;
+  potentialPayout: number;
+  selection: string; // Team name or player prop
+  status: 'pending' | 'won' | 'lost';
+  createdAt: Date;
+}
+
+// Lore System Types
+export interface DBALoreEntry {
+  id: string;
+  type: 'player' | 'environment' | 'enemy' | 'creature' | 'artifact' | 'event';
+  name: string;
+  description: string;
+  category: string;
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  discovered: boolean;
+  details: {
+    backstory?: string;
+    abilities?: string[];
+    weaknesses?: string[];
+    location?: string;
+    significance?: string;
+    relatedEntries?: string[]; // IDs of related lore entries
+  };
+  imageUrl?: string;
+  unlockedBy?: string; // Achievement or condition to unlock
+}
+
+// Enhanced Trading System
+export interface DBATrade {
+  id: string;
+  fromTeam: string;
+  toTeam: string;
+  offeredPlayers: NBAPlayer[];
+  offeredMoney: number;
+  requestedPlayers: NBAPlayer[];
+  requestedMoney: number;
+  status: 'pending' | 'accepted' | 'rejected' | 'countered';
+  createdAt: Date;
+  expiresAt?: Date;
+  counterOffers?: DBATrade[];
+}
+
+// Player Enhancement System
+export interface PlayerEnhancement {
+  id: string;
+  playerId: string;
+  enhancementType: 'stat_boost' | 'ability_unlock' | 'rarity_upgrade';
+  name: string;
+  description: string;
+  effect: {
+    statBoosts?: Partial<NBAPlayer['stats']>;
+    newAbilities?: string[];
+    rarityIncrease?: boolean;
+  };
+  cost: number;
+  requirements?: string[];
+  isActive: boolean;
+}
+
+// Fantasy RPG Elements
+export interface DBAQuest {
+  id: string;
+  name: string;
+  description: string;
+  type: 'collection' | 'battle' | 'exploration' | 'trading';
+  objectives: DBAQuestObjective[];
+  rewards: DBAQuestReward[];
+  status: 'available' | 'active' | 'completed' | 'failed';
+  timeLimit?: Date;
+  prerequisites?: string[]; // Quest IDs
+}
+
+export interface DBAQuestObjective {
+  id: string;
+  description: string;
+  type: 'win_games' | 'collect_players' | 'reach_rank' | 'earn_money' | 'trade_players';
+  target: number;
+  current: number;
+  completed: boolean;
+}
+
+export interface DBAQuestReward {
+  type: 'money' | 'player' | 'enhancement' | 'title' | 'lore_unlock';
+  value: number | string;
+  description: string;
+}
+
 // Game Log Entry Class
 export class GameEntry {
   constructor(

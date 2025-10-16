@@ -9,9 +9,10 @@ import WorldNews from '../../components/WorldNews';
 // Game Engine
 import DBAEngine from '../../lib/DBAEngine';
 import { GameEntry } from '../../types/GameTypes';
+import DBALore from '../../components/DBALore';
 
 // Types
-import { GameState, TerminalTheme, DBAGameState } from '../../types/GameTypes';
+import { GameState, TerminalTheme, DBAGameState, DBALoreEntry } from '../../types/GameTypes';
 
 interface DBAPageProps {
   onPageChange: (page: PageType) => void;
@@ -331,12 +332,26 @@ const DBAPage: React.FC<DBAPageProps> = ({ onPageChange }) => {
         />
       )}
 
+      {/* DBA Lore Database */}
+      {gameState && 'league' in gameState && gameEngine && (
+        <DBALore
+          isVisible={false} // This would be controlled by a state variable
+          onClose={() => {}} // Handle lore modal close
+          loreEntries={gameEngine.getLoreEntries()}
+          onDiscoverLore={(loreId) => {
+            if (gameEngine) {
+              gameEngine.discoverLore(loreId);
+            }
+          }}
+        />
+      )}
+
       {/* Matrix background effect */}
       <MatrixRain />
 
       {/* Footer - simplified */}
       <footer className="terminal-footer">
-        <div className="network-status">BkM DBA Terminal v1.0 | © Neo's Fantasy League</div>
+        <div className="network-status">BkM DBA Terminal v2.0 | Enhanced Fantasy Basketball | Betting & Lore System Active</div>
       </footer>
     </div>
   );

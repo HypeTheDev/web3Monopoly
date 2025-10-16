@@ -17,28 +17,41 @@ const MusicPlayer: React.FC = () => {
     title: string;
     artist: string;
     url: string;
+    fallbackUrls?: string[];
   }
 
-  // Available channels with 24/7 streaming radio stations
+  // Available channels with 24/7 streaming radio stations and fallback URLs
   const tracksByChannel = useMemo(() => ({
     beats: [
       {
         id: 'b1',
         title: 'Lo-Fi Hip Hop Radio',
         artist: 'Chillhop Radio',
-        url: 'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        url: 'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/',
+        fallbackUrls: [
+          'https://streams.ilovemusic.de/chillhop.mp3',
+          'https://uk7.internet-radio.com:8226/stream'
+        ]
       },
       {
         id: 'b2',
         title: 'Jazz Cafe 24/7',
         artist: 'Jazz Radio',
-        url: 'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc4'
+        url: 'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc4',
+        fallbackUrls: [
+          'https://uk7.internet-radio.com:8226/stream',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 'b3',
         title: 'Instrumental Beats',
         artist: 'Focus Music',
-        url: 'https://uk7.internet-radio.com:8226/stream'
+        url: 'https://uk7.internet-radio.com:8226/stream',
+        fallbackUrls: [
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/',
+          'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc4'
+        ]
       }
     ],
     terminal: [
@@ -46,19 +59,31 @@ const MusicPlayer: React.FC = () => {
         id: 't1',
         title: 'Ambient Room',
         artist: 'Sleep Radio',
-        url: 'https://streaming.radionomy.com/Sleep-Radio'
+        url: 'https://streams.ilovemusic.de/ambient.mp3',
+        fallbackUrls: [
+          'https://uk7.internet-radio.com:8226/stream',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 't2',
         title: 'Digital Lounge',
         artist: 'Nightlight FM',
-        url: 'https://nightlight.fm/stream'
+        url: 'https://streams.ilovemusic.de/electronic.mp3',
+        fallbackUrls: [
+          'https://uk7.internet-radio.com:8226/stream',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 't3',
         title: 'Code Beats Ambient',
         artist: 'WFMU Experimental',
-        url: 'https://stream0.wfmu.org/experimental-128k'
+        url: 'https://stream0.wfmu.org/experimental-128k',
+        fallbackUrls: [
+          'https://uk7.internet-radio.com:8226/stream',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       }
     ],
     elevator: [
@@ -66,19 +91,31 @@ const MusicPlayer: React.FC = () => {
         id: 'e1',
         title: 'Classical Piano',
         artist: 'Piano Radio',
-        url: 'https://streaming.radionomy.com/Abacusfm-PianoRadio'
+        url: 'https://streaming.radionomy.com/Abacusfm-PianoRadio',
+        fallbackUrls: [
+          'https://uk7.internet-radio.com:8226/stream',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 'e2',
         title: 'Smooth Jazz',
         artist: 'KJazz 88.1 FM',
-        url: 'https://kjzz.streamguys1.com/kjzzmp3'
+        url: 'https://kjzz.streamguys1.com/kjzzmp3',
+        fallbackUrls: [
+          'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc4',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 'e3',
         title: 'Elevator Classics',
         artist: 'Classical KDFC',
-        url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/KDFCFM.mp3'
+        url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/KDFCFM.mp3',
+        fallbackUrls: [
+          'https://streaming.radionomy.com/Abacusfm-PianoRadio',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       }
     ],
     easylistening: [
@@ -86,19 +123,31 @@ const MusicPlayer: React.FC = () => {
         id: 'el1',
         title: 'Coffee Shop Jazz',
         artist: 'Jazz Radio',
-        url: 'https://live.wostreaming.net/direct/ppm-coffeeshopmp3-ibc4'
+        url: 'https://live.wostreaming.net/direct/ppm-coffeeshopmp3-ibc4',
+        fallbackUrls: [
+          'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc4',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 'el2',
         title: 'Lounge Music',
         artist: 'Simply Lounge',
-        url: 'https://streaming.radionomy.com/Simply-Lounge'
+        url: 'https://streaming.radionomy.com/Simply-Lounge',
+        fallbackUrls: [
+          'https://streaming.radionomy.com/Abacusfm-PianoRadio',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       },
       {
         id: 'el3',
         title: 'Piano Radio',
         artist: 'Abacus FM Piano',
-        url: 'https://streaming.radionomy.com/Abacusfm-PianoRadio'
+        url: 'https://streaming.radionomy.com/Abacusfm-PianoRadio',
+        fallbackUrls: [
+          'https://streaming.radionomy.com/Simply-Lounge',
+          'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/'
+        ]
       }
     ]
   }), []);
@@ -132,107 +181,43 @@ const MusicPlayer: React.FC = () => {
     }
   }, [volume]);
 
-  // Stream music from external API - fallback function
-  const streamMusicFromAPI = useCallback(async () => {
-    try {
-      // For demo purposes, we'll use a placeholder streaming approach
-      // In production, this would connect to actual streaming services
+  // Fallback basic ambient music
+  const generateBasicAmbientMusic = useCallback(() => {
+    if (typeof window !== 'undefined' && 'AudioContext' in window) {
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-      // Simulate streaming by creating a more sophisticated tone generator
-      await generateAdvancedAmbientMusic();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
 
-    } catch (error) {
-      console.warn('Streaming API not available, falling back to local generation');
-      generateAdvancedAmbientMusic();
-    }
-  }, []);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-  // Update audio source when current track changes
-  useEffect(() => {
-    if (audioRef.current && playlist.length > 0) {
-      const currentTrackData = playlist[currentTrack];
-      if (currentTrackData) {
-        audioRef.current.src = currentTrackData.url;
-        audioRef.current.load();
-        // Auto-play if we were already playing
-        if (isPlaying) {
-          audioRef.current.play().catch(error => {
-            console.warn('Audio play failed, falling back to procedural generation');
-            streamMusicFromAPI();
-          });
-        }
+        // Simple frequency for fallback
+        oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime((volume / 1000) * 0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 2);
+
+        // Schedule next fallback pattern
+        setTimeout(() => {
+          if (isPlaying) {
+            generateBasicAmbientMusic();
+          }
+        }, 2000);
+
+      } catch (error) {
+        console.warn('Basic audio generation also failed');
       }
     }
-  }, [currentTrack, playlist, isPlaying]);
-
-  // Handle audio play/pause state changes
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      const handlePlay = () => setIsPlaying(true);
-      const handlePause = () => setIsPlaying(false);
-
-      audio.addEventListener('play', handlePlay);
-      audio.addEventListener('pause', handlePause);
-
-      return () => {
-        audio.removeEventListener('play', handlePlay);
-        audio.removeEventListener('pause', handlePause);
-      };
-    }
-  }, []);
-
-  const nextTrack = useCallback(() => {
-    const nextIndex = (currentTrack + 1) % playlist.length;
-    setCurrentTrack(nextIndex);
-  }, [currentTrack, playlist.length]);
-
-  const prevTrack = useCallback(() => {
-    const prevIndex = currentTrack === 0 ? playlist.length - 1 : currentTrack - 1;
-    setCurrentTrack(prevIndex);
-  }, [currentTrack, playlist.length]);
-
-  useEffect(() => {
-    const handleAudioError = () => {
-      console.warn('Audio failed to load, using placeholder audio');
-      // In production, you would have a fallback audio file
-    };
-
-    if (audioRef.current) {
-      const audio = audioRef.current;
-      audio.addEventListener('error', handleAudioError);
-      audio.addEventListener('ended', nextTrack);
-      
-      return () => {
-        audio.removeEventListener('error', handleAudioError);
-        audio.removeEventListener('ended', nextTrack);
-      };
-    }
-  }, [nextTrack]);
-
-  const togglePlay = () => {
-    if (playlist.length > 0) {
-      if (isPlaying) {
-        // Stop playing
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-        setIsPlaying(false);
-      } else {
-        // Start playing from streaming URL
-        if (audioRef.current) {
-          audioRef.current.play().catch(error => {
-            console.warn('Audio play failed, falling back to procedural generation');
-            streamMusicFromAPI();
-          });
-        }
-        setIsPlaying(true);
-      }
-    }
-  };
+  }, [volume, isPlaying]);
 
   // Advanced ambient music generation with more sophisticated patterns
-  const generateAdvancedAmbientMusic = () => {
+  const generateAdvancedAmbientMusic = useCallback(() => {
     if (typeof window !== 'undefined' && 'AudioContext' in window) {
       try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -324,42 +309,218 @@ const MusicPlayer: React.FC = () => {
         generateBasicAmbientMusic();
       }
     }
-  };
+  }, [currentChannel, volume, isPlaying, generateBasicAmbientMusic]);
 
-  // Fallback basic ambient music
-  const generateBasicAmbientMusic = () => {
-    if (typeof window !== 'undefined' && 'AudioContext' in window) {
-      try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  // Try multiple streaming URLs with fallback support
+  const tryStreamingUrls = useCallback(async (urls: string[], currentIndex: number = 0): Promise<void> => {
+    if (currentIndex >= urls.length) {
+      // All URLs failed, fall back to procedural generation
+      console.warn('All streaming URLs failed, falling back to procedural generation');
+      generateAdvancedAmbientMusic();
+      return;
+    }
 
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+    const currentUrl = urls[currentIndex];
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+    try {
+      // Test if URL is accessible by creating a temporary audio element
+      await new Promise<void>((resolve, reject) => {
+        const testAudio = new Audio();
+        testAudio.volume = volume / 100;
+        testAudio.crossOrigin = 'anonymous';
 
-        // Simple frequency for fallback
-        oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
-        oscillator.type = 'sine';
+        const timeout = setTimeout(() => {
+          testAudio.removeEventListener('canplaythrough', onSuccess);
+          testAudio.removeEventListener('error', onError);
+          reject(new Error('Timeout'));
+        }, 5000);
 
-        gainNode.gain.setValueAtTime((volume / 1000) * 0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+        const onSuccess = () => {
+          clearTimeout(timeout);
+          testAudio.removeEventListener('canplaythrough', onSuccess);
+          testAudio.removeEventListener('error', onError);
+          resolve();
+        };
 
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 2);
+        const onError = () => {
+          clearTimeout(timeout);
+          testAudio.removeEventListener('canplaythrough', onSuccess);
+          testAudio.removeEventListener('error', onError);
+          reject(new Error('Audio load failed'));
+        };
 
-        // Schedule next fallback pattern
-        setTimeout(() => {
+        testAudio.addEventListener('canplaythrough', onSuccess);
+        testAudio.addEventListener('error', onError);
+        testAudio.src = currentUrl;
+        testAudio.load();
+      });
+
+      // If we get here, the URL works - update the main audio element
+      if (audioRef.current) {
+        audioRef.current.src = currentUrl;
+        audioRef.current.load();
+        if (isPlaying) {
+          audioRef.current.play().catch(error => {
+            console.warn(`Failed to play from ${currentUrl}, trying next URL`);
+            tryStreamingUrls(urls, currentIndex + 1);
+          });
+        }
+      }
+
+    } catch (error) {
+      console.warn(`URL ${currentUrl} failed, trying next URL`);
+      // Try the next URL
+      tryStreamingUrls(urls, currentIndex + 1);
+    }
+  }, [volume, isPlaying, generateAdvancedAmbientMusic]);
+
+  // Stream music from external API - fallback function
+  const streamMusicFromAPI = useCallback(async () => {
+    const currentTrackData = playlist[currentTrack];
+    if (currentTrackData) {
+      const urlsToTry = [currentTrackData.url, ...(currentTrackData.fallbackUrls || [])];
+      await tryStreamingUrls(urlsToTry);
+    } else {
+      // No track data, fall back to procedural generation
+      generateAdvancedAmbientMusic();
+    }
+  }, [playlist, currentTrack, tryStreamingUrls, generateAdvancedAmbientMusic]);
+
+  // Update audio source when current track changes
+  useEffect(() => {
+    if (audioRef.current && playlist.length > 0) {
+      const currentTrackData = playlist[currentTrack];
+      if (currentTrackData) {
+        audioRef.current.src = currentTrackData.url;
+        audioRef.current.load();
+        // Auto-play if we were already playing
+        if (isPlaying) {
+          audioRef.current.play().catch(error => {
+            console.warn('Audio play failed, falling back to procedural generation');
+            streamMusicFromAPI();
+          });
+        }
+      }
+    }
+  }, [currentTrack, playlist, isPlaying, streamMusicFromAPI]);
+
+  // Handle audio play/pause state changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+
+      return () => {
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
+      };
+    }
+  }, []);
+
+  const nextTrack = useCallback(() => {
+    const nextIndex = (currentTrack + 1) % playlist.length;
+    setCurrentTrack(nextIndex);
+  }, [currentTrack, playlist.length]);
+
+  const prevTrack = useCallback(() => {
+    const prevIndex = currentTrack === 0 ? playlist.length - 1 : currentTrack - 1;
+    setCurrentTrack(prevIndex);
+  }, [currentTrack, playlist.length]);
+
+  useEffect(() => {
+    const handleAudioError = async (event: Event) => {
+      const audio = event.target as HTMLAudioElement;
+      const currentSrc = audio.src;
+
+      console.warn(`Audio failed to load: ${currentSrc}`);
+
+      // Try to get fallback URLs for the current track
+      const currentTrackData = playlist[currentTrack];
+      if (currentTrackData && currentTrackData.fallbackUrls && currentTrackData.fallbackUrls.length > 0) {
+        console.warn('Trying fallback URLs...');
+        const urlsToTry = [currentTrackData.url, ...currentTrackData.fallbackUrls];
+        const currentIndex = urlsToTry.findIndex(url => url === currentSrc);
+        const nextIndex = currentIndex + 1;
+
+        if (nextIndex < urlsToTry.length) {
+          // Try the next URL in the fallback chain
+          const nextUrl = urlsToTry[nextIndex];
+          console.warn(`Trying fallback URL: ${nextUrl}`);
+          audio.src = nextUrl;
+          audio.load();
+
           if (isPlaying) {
-            generateBasicAmbientMusic();
+            try {
+              await audio.play();
+              console.warn(`Successfully loaded fallback URL: ${nextUrl}`);
+            } catch (error) {
+              console.warn(`Fallback URL also failed: ${nextUrl}`);
+              // If this was the last URL, fall back to procedural generation
+              if (nextIndex + 1 >= urlsToTry.length) {
+                console.warn('All URLs failed, falling back to procedural generation');
+                streamMusicFromAPI();
+              }
+            }
           }
-        }, 2000);
+        } else {
+          // No more fallback URLs, use procedural generation
+          console.warn('No more fallback URLs, falling back to procedural generation');
+          streamMusicFromAPI();
+        }
+      } else {
+        // No fallback URLs available, use procedural generation
+        console.warn('No fallback URLs available, falling back to procedural generation');
+        streamMusicFromAPI();
+      }
+    };
 
-      } catch (error) {
-        console.warn('Basic audio generation also failed');
+    if (audioRef.current) {
+      const audio = audioRef.current;
+      audio.addEventListener('error', handleAudioError);
+      audio.addEventListener('ended', nextTrack);
+
+      return () => {
+        audio.removeEventListener('error', handleAudioError);
+        audio.removeEventListener('ended', nextTrack);
+      };
+    }
+  }, [nextTrack, playlist, currentTrack, isPlaying, streamMusicFromAPI]);
+
+  const togglePlay = async () => {
+    if (playlist.length > 0) {
+      if (isPlaying) {
+        // Stop playing
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        setIsPlaying(false);
+      } else {
+        // Start playing from streaming URL
+        if (audioRef.current) {
+          try {
+            await audioRef.current.play();
+            setIsPlaying(true);
+          } catch (error) {
+            console.warn('Audio play failed, falling back to procedural generation');
+            await streamMusicFromAPI();
+            setIsPlaying(true);
+          }
+        } else {
+          // No audio element, use procedural generation directly
+          await streamMusicFromAPI();
+          setIsPlaying(true);
+        }
       }
     }
   };
+
+
+
+
 
   const switchChannel = (channel: ChannelType) => {
     setCurrentChannel(channel);

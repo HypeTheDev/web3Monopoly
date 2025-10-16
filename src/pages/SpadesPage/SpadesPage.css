@@ -1,17 +1,68 @@
+/* Playable Spades Game Styles */
 .spades-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #000000 0%, #111111 50%, #000000 100%);
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
+  width: 100%;
+  height: 100vh;
+  background: var(--background-color);
+  color: var(--primary-color);
+  font-family: var(--font-family);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
+/* Game Header */
 .page-header {
-  background: #000;
-  border-bottom: 2px solid #333;
+  background: var(--panel-color);
+  border-bottom: 2px solid var(--primary-color);
   padding: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 4px;
+}
+
+.back-btn:hover {
+  background: var(--secondary-color);
+  color: var(--background-color);
+}
+
+.game-title {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-family: var(--font-family);
+  text-shadow: 0 0 10px var(--primary-color);
+  margin: 0;
+}
+
+.game-status {
+  color: var(--success-color);
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+  background: rgba(0, 255, 0, 0.1);
+  padding: 4px 12px;
+  border: 1px solid var(--success-color);
+  border-radius: 4px;
 }
 
 .header-content {
@@ -231,5 +282,584 @@
 
   .status-info {
     padding: 15px;
+  }
+}
+
+/* Game Controls */
+.game-controls {
+  background: var(--panel-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.control-btn {
+  background: var(--background-color);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 4px;
+}
+
+.control-btn:hover {
+  background: var(--primary-color);
+  color: var(--background-color);
+  box-shadow: 0 0 10px var(--primary-color);
+}
+
+.control-btn.success {
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.control-btn.success:hover {
+  background: var(--success-color);
+}
+
+.control-btn.danger {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.control-btn.danger:hover {
+  background: var(--danger-color);
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.speed-selector {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  padding: 4px 8px;
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+.view-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.view-btn {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.view-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.view-btn.active {
+  background: var(--primary-color);
+  color: var(--background-color);
+  border-color: var(--primary-color);
+}
+
+/* Game Content */
+.spades-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Overview Panel */
+.overview-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-card {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.info-card h3 {
+  color: var(--primary-color);
+  margin-bottom: 12px;
+  font-size: 1rem;
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.phase-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phase-active {
+  background: var(--background-color);
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.phase-waiting {
+  background: var(--background-color);
+  border: 1px solid var(--warning-color);
+  color: var(--warning-color);
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.team-display {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.team-name {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.team-players {
+  color: var(--text-color);
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.team-score {
+  color: var(--secondary-color);
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.current-trick {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.current-trick h3 {
+  color: var(--primary-color);
+  margin-bottom: 12px;
+  font-size: 1rem;
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.trick-cards {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.trick-card {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+.no-trick {
+  color: var(--text-color);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Hands Panel */
+.hands-panel {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.hands-panel h3 {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.hands-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.player-hand {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.player-name {
+  color: var(--secondary-color);
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.hand-cards {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.hand-card {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.no-cards {
+  color: var(--text-color);
+  font-style: italic;
+  padding: 8px;
+}
+
+.player-stats {
+  color: var(--text-color);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Tricks Panel */
+.tricks-panel {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.tricks-panel h3 {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.trick-history {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.trick-entry {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.trick-number {
+  color: var(--secondary-color);
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.trick-cards {
+  display: flex;
+  gap: 4px;
+}
+
+.trick-winner {
+  color: var(--success-color);
+  font-size: 0.8rem;
+}
+
+.trick-points {
+  color: var(--warning-color);
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.no-tricks {
+  color: var(--text-color);
+  font-style: italic;
+  text-align: center;
+  padding: 40px;
+}
+
+/* Scores Panel */
+.scores-panel {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.scores-panel h3 {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.score-display {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.team-score-card {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.team-score-card h4 {
+  color: var(--secondary-color);
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.team-details {
+  margin-bottom: 12px;
+}
+
+.player-score {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  color: var(--text-color);
+}
+
+.team-total {
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+}
+
+/* Game Log Panel */
+.game-log-panel {
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.game-log-panel h3 {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.game-log {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+}
+
+.log-entry {
+  margin-bottom: 4px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.log-turn {
+  color: var(--warning-color);
+  font-weight: bold;
+  font-size: 0.7rem;
+}
+
+.log-player {
+  color: var(--secondary-color);
+  font-size: 0.7rem;
+}
+
+.log-action {
+  color: var(--success-color);
+  font-size: 0.7rem;
+}
+
+.log-details {
+  color: var(--text-color);
+  font-size: 0.7rem;
+}
+
+.no-log {
+  color: var(--text-color);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Footer */
+.page-footer {
+  background: var(--panel-color);
+  border-top: 1px solid var(--primary-color);
+  padding: 12px 20px;
+  text-align: center;
+  color: var(--text-color);
+  font-size: 0.8rem;
+}
+
+/* Loading State */
+.loading {
+  color: var(--info-color);
+  font-family: var(--font-family);
+  text-align: center;
+  padding: 40px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid var(--info-color);
+  border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .overview-panel {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .score-display {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .game-controls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .control-buttons {
+    justify-content: center;
+  }
+
+  .view-selector {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hands-display {
+    grid-template-columns: 1fr;
+  }
+
+  .spades-content {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-title {
+    font-size: 1.2rem;
+  }
+
+  .game-controls {
+    padding: 12px 16px;
+  }
+
+  .control-btn {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  .trick-cards {
+    gap: 4px;
+  }
+
+  .trick-card {
+    padding: 6px 8px;
+    font-size: 1rem;
+    min-width: 35px;
+  }
+
+  .log-entry {
+    font-size: 0.7rem;
+    gap: 4px;
   }
 }
