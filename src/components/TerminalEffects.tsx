@@ -157,6 +157,28 @@ const TerminalEffects: React.FC<TerminalEffectsProps> = ({ currentPage }) => {
         'SCORING: ADVANCED',
         'DIFFICULTY: EXPERT'
       ]
+    },
+    [PageType.SEVEN777]: {
+      scanlineIntensity: 0.35,
+      noiseLevel: 0.18,
+      primaryColor: '#ffd700',
+      secondaryColor: '#ff4444',
+      accentColor: '#ffff88',
+      atmosphere: 'neon',
+      particleCount: 30,
+      glitchChance: 0.12,
+      terminalText: [
+        'CASINO ENGINES LOADED',
+        'VIRTUAL CREDITS CONFIRMED',
+        'GAMBLING PROTOCOLS ENABLED',
+        'LUCK CALCULATION ACTIVE'
+      ],
+      statusMessages: [
+        'BALANCE: FAKE CREDITS ONLY',
+        'HOUSE EDGE: STANDARD',
+        'GAMES: MULTIPLE ACTIVE',
+        'RISK LEVEL: ENTERTAINMENT'
+      ]
     }
   }), []);
 

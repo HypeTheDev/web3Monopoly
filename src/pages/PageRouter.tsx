@@ -5,6 +5,7 @@ import DBAPage from './DBAPage/DBAPage';
 import SpadesPage from './SpadesPage/SpadesPage';
 import ChessPage from './ChessPage/ChessPage';
 import MessengerPage from './MessengerPage/MessengerPage';
+import Slot777Page from './Slot777Page/Slot777Page';
 
 export enum PageType {
   HOME = 'home',
@@ -12,6 +13,7 @@ export enum PageType {
   DBA = 'dba',
   SPADES = 'spades',
   CHESS = 'chess',
+  SEVEN777 = 'seven777',
   MESSENGER = 'messenger'
 }
 
@@ -36,6 +38,9 @@ const PageRouter: React.FC<PageRouterProps> = ({ activePage, onPageChange }) => 
 
     case PageType.CHESS:
       return <ChessPage onPageChange={onPageChange} />;
+
+    case PageType.SEVEN777:
+      return <Slot777Page onPageChange={onPageChange} />;
 
     case PageType.MESSENGER:
       return <MessengerPage onPageChange={onPageChange} />;

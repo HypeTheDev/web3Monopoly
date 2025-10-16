@@ -30,7 +30,8 @@ const LightBeamAnimation: React.FC<LightBeamAnimationProps> = ({ currentPage }) 
     [PageType.MONOPOLY]: ['#00ff00', '#ffd700', '#ff6b35'],
     [PageType.DBA]: ['#ff8800', '#00ff80', '#8080ff'],
     [PageType.CHESS]: ['#8888ff', '#ffff88', '#ff88ff'],
-    [PageType.SPADES]: ['#ff4444', '#44ff44', '#4444ff']
+    [PageType.SPADES]: ['#ff4444', '#44ff44', '#4444ff'],
+    [PageType.SEVEN777]: ['#ffd700', '#ff4444', '#ffff88']
   }), []);
 
   const colors = pageColors[currentPage] || pageColors[PageType.HOME];

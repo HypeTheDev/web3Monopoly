@@ -22,19 +22,40 @@ const SpadesPage: React.FC<SpadesPageProps> = ({ onPageChange }) => {
       </div>
 
       <div className="spades-content">
-        <div className="coming-soon-card">
-          <div className="card-icon">♠️</div>
-          <h2>COMING SOON</h2>
-          <p>Trick-taking card game with AI opponents is under development.</p>
+        <div className="tcg-preview-card">
+          <div className="card-icon">🎴</div>
+          <h2>SPADES TCG</h2>
+          <p>Yu-Gi-Oh meets Spades! Collect fantasy NBA characters as cards and battle in epic trick-taking duels!</p>
           <div className="status-info">
             <div className="status-item">
-              <strong>Phase:</strong> Bidding & Playing System Ready
+              <strong>Phase:</strong> TCG System Design Complete
             </div>
             <div className="status-item">
-              <strong>Expected Release:</strong> Q4 2025
+              <strong>Style:</strong> Yu-Gi-Oh + Spades Fusion
             </div>
             <div className="status-item">
-              <strong>Features:</strong> 2v2 Teams, Auction Bidding, Advanced Strategy
+              <strong>Features:</strong> DBA Characters, Card Battles, Trick-Taking, Endless Fun!
+            </div>
+          </div>
+        </div>
+
+        <div className="sample-characters">
+          <h3>Fantasy NBA Card Characters</h3>
+          <div className="character-showcase">
+            <div className="character-card">
+              <div className="character-name">Nexus Prime</div>
+              <div className="character-power">Reality Warping</div>
+              <div className="character-stats">ATK: 3200 DEF: 2800</div>
+            </div>
+            <div className="character-card">
+              <div className="character-name">Plasma Storm</div>
+              <div className="character-power">Electric Control</div>
+              <div className="character-stats">ATK: 2900 DEF: 3100</div>
+            </div>
+            <div className="character-card">
+              <div className="character-name">Void Reaper</div>
+              <div className="character-power">Shadow Travel</div>
+              <div className="character-stats">ATK: 3500 DEF: 2600</div>
             </div>
           </div>
         </div>

@@ -16,10 +16,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 70%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 255, 0, 0.025) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.025) 0%, transparent 50%),
+    radial-gradient(circle at 40% 70%, rgba(255, 255, 0, 0.015) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -258,21 +258,75 @@
 
 /* Security Notice */
 .security-notice {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
   font-family: 'Courier New', monospace;
   font-size: 11px;
   color: #555;
   text-align: center;
   max-width: 600px;
   line-height: 1.4;
+  margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .security-notice .highlight {
   color: #00ff00;
   text-shadow: 0 0 3px #00ff00;
+}
+
+/* Quick Start Guide */
+.quick-start h3 {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  color: #00ff00;
+  text-shadow: 0 0 5px #00ff00;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.quick-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #888;
+  background: rgba(0, 255, 0, 0.02);
+  padding: 12px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.step:hover {
+  border-color: #00ff00;
+  background: rgba(0, 255, 0, 0.05);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+}
+
+.step-number {
+  font-size: 14px;
+  font-weight: bold;
+  color: #00ff00;
+  text-shadow: 0 0 3px #00ff00;
+  border: 1px solid #00ff00;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(0, 255, 0, 0.1);
 }
 
 /* Animations */
@@ -334,6 +388,43 @@
   .start-button {
     font-size: 14px;
     padding: 12px 24px;
+  }
+
+  .quick-start {
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .quick-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #888;
+  }
+
+  .step-number {
+    font-size: 14px;
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+    border: 1px solid #00ff00;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 }
 

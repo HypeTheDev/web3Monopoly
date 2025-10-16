@@ -14,23 +14,23 @@ export class SpadesGameEngine {
   }
 
   private initializeGameState(): SpadesGameState {
-    // Create themed player names for Spades
-    const spadesPlayers = [
-      { id: 'blade-master', name: 'Blade Master', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'blade-token', color: '#E74C3C' },
-      { id: 'shadow-dealer', name: 'Shadow Dealer', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'shadow-token', color: '#8E44AD' },
-      { id: 'trick-runner', name: 'Trick Runner', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'trick-token', color: '#3498DB' },
-      { id: 'void-nil', name: 'Void Nil', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'void-token', color: '#2C3E50' }
+    // Create themed player names for Spades TCG
+    const spadesTCGPlayers = [
+      { id: 'nexus-prime', name: 'Nexus Prime', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'nexus-token', color: '#8E44AD' },
+      { id: 'plasma-storm', name: 'Plasma Storm', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'plasma-token', color: '#3498DB' },
+      { id: 'quantum-flash', name: 'Quantum Flash', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'quantum-token', color: '#E74C3C' },
+      { id: 'void-reaper', name: 'Void Reaper', money: 0, position: 0, properties: [], inJail: false, jailTurns: 0, tokenId: 'void-token', color: '#2C3E50' }
     ];
 
     return {
       gameMode: GameMode.SPADES,
-      players: spadesPlayers,
+      players: spadesTCGPlayers,
       currentPlayerIndex: 0,
       gameStatus: 'waiting',
       roundNumber: 1,
-      teams: { 
-        team1: ['blade-master', 'trick-runner'], 
-        team2: ['shadow-dealer', 'void-nil'] 
+      teams: {
+        team1: ['nexus-prime', 'plasma-storm'],
+        team2: ['quantum-flash', 'void-reaper']
       },
       currentDealer: 0,
       currentTrick: [],

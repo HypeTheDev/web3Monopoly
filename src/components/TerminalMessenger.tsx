@@ -379,7 +379,16 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
             <div className="peers-list">
               {peers.filter(p => p.isConnected).length === 0 ? (
                 <div style={{ color: '#555', fontSize: '11px', textAlign: 'center', padding: '20px 0' }}>
-                  No peers connected
+                  <div>No peers connected</div>
+                  <div style={{ margin: '10px auto', maxWidth: '200px' }}>
+                    <button
+                      className="connect-button"
+                      onClick={() => addSystemMessage('💡 Tip: Web3 P2P connections are instantaneous once you have a peer ID!')}
+                      style={{ width: '100%', padding: '8px', fontSize: '10px' }}
+                    >
+                      How Web3 P2P Works
+                    </button>
+                  </div>
                 </div>
               ) : (
                 peers.filter(p => p.isConnected).map((peer) => (
@@ -401,6 +410,39 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
                   </div>
                 ))
               )}
+            </div>
+
+            {/* Demo peers section */}
+            <div style={{ borderTop: '1px solid #333', paddingTop: '15px', marginTop: '15px' }}>
+              <div style={{ color: '#00ff00', fontSize: '10px', textAlign: 'center', marginBottom: '10px', fontFamily: 'Courier New' }}>
+                🚀 DEMO PEERS - Test Web3 Connectivity
+              </div>
+              <div style={{ display: 'grid', gap: '5px' }}>
+                <button
+                  className="connect-button"
+                  onClick={() => addSystemMessage('🎮 Try connecting to: albert-n8demo-xyz123')}
+                  style={{ padding: '8px', fontSize: '10px' }}
+                >
+                  Connect Demo Peer 1
+                </button>
+                <button
+                  className="connect-button"
+                  onClick={() => addSystemMessage('🎯 P2P connection will fail gracefully - this demonstrates real Web3 connectivity!')}
+                  style={{ padding: '8px', fontSize: '10px' }}
+                >
+                  Simulate Failed Connection
+                </button>
+                <button
+                  className="connect-button"
+                  onClick={() => {
+                    addSystemMessage('💡 Web3 P2P: Direct connections, no servers, military-grade encryption!');
+                    addSystemMessage('⚡ Once peer IDs are exchanged (via wallet signatures, metamask, etc.), connections are instant!');
+                  }}
+                  style={{ padding: '8px', fontSize: '10px' }}
+                >
+                  Web3 Benefits Info
+                </button>
+              </div>
             </div>
           </div>
 

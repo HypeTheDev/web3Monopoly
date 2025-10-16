@@ -97,18 +97,18 @@ const HomePage: React.FC<HomePageProps> = ({ onPageChange }) => {
                   <button className="game-btn">LAUNCH</button>
                 </div>
 
-                <div className="game-card soon">
+                <div className="game-card" onClick={() => onPageChange(PageType.SPADES)}>
                   <div className="game-icon">♠️</div>
                   <h3>SPADES</h3>
-                  <p>Trick-taking card game - Coming Soon</p>
-                  <button className="game-btn disabled">COMING SOON</button>
+                  <p>Trick-taking card game with TCG elements</p>
+                  <button className="game-btn">LAUNCH</button>
                 </div>
 
-                <div className="game-card soon">
-                  <div className="game-icon">♟️</div>
-                  <h3>CHESS</h3>
-                  <p>King of the Hill variant - Coming Soon</p>
-                  <button className="game-btn disabled">COMING SOON</button>
+                <div className="game-card featured" onClick={() => onPageChange(PageType.SEVEN777)}>
+                  <div className="game-icon">7️⃣</div>
+                  <h3>777</h3>
+                  <p>Casino hub with gambling minigames & loot crates</p>
+                  <button className="game-btn">LAUNCH</button>
                 </div>
               </div>
             </div>

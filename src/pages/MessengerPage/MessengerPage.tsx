@@ -80,11 +80,10 @@ const MessengerPage: React.FC<MessengerPageProps> = ({ onPageChange }) => {
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🌐</div>
-                  <div className="feature-title">Decentralized Network</div>
+                  <div className="feature-icon">🚀</div>
+                  <div className="feature-title">Web3 Ready - Easy Connections</div>
                   <div className="feature-description">
-                    No central servers, no data collection. Direct peer-to-peer connections
-                    using WebRTC technology for maximum privacy.
+                    Once you have a peer ID from MetaMask signatures, NFT transfers, or current wallet address lookup, connecting to friends is instant. No QR codes, no complex setup!
                   </div>
                 </div>
 
@@ -131,11 +130,34 @@ const MessengerPage: React.FC<MessengerPageProps> = ({ onPageChange }) => {
 
               {/* Security Notice */}
               <div className="security-notice">
-                <span className="highlight">SECURITY NOTICE:</span> This messaging platform uses 
-                advanced cryptographic techniques for maximum security. All messages are encrypted 
-                with <span className="highlight">AES-256</span> using keys generated through 
-                <span className="highlight">Diffie-Hellman</span> key exchange. No data is ever 
-                stored on external servers.
+                <span className="highlight">WEB3 SIMPLICITY:</span> Just share your unique peer ID
+                with friends (like sharing a wallet address). Click connect, instant encrypted chat!
+                <span className="highlight"> No servers, no registration, no middlemen!</span>
+              </div>
+
+              {/* Quick Start */}
+              <div className="quick-start">
+                <h3 style={{ color: '#00ff00', textAlign: 'center', marginBottom: '15px' }}>
+                  🚀 How Web3 Messaging Works
+                </h3>
+                <div className="quick-steps">
+                  <div className="step">
+                    <div className="step-number">1</div>
+                    <div>Launch Terminal (get your unique Peer ID)</div>
+                  </div>
+                  <div className="step">
+                    <div className="step-number">2</div>
+                    <div>Share your Peer ID with a friend</div>
+                  </div>
+                  <div className="step">
+                    <div className="step-number">3</div>
+                    <div>Paste their ID & connect - instant!</div>
+                  </div>
+                  <div className="step">
+                    <div className="step-number">4</div>
+                    <div>Auto-encrypted messages flow directly</div>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (

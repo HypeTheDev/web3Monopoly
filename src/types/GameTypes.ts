@@ -9,7 +9,7 @@ export enum GameMode {
 
 export const GAME_MODE_NAMES = {
   [GameMode.MONOPOLY]: 'Monopoly',
-  [GameMode.SPADES]: 'Spades (2v2)',
+  [GameMode.SPADES]: 'Spades TCG (1v1 & 2v2)',
   [GameMode.CHESS]: 'Chess (King of the Hill)',
   [GameMode.DBA]: 'Digital Basketball Association'
 };
@@ -422,6 +422,176 @@ export interface GameStats {
     losses: number;
     totalValue: number;
   }[];
+}
+
+// TCG/Card Game Types - Spades TCG System (Yu-Gi-Oh meets Spades)
+export interface DBACard {
+  // Core card properties
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+
+  // Card type and category
+  cardType: 'monster' | 'spell' | 'trap' | 'fusion' | 'ritual';
+  category: 'character' | 'support' | 'terrain' | 'event';
+
+  // Character data from DBA
+  character?: DBACharacter;
+  playerName?: string;
+  stats?: CardStats;
+
+  // Yu-Gi-Oh style properties
+  level?: number; // 1-12 for monsters
+  attack?: number;
+  defense?: number;
+  attribute?: 'light' | 'dark' | 'fire' | 'water' | 'earth' | 'wind' | 'divine';
+
+  // Spades mechanics
+  suit?: 'hearts' | 'diamonds' | 'clubs' | 'spades';
+  rank?: number; // 2-14 (Ace is 14)
+
+  // Abilities and effects
+  effects: CardEffect[];
+  summonRequirements?: SummonRequirement;
+
+  // Rarity and market value
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythical';
+  marketValue?: number;
+
+  // Collection metadata
+  series: string;
+  releasedAt: Date;
+  owned: boolean;
+}
+
+export interface DBACharacter {
+  id: string;
+  name: string;
+  realName?: string; // Real NBA player name
+  team: string;
+  position: 'PG' | 'SG' | 'SF' | 'PF' | 'C';
+  power: string; // Superpower description
+  stats: {
+    attack: number;
+    defense: number;
+    speed: number;
+    intelligence: number;
+    powerLevel: number;
+  };
+  abilities: CharacterAbility[];
+  weaknesses: string[];
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythical';
+}
+
+export interface CardStats {
+  attack: number;
+  defense: number;
+  hp: number;
+  speed: number;
+  special: number;
+}
+
+export interface CharacterAbility {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  effect: (card: DBACard, battle: TCGDuel) => void;
+  cooldown?: number;
+}
+
+export interface CardEffect {
+  trigger: 'on-play' | 'on-attack' | 'on-defense' | 'on-destroy' | 'continuous' | 'turn-start';
+  condition?: string;
+  action: string;
+  duration?: 'permanent' | 'turn' | 'battle';
+}
+
+export interface SummonRequirement {
+  sacrifice: number; // Cards to sacrifice
+  level?: number; // Minimum level
+  specificCards?: string[]; // Required specific cards
+  energy?: number; // Energy cost
+}
+
+// TCG Duel System
+export interface TCGDuel {
+  id: string;
+  players: TCGPlayer[];
+  currentPlayerIndex: number;
+  turnNumber: number;
+  phase: 'draw' | 'standby' | 'main1' | 'battle' | 'main2' | 'end';
+  status: 'waiting' | 'active' | 'completed';
+
+  // Game zones
+  fields: Record<string, TCGField>; // Player ID -> Field
+  winner?: string;
+  gameLog: TCGGameEvent[];
+
+  // Spades mechanics
+  bidAmount?: number;
+  tricksToWin?: number;
+  currentTrick: DBACard[];
+}
+
+export interface TCGPlayer {
+  id: string;
+  name: string;
+  lifePoints: number;
+  deck: DBACard[];
+  hand: DBACard[];
+  graveyard: DBACard[];
+  banishedZone: DBACard[];
+  energy: number;
+  maxEnergy: number;
+}
+
+export interface TCGField {
+  monsterZones: (DBACard | null)[];
+  spellTrapZones: (DBACard | null)[];
+  fieldSpell?: DBACard;
+  deck: DBACard[];
+  extraDeck?: DBACard[]; // For fusion monsters
+}
+
+export interface TCGGameEvent {
+  id: string;
+  turn: number;
+  playerId: string;
+  actionType: 'draw' | 'play' | 'attack' | 'activate' | 'summon' | 'destroy' | 'discard';
+  details: string;
+  targetCard?: string;
+  timestamp: Date;
+}
+
+// Deck Building and Collection
+export interface TCGDeck {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: string;
+  mainDeck: DBACard[];
+  extraDeck: DBACard[];
+  sideDeck?: DBACard[];
+  createdAt: Date;
+  lastUpdated: Date;
+}
+
+export interface TCGCollection {
+  playerId: string;
+  cards: DBACard[];
+  cardCounts: Record<string, number>; // Card ID -> Count owned
+  lastSync: Date;
+}
+
+// Battle Resolution
+export interface TCGAttack {
+  attacker: DBACard;
+  defender: DBACard;
+  damage: number;
+  effects: CardEffect[];
+  battleResult: 'destroyed' | 'survived' | 'tie';
 }
 
 // Game Log Entry Class
