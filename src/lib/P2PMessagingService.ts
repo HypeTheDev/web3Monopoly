@@ -38,7 +38,7 @@ export type ConnectionHandler = (status: ConnectionStatus) => void;
 export type PeerHandler = (peer: PeerInfo) => void;
 
 export class P2PMessagingService {
-  private peer: Peer | null = null;
+  public peer: Peer | null = null;
   private connections: Map<string, DataConnection> = new Map();
   private crypto: AlbertCrypto;
   private encryptionServices: Map<string, EncryptionService> = new Map();

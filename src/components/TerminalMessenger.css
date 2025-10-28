@@ -16,6 +16,28 @@
   overflow: hidden;
 }
 
+.online-user-item {
+  background: rgba(0, 255, 255, 0.05);
+  border-left: 2px solid #00ffff;
+}
+
+.status-dot {
+  font-size: 12px;
+  margin-right: 6px;
+}
+
+.status-dot.status-online {
+  color: #00ff00;
+}
+
+.status-dot.status-away {
+  color: #ffff00;
+}
+
+.status-dot.status-offline {
+  color: #666;
+}
+
 .terminal-header {
   background: #1a1a1a;
   border-bottom: 1px solid #333;
@@ -419,23 +441,141 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
   .terminal-messenger {
     height: 100vh;
-    border-radius: 0;
+    border-radius: 8px;
+  }
+  
+  .terminal-body {
+    flex-direction: column;
   }
   
   .sidebar {
-    position: absolute;
-    right: -250px;
+    position: fixed;
+    right: -280px;
     top: 0;
     bottom: 0;
-    z-index: 10;
-    transition: right 0.3s ease;
+    width: 280px;
+    z-index: 1000;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
   }
   
   .sidebar.open {
     right: 0;
+  }
+  
+  .message-area {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .terminal-messenger {
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+  
+  .terminal-header {
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  .connection-info {
+    font-size: 10px;
+  }
+  
+  .messages-container {
+    padding: 12px;
+  }
+  
+  .message {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .message-header {
+    font-size: 11px;
+  }
+  
+  .message-content {
+    font-size: 13px;
+  }
+  
+  .input-area {
+    padding: 12px;
+  }
+  
+  .message-input {
+    font-size: 14px;
+    padding: 10px;
+  }
+  
+  .send-button {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  
+  .sidebar {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .sidebar-section {
+    margin-bottom: 16px;
+  }
+  
+  .sidebar-title {
+    font-size: 11px;
+  }
+  
+  .peer-input,
+  .connect-button {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .terminal-header {
+    padding: 10px;
+  }
+  
+  .terminal-title {
+    font-size: 12px;
+  }
+  
+  .connection-info {
+    display: none;
+  }
+  
+  .messages-container {
+    padding: 10px;
+  }
+  
+  .message {
+    padding: 8px;
+  }
+  
+  .input-area {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .input-prefix {
+    display: none;
+  }
+  
+  .message-input {
+    font-size: 13px;
+  }
+  
+  .send-button {
+    padding: 8px 12px;
+    font-size: 11px;
   }
 }
 

@@ -202,7 +202,7 @@ export class ThemeManager {
       root.style.setProperty(`--${key}-color`, value);
     });
 
-    // Also apply to legacy CSS variables for backward compatibility
+    // Apply to legacy CSS variables for backward compatibility
     root.style.setProperty('--primary-color', colors.primary);
     root.style.setProperty('--secondary-color', colors.secondary);
     root.style.setProperty('--accent-color', colors.accent);
@@ -214,6 +214,20 @@ export class ThemeManager {
     root.style.setProperty('--panel-color', colors.panel);
     root.style.setProperty('--border-color', colors.border);
     root.style.setProperty('--text-color', colors.text);
+
+    // Apply to modern neon color system
+    root.style.setProperty('--neon-cyan', colors.primary);
+    root.style.setProperty('--neon-green', colors.success);
+    root.style.setProperty('--neon-pink', colors.accent);
+    root.style.setProperty('--neon-yellow', colors.secondary);
+    root.style.setProperty('--neon-purple', colors.info);
+    root.style.setProperty('--neon-orange', colors.warning);
+    root.style.setProperty('--neon-red', colors.danger);
+    
+    // Apply background colors
+    root.style.setProperty('--bg-primary', colors.background);
+    root.style.setProperty('--bg-secondary', colors.panel);
+    root.style.setProperty('--bg-tertiary', colors.border);
 
     // Force a repaint to ensure changes are applied
     void document.body.offsetHeight;

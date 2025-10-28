@@ -7,6 +7,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { P2PMessagingService, P2PMessage, ConnectionStatus, PeerInfo } from '../lib/P2PMessagingService';
+import { OnlineUsersService, OnlineUser } from '../lib/OnlineUsersService';
+import { useUser } from '../context/UserContext';
 import './TerminalMessenger.css';
 
 interface TerminalMessengerProps {
@@ -14,7 +16,9 @@ interface TerminalMessengerProps {
 }
 
 const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
+  const { user } = useUser();
   const [messagingService] = useState(() => new P2PMessagingService());
+  const [onlineUsersService] = useState(() => new OnlineUsersService());
   const [messages, setMessages] = useState<P2PMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
@@ -24,6 +28,7 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
     encryptionStatus: 'none'
   });
   const [peers, setPeers] = useState<PeerInfo[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [connectPeerId, setConnectPeerId] = useState('');
   const [isInitializing, setIsInitializing] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -63,7 +68,11 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
         const peerId = await messagingService.initialize();
         console.log('Messaging service initialized with peer ID:', peerId);
         
-        // Load existing message history
+        if (user && messagingService.peer) {
+          await onlineUsersService.initialize(messagingService.peer, user.username);
+          console.log('Online users service initialized');
+        }
+        
         const history = messagingService.getMessageHistory();
         setMessages(history);
         
@@ -76,15 +85,20 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
 
     initializeService();
 
-    // Setup event handlers
     messagingService.onMessage(handleNewMessage);
     messagingService.onConnection(handleConnectionChange);
     messagingService.onPeer(handlePeerUpdate);
 
+    const unsubscribe = onlineUsersService.onUsersChange((users) => {
+      setOnlineUsers(users);
+    });
+
     return () => {
       messagingService.cleanup();
+      onlineUsersService.cleanup();
+      unsubscribe();
     };
-  }, [messagingService, handleNewMessage, handleConnectionChange, handlePeerUpdate]);
+  }, [messagingService, onlineUsersService, handleNewMessage, handleConnectionChange, handlePeerUpdate, user]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -373,22 +387,52 @@ const TerminalMessenger: React.FC<TerminalMessengerProps> = ({ onClose }) => {
             </div>
           </div>
 
+          {/* Online Users */}
+          <div className="sidebar-section">
+            <div className="sidebar-title">
+              Online Users ({onlineUsers.length})
+              <span style={{ fontSize: '10px', marginLeft: '8px', color: '#00ff00' }}>●</span>
+            </div>
+            <div className="peers-list">
+              {onlineUsers.length === 0 ? (
+                <div style={{ color: '#555', fontSize: '11px', textAlign: 'center', padding: '20px 0' }}>
+                  <div>No other users online</div>
+                </div>
+              ) : (
+                onlineUsers.map((user) => (
+                  <div key={user.peerId} className="peer-item online-user-item">
+                    <div className="peer-name">
+                      <span style={{ color: '#00ffff', fontWeight: 'bold' }}>{user.username}</span>
+                      <div style={{ fontSize: '9px', color: '#666', marginTop: '2px' }}>
+                        {user.peerId.substring(0, 12)}...
+                      </div>
+                    </div>
+                    <div className="peer-status">
+                      <span className={`status-dot status-${user.status}`}>●</span>
+                      <button
+                        className="connect-button"
+                        style={{ padding: '4px 8px', fontSize: '10px' }}
+                        onClick={() => {
+                          setConnectPeerId(user.peerId);
+                          connectToPeer();
+                        }}
+                      >
+                        Chat
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
           {/* Connected Peers */}
           <div className="sidebar-section">
-            <div className="sidebar-title">Connected Peers ({peers.filter(p => p.isConnected).length})</div>
+            <div className="sidebar-title">Active Chats ({peers.filter(p => p.isConnected).length})</div>
             <div className="peers-list">
               {peers.filter(p => p.isConnected).length === 0 ? (
                 <div style={{ color: '#555', fontSize: '11px', textAlign: 'center', padding: '20px 0' }}>
-                  <div>No peers connected</div>
-                  <div style={{ margin: '10px auto', maxWidth: '200px' }}>
-                    <button
-                      className="connect-button"
-                      onClick={() => addSystemMessage('💡 Tip: Web3 P2P connections are instantaneous once you have a peer ID!')}
-                      style={{ width: '100%', padding: '8px', fontSize: '10px' }}
-                    >
-                      How Web3 P2P Works
-                    </button>
-                  </div>
+                  <div>No active chats</div>
                 </div>
               ) : (
                 peers.filter(p => p.isConnected).map((peer) => (

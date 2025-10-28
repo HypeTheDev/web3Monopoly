@@ -1,0 +1,123 @@
+.user-header {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid var(--neon-cyan, #00ffff);
+  border-radius: 20px;
+  padding: 8px 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.user-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.username {
+  color: var(--neon-cyan, #00ffff);
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+.logout-button {
+  background: transparent;
+  border: 1px solid var(--neon-green, #39ff14);
+  color: var(--neon-green, #39ff14);
+  padding: 5px 15px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: var(--neon-green, #39ff14);
+  color: #000;
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+}
+
+/* Token Balance Compact */
+.token-balance-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid var(--neon-green, #39ff14);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Courier New', monospace;
+}
+
+.token-balance-compact:hover {
+  background: rgba(57, 255, 20, 0.2);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+  transform: translateY(-2px);
+}
+
+.token-icon {
+  font-size: 1rem;
+}
+
+.token-amount {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--neon-green, #39ff14);
+  text-shadow: 0 0 8px var(--neon-green);
+}
+
+.token-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .user-header {
+    top: 5px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  
+  .user-label {
+    display: none;
+  }
+  
+  .user-info, .logout-button {
+    font-size: 0.75rem;
+  }
+  
+  .token-balance-compact {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  
+  .token-icon {
+    font-size: 0.9rem;
+  }
+  
+  .token-amount {
+    font-size: 0.9rem;
+  }
+  
+  .token-label {
+    display: none;
+  }
+}
