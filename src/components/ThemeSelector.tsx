@@ -8,7 +8,7 @@ interface Position {
 
 const ThemeSelector: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState<Position>({ x: 20, y: 100 });
+  const [position, setPosition] = useState<Position>({ x: 20, y: 300 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [currentTheme, setCurrentTheme] = useState<Theme>(themeManager.getCurrentTheme());

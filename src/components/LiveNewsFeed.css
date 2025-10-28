@@ -14,6 +14,7 @@
 .news-status-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 10px 16px;
   background: rgba(0, 255, 0, 0.08);
   border-bottom: 1px solid var(--terminal-border, #333);
@@ -45,7 +46,12 @@
   text-shadow: 0 0 4px currentColor;
 }
 
-/* Removed last-update - cleaner look */
+.news-count {
+  color: var(--neon-yellow, #ffff00);
+  font-size: 10px;
+  font-weight: bold;
+  opacity: 0.8;
+}
 
 /* Category Tabs */
 .news-categories {

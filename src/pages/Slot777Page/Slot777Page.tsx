@@ -9,11 +9,272 @@ import React, { useState, useEffect } from 'react';
 import { PageType } from '../PageRouter';
 import './Slot777Page.css';
 
+// Pinball Game Component
+const PinballGame: React.FC<{balance: number, onBalanceChange: (amount: number) => void}> = ({balance, onBalanceChange}) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [score, setScore] = useState(0);
+  const [ballsLeft, setBallsLeft] = useState(3);
+  const [gameEnded, setGameEnded] = useState(true);
+
+  const startGame = () => {
+    if (balance < 5) return;
+    onBalanceChange(-5);
+    setIsPlaying(true);
+    setGameEnded(false);
+    setScore(0);
+    setBallsLeft(3);
+  };
+
+  const endGame = () => {
+    setIsPlaying(false);
+    setGameEnded(true);
+    if (score > 0) {
+      const winnings = Math.floor(score / 10);
+      onBalanceChange(winnings);
+    }
+  };
+
+  const launchBall = () => {
+    if (ballsLeft <= 0) return;
+    setBallsLeft(prev => prev - 1);
+    setScore(prev => prev + Math.floor(Math.random() * 50) + 10);
+
+    // Auto end after some time or when no balls left
+    setTimeout(() => {
+      if (ballsLeft <= 1) {
+        endGame();
+      }
+    }, 2000);
+  };
+
+  return (
+    <div className="pinball-game">
+      <h3>🎳 PINBALL WIZARD 🎳</h3>
+      <div className="pinball-machine">
+        {!isPlaying && !gameEnded ? (
+          <button className="start-pinball-btn" onClick={startGame} disabled={balance < 5}>
+            START GAME - 5 CREDITS
+          </button>
+        ) : gameEnded ? (
+          <div className="game-results">
+            <h4>Game Over!</h4>
+            <p>Score: {score} points</p>
+            {score > 0 && <p>Winnings: {Math.floor(score / 10)} credits</p>}
+            <button className="play-again-btn" onClick={() => setGameEnded(false)}>
+              Play Again
+            </button>
+          </div>
+        ) : (
+          <div className="game-play">
+            <div className="pinball-display">
+              <div className="score-display">SCORE: {score}</div>
+              <div className="balls-display">BALLS: {ballsLeft}</div>
+            </div>
+            <div className="pinball-table">
+              <div className="bumpers">
+                <div className="bumper">🎯</div>
+                <div className="bumper">⭐</div>
+                <div className="bumper">💎</div>
+              </div>
+              <div className="flippers">
+                <button className="flipper left-flipper" onClick={() => setScore(prev => prev + 5)}>◀</button>
+                <button className="flipper right-flipper" onClick={() => setScore(prev => prev + 5)}>▶</button>
+              </div>
+            </div>
+            <button className="launch-btn" onClick={launchBall} disabled={ballsLeft <= 0}>
+              LAUNCH BALL!
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Blackjack Game Component
+const BlackjackGame: React.FC<{balance: number, onBalanceChange: (amount: number) => void}> = ({balance, onBalanceChange}) => {
+  const [playerCards, setPlayerCards] = useState<string[]>([]);
+  const [dealerCards, setDealerCards] = useState<string[]>([]);
+  const [gameState, setGameState] = useState<'betting' | 'playing' | 'dealer-turn' | 'ended'>('betting');
+  const [bet, setBet] = useState(0);
+  const [message, setMessage] = useState('Place your bet to start!');
+
+  const cardValues = {
+    '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+    'J': 10, 'Q': 10, 'K': 10, 'A': 11
+  };
+
+  const suits = ['♠', '♥', '♦', '♣'];
+  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+  const getRandomCard = () => {
+    const rank = ranks[Math.floor(Math.random() * ranks.length)];
+    const suit = suits[Math.floor(Math.random() * suits.length)];
+    return rank + suit;
+  };
+
+  const calculateHandValue = (hand: string[]) => {
+    let value = 0;
+    let aces = 0;
+    for (const card of hand) {
+      const rank = card.slice(0, -1);
+      if (rank === 'A') aces++;
+      value += cardValues[rank as keyof typeof cardValues];
+    }
+
+    // Handle aces
+    while (value > 21 && aces > 0) {
+      value -= 10;
+      aces--;
+    }
+
+    return value;
+  };
+
+  const placeBet = (amount: number) => {
+    if (balance >= amount) {
+      setBet(amount);
+      onBalanceChange(-amount);
+      setGameState('playing');
+      dealInitialCards();
+      setMessage('Hit or Stand?');
+    }
+  };
+
+  const dealInitialCards = () => {
+    const playerHand = [getRandomCard(), getRandomCard()];
+    const dealerHand = [getRandomCard()];
+    setPlayerCards(playerHand);
+    setDealerCards(dealerHand);
+  };
+
+  const hit = () => {
+    const newCard = getRandomCard();
+    const newHand = [...playerCards, newCard];
+    setPlayerCards(newHand);
+
+    const value = calculateHandValue(newHand);
+    if (value > 21) {
+      setGameState('ended');
+      setMessage('Bust! You lose.');
+    } else {
+      setMessage('Hit or Stand?');
+    }
+  };
+
+  const stand = () => {
+    setGameState('dealer-turn');
+    dealerPlay();
+  };
+
+  const dealerPlay = () => {
+    let dealerHand = [...dealerCards];
+    while (calculateHandValue(dealerHand) < 17) {
+      dealerHand.push(getRandomCard());
+    }
+    setDealerCards(dealerHand);
+
+    const playerValue = calculateHandValue(playerCards);
+    const dealerValue = calculateHandValue(dealerHand);
+
+    let result: string;
+    let won = false;
+
+    if (dealerValue > 21) {
+      result = 'Dealer busts! You win!';
+      won = true;
+    } else if (playerValue > dealerValue) {
+      result = 'You win!';
+      won = true;
+    } else if (playerValue < dealerValue) {
+      result = 'Dealer wins!';
+    } else {
+      result = 'Push! It\'s a tie.';
+      onBalanceChange(bet); // Return the bet
+    }
+
+    if (won) {
+      onBalanceChange(bet * 2);
+    }
+
+    setGameState('ended');
+    setMessage(result);
+  };
+
+  const resetGame = () => {
+    setPlayerCards([]);
+    setDealerCards([]);
+    setGameState('betting');
+    setBet(0);
+    setMessage('Place your bet to start!');
+  };
+
+  return (
+    <div className="blackjack-game">
+      <h3>🃏 BLACKJACK TABLE 🃏</h3>
+      <div className="blackjack-table">
+        <div className="message">{message}</div>
+
+        {/* Dealer Cards */}
+        <div className="dealer-section">
+          <h4>Dealer</h4>
+          <div className="cards">
+            {dealerCards.map((card, index) => (
+              <div key={index} className="playing-card">{card}</div>
+            ))}
+          </div>
+          {gameState === 'dealer-turn' || gameState === 'ended' ?
+            <div className="hand-value">Value: {calculateHandValue(dealerCards)}</div> :
+            <div className="hand-value">Value: ?</div>
+          }
+        </div>
+
+        {/* Player Cards */}
+        <div className="player-section">
+          <h4>Player</h4>
+          <div className="cards">
+            {playerCards.map((card, index) => (
+              <div key={index} className="playing-card">{card}</div>
+            ))}
+          </div>
+          <div className="hand-value">Value: {calculateHandValue(playerCards)}</div>
+        </div>
+
+        {/* Betting */}
+        {gameState === 'betting' && (
+          <div className="betting-section">
+            <h4>Place Your Bet</h4>
+            <div className="bet-buttons">
+              <button onClick={() => placeBet(10)} disabled={balance < 10}>10</button>
+              <button onClick={() => placeBet(25)} disabled={balance < 25}>25</button>
+              <button onClick={() => placeBet(50)} disabled={balance < 50}>50</button>
+            </div>
+            <div className="min-max">Min: 10 | Max: 50</div>
+          </div>
+        )}
+
+        {/* Game Controls */}
+        {gameState === 'playing' && (
+          <div className="game-controls">
+            <button className="hit-btn" onClick={hit}>HIT</button>
+            <button className="stand-btn" onClick={stand}>STAND</button>
+          </div>
+        )}
+
+        {/* Play Again */}
+        {gameState === 'ended' && (
+          <button className="play-again-btn" onClick={resetGame}>PLAY AGAIN</button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 interface Slot777PageProps {
   onPageChange: (page: PageType) => void;
 }
 
-type GameType = 'slots' | 'blackjack' | 'roulette' | 'lootbox';
+type GameType = 'slots' | 'pinball' | 'blackjack' | 'roulette' | 'lootbox';
 
 const Slot777Page: React.FC<Slot777PageProps> = ({ onPageChange }) => {
   const [activeGame, setActiveGame] = useState<GameType>('slots');
@@ -45,6 +306,13 @@ const Slot777Page: React.FC<Slot777PageProps> = ({ onPageChange }) => {
       icon: '🎰',
       description: 'Spin the reels for massive payouts!',
       cost: 10
+    },
+    {
+      id: 'pinball' as GameType,
+      name: 'PINBALL',
+      icon: '🎳',
+      description: 'Tilt the table and score big!',
+      cost: 5
     },
     {
       id: 'blackjack' as GameType,
@@ -109,10 +377,20 @@ const Slot777Page: React.FC<Slot777PageProps> = ({ onPageChange }) => {
   };
 
   const openLootbox = () => {
-    if (balance < 50 || isOpeningLootbox) return;
+    console.log('Lootbox button clicked, balance:', balance, 'isOpening:', isOpeningLootbox);
 
+    if (balance < 50 || isOpeningLootbox) {
+      console.log('Cannot open lootbox:', { balance, isOpeningLootbox });
+      return;
+    }
+
+    console.log('Opening lootbox...');
     setIsOpeningLootbox(true);
-    setBalance(prev => prev - 50);
+    setBalance(prev => {
+      const newBalance = prev - 50;
+      console.log('New balance after deduction:', newBalance);
+      return newBalance;
+    });
 
     setTimeout(() => {
       const prizes = [
@@ -129,8 +407,10 @@ const Slot777Page: React.FC<Slot777PageProps> = ({ onPageChange }) => {
         winningItems.push(prizes[Math.floor(Math.random() * prizes.length)]);
       }
 
+      console.log('Generated prizes:', winningItems);
       setLootBoxItems(winningItems);
       setIsOpeningLootbox(false);
+      console.log('Lootbox opened successfully');
     }, 3000);
   };
 
@@ -172,17 +452,20 @@ const Slot777Page: React.FC<Slot777PageProps> = ({ onPageChange }) => {
       <div className="slot777-content">
         <div className="game-selection">
           <h2>Choose Your Game</h2>
-          <div className="game-grid">
-            {games.map(game => (
+          <div className="game-carousel">
+            {games.map((game, index) => (
               <div
                 key={game.id}
-                className={`game-card ${activeGame === game.id ? 'active' : ''}`}
+                className={`playing-card ${activeGame === game.id ? 'selected' : ''}`}
                 onClick={() => setActiveGame(game.id)}
               >
-                <div className="game-icon">{game.icon}</div>
-                <h3>{game.name}</h3>
-                <p>{game.description}</p>
-                <div className="game-cost">Cost: {game.cost} credits</div>
+                <div className="card-suit">{game.icon}</div>
+                <div className="card-content">
+                  <h3>{game.name}</h3>
+                  <p>{game.description}</p>
+                  <div className="game-cost">Cost: {game.cost} credits</div>
+                </div>
+                <div className="card-suit bottom">{game.icon}</div>
               </div>
             ))}
           </div>
@@ -225,24 +508,12 @@ const Slot777Page: React.FC<Slot777PageProps> = ({ onPageChange }) => {
             </div>
           )}
 
+          {activeGame === 'pinball' && (
+            <PinballGame balance={balance} onBalanceChange={setBalance} />
+          )}
+
           {activeGame === 'blackjack' && (
-            <div className="blackjack-game">
-              <h3>🃏 BLACKJACK TABLE 🃏</h3>
-              <div className="coming-soon-card">
-                <div className="card-icon">♠️</div>
-                <h2>COMING SOON</h2>
-                <p>21 or bust! Ace high, queen low. Dealer's got the Pearl.</p>
-                <div className="feature-preview">
-                  <h4>Features:</h4>
-                  <ul>
-                    <li>• Simplified rules for quick gameplay</li>
-                    <li>• Double down and insurance</li>
-                    <li>• Achievements for lucky streaks</li>
-                    <li>• AI dealer that never cheats</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <BlackjackGame balance={balance} onBalanceChange={setBalance} />
           )}
 
           {activeGame === 'roulette' && (

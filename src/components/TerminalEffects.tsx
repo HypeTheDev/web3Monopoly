@@ -205,12 +205,12 @@ const TerminalEffects: React.FC<TerminalEffectsProps> = ({ currentPage }) => {
     return () => clearInterval(glitchInterval);
   }, [config.glitchChance]);
 
-  // Boot sequence on page change
-  useEffect(() => {
-    setBootSequence(true);
-    const timer = setTimeout(() => setBootSequence(false), 2000);
-    return () => clearTimeout(timer);
-  }, [currentPage]);
+  // Boot sequence on page change - DISABLED to avoid blocking UI
+  // useEffect(() => {
+  //   setBootSequence(true);
+  //   const timer = setTimeout(() => setBootSequence(false), 2000);
+  //   return () => clearTimeout(timer);
+  // }, [currentPage]);
 
   return (
     <div 

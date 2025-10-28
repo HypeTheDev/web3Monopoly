@@ -11,7 +11,7 @@
   overflow: hidden;
 }
 
-/* CRT Scanlines */
+/* CRT Scanlines - Reduced */
 .crt-scanlines {
   position: absolute;
   top: 0;
@@ -22,8 +22,8 @@
     90deg,
     transparent,
     transparent 2px,
-    rgba(255, 255, 255, var(--scanline-intensity, 0.1)) 3px,
-    rgba(255, 255, 255, var(--scanline-intensity, 0.1)) 3px
+    rgba(255, 255, 255, calc(var(--scanline-intensity, 0.1) * 0.4)) 3px,
+    rgba(255, 255, 255, calc(var(--scanline-intensity, 0.1) * 0.4)) 3px
   );
   animation: scanlineMove 0.1s linear infinite;
 }
@@ -33,7 +33,7 @@
   100% { transform: translateY(4px); }
 }
 
-/* TV Noise/Static */
+/* TV Noise/Static - Reduced */
 .tv-noise {
   position: absolute;
   top: 0;
@@ -41,8 +41,8 @@
   width: 100%;
   height: 100%;
   background-image: 
-    radial-gradient(circle, transparent 20%, rgba(255, 255, 255, var(--noise-level, 0.1)) 21%, rgba(255, 255, 255, var(--noise-level, 0.1)) 22%, transparent 22%),
-    linear-gradient(0deg, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
+    radial-gradient(circle, transparent 20%, rgba(255, 255, 255, calc(var(--noise-level, 0.1) * 0.3)) 21%, rgba(255, 255, 255, calc(var(--noise-level, 0.1) * 0.3)) 22%, transparent 22%),
+    linear-gradient(0deg, transparent 50%, rgba(0, 0, 0, 0.02) 50%);
   background-size: 3px 3px, 100% 2px;
   animation: noiseFlicker 0.15s infinite linear alternate-reverse;
 }
@@ -52,7 +52,7 @@
   100% { opacity: 0.8; }
 }
 
-/* CRT Vignette */
+/* CRT Vignette - Reduced */
 .crt-vignette {
   position: absolute;
   top: 0;
@@ -62,8 +62,8 @@
   background: radial-gradient(
     ellipse at center,
     transparent 0%,
-    transparent 70%,
-    rgba(0, 0, 0, 0.3) 100%
+    transparent 80%,
+    rgba(0, 0, 0, 0.15) 100%
   );
 }
 

@@ -124,7 +124,8 @@
 /* Main Content */
 .slot777-content {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
   gap: 30px;
   padding: 30px;
   max-width: 1600px;
@@ -150,64 +151,143 @@
   text-shadow: 0 0 10px #ffd700;
 }
 
-.game-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+/* Game Carousel - Playing Card Style */
+.game-carousel {
+  display: flex;
   gap: 15px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.game-card {
-  background: rgba(0, 20, 0, 0.9);
-  border: 2px solid #333;
-  border-radius: 10px;
+.game-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.playing-card {
+  flex: 0 0 280px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+  border: 2px solid #222;
+  border-radius: 12px;
   padding: 20px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   text-align: center;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  scroll-snap-align: start;
 }
 
-.game-card:hover {
+.playing-card::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.playing-card:hover {
+  transform: translateY(-3px) rotate(1deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.playing-card.selected {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
   border-color: #ffd700;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-  transform: translateY(-2px);
 }
 
-.game-card.active {
-  border-color: #ffd700;
-  background: rgba(255, 215, 0, 0.1);
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+.card-suit {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 2rem;
+  z-index: 2;
 }
 
-.game-icon {
-  font-size: 3rem;
-  margin-bottom: 10px;
-  display: block;
+.card-suit.bottom {
+  top: auto;
+  left: auto;
+  bottom: 10px;
+  right: 10px;
+  transform: rotate(180deg);
 }
 
-.game-card h3 {
-  color: #00ff00;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.playing-card h3 {
+  color: #000;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
   font-weight: bold;
+  text-transform: uppercase;
+  font-family: 'serif';
 }
 
-.game-card p {
-  color: #cccccc;
+.playing-card p {
+  color: #444;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  line-height: 1.3;
+  font-style: italic;
+}
+
+.playing-card .game-cost {
+  color: #8b4513;
   font-size: 0.9rem;
-  margin-bottom: 15px;
-  line-height: 1.4;
+  font-weight: bold;
+  background: rgba(139, 69, 19, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #8b4513;
+  font-family: 'serif';
 }
 
-.game-cost {
+/* Game Carousel Navigation */
+.game-selection {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  padding: 25px;
+  height: fit-content;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+}
+
+.game-selection h2 {
   color: #ffd700;
-  font-size: 0.8rem;
-  font-weight: bold;
-  background: rgba(255, 215, 0, 0.1);
-  padding: 5px 10px;
-  border-radius: 10px;
-  border: 1px solid #ffd700;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 0 10px #ffd700;
+}
+
+/* Responsive carousel adjustments */
+@media (max-width: 768px) {
+  .playing-card {
+    flex: 0 0 250px;
+    padding: 15px;
+  }
+
+  .card-suit {
+    font-size: 1.7rem;
+  }
+
+  .playing-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .playing-card p {
+    font-size: 0.8rem;
+  }
 }
 
 /* Game Display Area */
@@ -343,6 +423,345 @@
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px solid #00ff00;
+}
+
+/* Pinball Game Styles */
+.pinball-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  flex: 1;
+}
+
+.pinball-machine {
+  background: rgba(0, 20, 0, 0.9);
+  border: 3px solid #333;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.pinball-display {
+  display: flex;
+  gap: 30px;
+  font-family: 'Courier New', monospace;
+}
+
+.score-display, .balls-display {
+  background: #000;
+  color: #00ff00;
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: 2px solid #00ff00;
+  text-align: center;
+  font-weight: bold;
+}
+
+.pinball-table {
+  position: relative;
+  width: 200px;
+  height: 300px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+  border: 4px solid #666;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.bumpers {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.bumper {
+  font-size: 2rem;
+  color: #ff4444;
+  animation: bumper-flash 2s infinite;
+}
+
+@keyframes bumper-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.flippers {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.flipper {
+  background: #444;
+  border: 2px solid #ffd700;
+  color: #ffd700;
+  font-size: 1.5rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.flipper:hover {
+  background: #666;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.left-flipper {
+  transform: rotate(-30deg);
+}
+
+.right-flipper {
+  transform: rotate(30deg);
+}
+
+.launch-btn {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: #000;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.launch-btn:hover:not(:disabled) {
+  background: linear-gradient(45deg, #FFA500, #FFD700);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 165, 0, 0.6);
+}
+
+.launch-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.start-pinball-btn, .play-again-btn {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: #000;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.start-pinball-btn:hover, .play-again-btn:hover {
+  background: linear-gradient(45deg, #FFA500, #FFD700);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 165, 0, 0.6);
+}
+
+.game-results {
+  text-align: center;
+  color: #ffd700;
+}
+
+.game-results h4 {
+  margin-bottom: 15px;
+}
+
+.game-results p {
+  margin: 5px 0;
+}
+
+/* Blackjack Game Styles */
+.blackjack-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  flex: 1;
+}
+
+.blackjack-table {
+  background: linear-gradient(135deg, #0f4c0f 0%, #1a2a1a 100%);
+  border: 3px solid #8B4513;
+  border-radius: 15px;
+  padding: 30px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.message {
+  color: #ffd700;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 5px #ffd700;
+}
+
+.dealer-section, .player-section {
+  margin-bottom: 30px;
+}
+
+.dealer-section h4, .player-section h4 {
+  color: #ffd700;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.playing-card {
+  background: #ffffff;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.cards .playing-card:first-child {
+  color: #ff0000;
+}
+
+.cards .playing-card:nth-child(even) {
+  color: #000000;
+}
+
+.hand-value {
+  color: #00ff00;
+  text-align: center;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.betting-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.betting-section h4 {
+  color: #ffd700;
+  margin-bottom: 15px;
+}
+
+.bet-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.bet-buttons button {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: #000;
+  border: 2px solid #B8860B;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: all 0.3s;
+}
+
+.bet-buttons button:hover:not(:disabled) {
+  background: linear-gradient(45deg, #FFA500, #FFD700);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+}
+
+.bet-buttons button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.min-max {
+  color: #cccccc;
+  font-size: 0.9rem;
+}
+
+.game-controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.hit-btn {
+  background: linear-gradient(45deg, #32CD32, #228B22);
+  color: #000;
+  border: 2px solid #228B22;
+  padding: 15px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+
+.hit-btn:hover {
+  background: linear-gradient(45deg, #228B22, #32CD32);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(50, 205, 50, 0.5);
+}
+
+.stand-btn {
+  background: linear-gradient(45deg, #FF6347, #DC143C);
+  color: #000;
+  border: 2px solid #DC143C;
+  padding: 15px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+
+.stand-btn:hover {
+  background: linear-gradient(45deg, #DC143C, #FF6347);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 99, 71, 0.5);
+}
+
+.play-again-btn {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: #000;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.play-again-btn:hover {
+  background: linear-gradient(45deg, #FFA500, #FFD700);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 165, 0, 0.6);
 }
 
 /* Coming Soon Cards */

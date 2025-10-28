@@ -7,14 +7,14 @@
 }
 
 :root {
-  /* Neon Color Palette */
+  /* Neon Color Palette - Enhanced Vibrancy */
   --neon-cyan: #00ffff;
-  --neon-green: #39ff14;
+  --neon-green: #00ff41;
   --neon-pink: #ff10f0;
   --neon-yellow: #ffff00;
-  --neon-purple: #9d00ff;
-  --neon-orange: #ff8800;
-  --neon-red: #ff0055;
+  --neon-purple: #a855f7;
+  --neon-orange: #ff9500;
+  --neon-red: #ff0066;
   
   /* Background & Surface */
   --bg-primary: #0a0a0a;
@@ -29,15 +29,15 @@
   --text-secondary: #a0a0a0;
   --text-dim: #606060;
   
-  /* Effects */
-  --glow-sm: 0 0 10px;
-  --glow-md: 0 0 20px;
-  --glow-lg: 0 0 30px;
-  --blur-glass: blur(10px);
+  /* Effects - Enhanced Glow */
+  --glow-sm: 0 0 12px;
+  --glow-md: 0 0 24px;
+  --glow-lg: 0 0 40px;
+  --blur-glass: blur(12px);
   
-  /* Transitions */
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fast: all 0.15s ease-out;
+  /* Transitions - Smoother */
+  --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html, body {
@@ -54,24 +54,26 @@ html, body {
   position: relative;
 }
 
-/* Smooth Scrollbar */
+/* Smooth Scrollbar - Enhanced */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--bg-secondary);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--neon-cyan);
-  border-radius: 4px;
+  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-green));
+  border-radius: 5px;
   box-shadow: var(--glow-sm) var(--neon-cyan);
+  transition: var(--transition-fast);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--neon-green);
+  background: linear-gradient(180deg, var(--neon-green), var(--neon-cyan));
   box-shadow: var(--glow-md) var(--neon-green);
 }
 

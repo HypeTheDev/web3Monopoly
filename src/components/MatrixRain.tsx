@@ -78,7 +78,7 @@ const MatrixRain: React.FC = () => {
         height: '100%',
         pointerEvents: 'none',
         zIndex: -1,
-        opacity: 0.2
+        opacity: 0.06
       }}
     />
   );

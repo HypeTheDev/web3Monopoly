@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import NewsService, { NewsArticle } from '../lib/NewsService';
 import './LiveNewsFeed.css';
 
 interface NewsItem {
@@ -231,8 +232,10 @@ const ROTATING_NEWS: { [key in NewsCategory]: NewsItem[] } = {
 
 const LiveNewsFeed: React.FC<LiveNewsFeedProps> = ({ activeCategory, onCategoryChange }) => {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-
+  const [liveNews, setLiveNews] = useState<NewsArticle[]>([]);
   const [isLive, setIsLive] = useState<boolean>(true);
+  const [isLoadingLive, setIsLoadingLive] = useState<boolean>(false);
+  const newsService = NewsService.getInstance();
 
   // Filter news by category
   const getFilteredNews = useCallback(() => {
@@ -246,41 +249,62 @@ const LiveNewsFeed: React.FC<LiveNewsFeedProps> = ({ activeCategory, onCategoryC
     return [...baseNews, ...rotatingNews].sort((a, b) => b.timestamp - a.timestamp);
   }, [activeCategory]);
 
-  // Simulate live updates with rotating content
+  // Fetch real news on mount and category change
+  useEffect(() => {
+    const loadLiveNews = async () => {
+      setIsLoadingLive(true);
+      try {
+        const articles = await newsService.fetchNews(activeCategory);
+        setLiveNews(articles);
+      } catch (error) {
+        console.warn('Failed to load live news:', error);
+      } finally {
+        setIsLoadingLive(false);
+      }
+    };
+
+    loadLiveNews();
+
+    const refreshInterval = setInterval(() => {
+      loadLiveNews();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, [activeCategory, newsService]);
+
+  // Merge live news with curated content
   useEffect(() => {
     const updateNews = () => {
       const filteredNews = getFilteredNews();
       
-      // Simulate new breaking news every 30 seconds for breaking category
-      if (activeCategory === NewsCategory.BREAKING && Math.random() < 0.3) {
-        const breakingUpdate = {
-          id: `live-${Date.now()}`,
-          title: `LIVE UPDATE: ${['Market', 'Technology', 'Global', 'Emergency'][Math.floor(Math.random() * 4)]} Alert`,
-          description: 'Live situation developing - monitoring international networks for real-time updates.',
-          category: NewsCategory.BREAKING,
-          timestamp: Date.now(),
-          location: 'Global Networks',
-          priority: 'breaking' as const,
-          source: 'Live Feed',
-          tags: ['live', 'developing', 'monitoring']
-        };
-        setNewsItems([breakingUpdate, ...filteredNews.slice(0, 9)]);
-      } else {
-        setNewsItems(filteredNews.slice(0, 10));
-      }
+      const convertedLiveNews: NewsItem[] = liveNews.map(article => ({
+        id: article.id,
+        title: article.title,
+        description: article.description,
+        category: article.category,
+        timestamp: article.timestamp,
+        location: article.location,
+        priority: article.priority,
+        source: article.source,
+        tags: article.tags
+      }));
       
-
+      const allNews = [...convertedLiveNews, ...filteredNews];
+      const uniqueNews = Array.from(
+        new Map(allNews.map(item => [item.id, item])).values()
+      ).sort((a, b) => b.timestamp - a.timestamp);
+      
+      setNewsItems(uniqueNews.slice(0, 15));
     };
 
     updateNews();
 
-    // Update every 15 seconds for breaking news, 60 seconds for others
     const interval = setInterval(updateNews, 
       activeCategory === NewsCategory.BREAKING ? 15000 : 60000
     );
 
     return () => clearInterval(interval);
-  }, [activeCategory, getFilteredNews]);
+  }, [activeCategory, getFilteredNews, liveNews]);
 
   // Ping status indicator
   useEffect(() => {
@@ -334,7 +358,10 @@ const LiveNewsFeed: React.FC<LiveNewsFeedProps> = ({ activeCategory, onCategoryC
       <div className="news-status-bar">
         <div className="ping-indicator">
           <span className={`ping-dot ${isLive ? 'active' : ''}`}></span>
-          <span className="ping-text">LIVE 24/7</span>
+          <span className="ping-text">{isLoadingLive ? 'UPDATING...' : 'LIVE 24/7'}</span>
+        </div>
+        <div className="news-count">
+          {newsItems.length} STORIES
         </div>
       </div>
 
